@@ -1,0 +1,1 @@
+{\n  "name": "camptime",\n  "version": "1.0.0",\n  "description": "A project built with Vue 3 and Vite",\n  "scripts": {\n    "dev": "vite",\n    "build": "vite build",\n    "serve": "vite preview"\n  },\n  "dependencies": {\n    "vue": ">=3.0.0"\n  },\n  "devDependencies": {\n    "vite": "^2.0.0"\n  }\n}

@@ -2,7 +2,7 @@
   <div id="app" class="app">
     <nav class="navbar">
       <div class="navbar-brand">
-        <router-link to="/">Camp Time</router-link>
+        <router-link to="/">It's Camp Time</router-link>
       </div>
       <ul class="nav-links">
         <li><router-link to="/">Home</router-link></li>
@@ -16,7 +16,7 @@
       <router-view />
     </main>
     <footer class="footer">
-      <p>&copy; 2026 Camp Time. All rights reserved.</p>
+      <p>&copy; 2026 It's Camp Time. All rights reserved.</p>
     </footer>
   </div>
 </template>

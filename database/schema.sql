@@ -1,1 +1,100 @@
-CREATE TABLE users (\n    user_id INT AUTO_INCREMENT PRIMARY KEY,\n    username VARCHAR(50) NOT NULL UNIQUE,\n    email VARCHAR(100) NOT NULL UNIQUE,\n    password_hash VARCHAR(255) NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n);\n\nCREATE TABLE products (\n    product_id INT AUTO_INCREMENT PRIMARY KEY,\n    name VARCHAR(100) NOT NULL,\n    description TEXT,\n    price DECIMAL(10, 2) NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    INDEX (name) -- Index on name for faster searches\n);\n\nCREATE TABLE cart_items (\n    cart_item_id INT AUTO_INCREMENT PRIMARY KEY,\n    user_id INT NOT NULL,\n    product_id INT NOT NULL,\n    quantity INT DEFAULT 1,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,\n    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE\n);\n\nCREATE TABLE orders (\n    order_id INT AUTO_INCREMENT PRIMARY KEY,\n    user_id INT NOT NULL,\n    total_amount DECIMAL(10, 2) NOT NULL,\n    order_status ENUM('pending', 'completed', 'canceled') DEFAULT 'pending',\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE\n);\n\nCREATE TABLE order_items (\n    order_item_id INT AUTO_INCREMENT PRIMARY KEY,\n    order_id INT NOT NULL,\n    product_id INT NOT NULL,\n    quantity INT DEFAULT 1,\n    price DECIMAL(10, 2) NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,\n    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE\n);\n\nCREATE TABLE payments (\n    payment_id INT AUTO_INCREMENT PRIMARY KEY,\n    order_id INT NOT NULL,\n    payment_status ENUM('pending', 'completed', 'failed') DEFAULT 'pending',\n    payment_method ENUM('credit_card', 'paypal', 'bank_transfer') NOT NULL,\n    amount DECIMAL(10, 2) NOT NULL,\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE\n);\n
+-- E-commerce Database Schema
+
+CREATE TABLE users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+    product_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    price DECIMAL(10, 2) NOT NULL,
+    stock_quantity INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    total DECIMAL(10, 2) NOT NULL,
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    shipping_group_id INT,
+    status ENUM('pending', 'shipped', 'delivered', 'cancelled') DEFAULT 'pending',
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (shipping_group_id) REFERENCES shipping_groups(shipping_group_id)
+);
+
+CREATE TABLE tax_groups (
+    tax_group_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    rate DECIMAL(5, 4) NOT NULL
+);
+
+CREATE TABLE shipping_groups (
+    shipping_group_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    cost DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    contact_number VARCHAR(20),
+    address TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE support_tickets (
+    ticket_id INT PRIMARY KEY AUTO_INCREMENT,
+    customer_id INT,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('open', 'closed') DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+CREATE TABLE email_templates (
+    template_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL
+);
+
+CREATE TABLE blog_posts (
+    post_id INT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE inventory (
+    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT,
+    quantity INT NOT NULL,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+CREATE TABLE analytics (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT,
+    product_id INT,
+    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+CREATE TABLE audit_logs (
+    log_id INT PRIMARY KEY AUTO_INCREMENT,
+    action VARCHAR(255) NOT NULL,
+    user_id INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);

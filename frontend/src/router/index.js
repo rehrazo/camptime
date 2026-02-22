@@ -4,7 +4,7 @@ import Products from '../views/Products.vue'
 import ProductDetail from '../views/ProductDetail.vue'
 import Cart from '../views/Cart.vue'
 import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
+import Signup from '../views/Signup.vue'
 import Account from '../views/Account.vue'
 import Checkout from '../views/Checkout.vue'
 
@@ -36,8 +36,8 @@ const routes = [
   },
   {
     path: '/register',
-    name: 'Register',
-    component: Register,
+    name: 'Signup',
+    component: Signup,
   },
   {
     path: '/account',

@@ -25,6 +25,10 @@ const pool = mysql.createPool({
 });
 
 // Routes
+app.get('/', (req, res) => {
+  res.json({ message: 'Camptime Backend API', version: '1.0.0', health: '/api/health' });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
 });

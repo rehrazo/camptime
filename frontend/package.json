@@ -1,1 +1,26 @@
-{\n  "name": "camptime-frontend",\n  "version": "1.0.0",\n  "description": "Frontend for Camptime e-commerce platform",\n  "type": "module",\n  "scripts": {\n    "dev": "vite",\n    "build": "vite build",\n    "preview": "vite preview",\n    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"\n  },\n  "dependencies": {\n    "vue": "^3.3.4",\n    "vue-router": "^4.2.4",\n    "pinia": "^2.1.4",\n    "axios": "^1.4.0",\n    "@stripe/js": "^1.46.0",\n    "@stripe/vue-stripe": "^2.0.2"\n  },\n  "devDependencies": {\n    "@vitejs/plugin-vue": "^4.3.4",\n    "vite": "^4.4.9",\n    "sass": "^1.66.1",\n    "eslint": "^8.47.0",\n    "eslint-plugin-vue": "^9.17.0"\n  }\n}
+{
+  "name": "camptime-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Camptime e-commerce platform",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4",
+    "pinia": "^2.1.4",
+    "axios": "^1.4.0",
+    "@stripe/stripe-js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "vite": "^4.4.9",
+    "sass": "^1.66.1",
+    "eslint": "^8.47.0",
+    "eslint-plugin-vue": "^9.17.0"
+  }
+}

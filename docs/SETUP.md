@@ -4,7 +4,7 @@
 Before you begin, ensure you have the following installed on your system:
 - Node.js (version 14 or above)
 - npm (Node Package Manager)
-- MongoDB (local or cloud instance)
+- MySQL (version 5.7 or above)
 - Git
 
 ## Installation Steps
@@ -20,19 +20,33 @@ Before you begin, ensure you have the following installed on your system:
    ```
 
 3. **Setup Environment Variables**: Copy the sample environment configuration file and update your variables:
-   ```bash
-   cp .env.sample .env
-   nano .env  # or use your preferred text editor
+   ```powershell
+   Copy-Item .env.example .env
+   code .env  # opens in VS Code
    ```
    Update the following variables in the `.env` file:
-   - `DB_URI`: Your database connection string
-   - `PORT`: The port on which the application will run (default is 3000)
+   - `DB_HOST`: Your MySQL host (default is localhost)
+   - `DB_USER`: Your MySQL username
+   - `DB_PASSWORD`: Your MySQL password
+   - `DB_NAME`: Your database name (default is camptime)
+   - `PORT`: The port on which the application will run (default is 5000)
    
 ## Database Setup
-1. **MongoDB Configuration**: If you're using a local MongoDB instance, ensure it is running. If you're using a cloud instance, make sure you have the correct URI.
-2. **Create a Database**: In the MongoDB shell or your database GUI, create a database named `camptime`.
-3. **Initial Data Seeding**: Run the initial data scripts provided in the `scripts/` folder to populate the database with necessary data.
-   ```bash
+1. **MySQL Configuration**: Ensure your MySQL server is running. You can start it with:
+   ```powershell
+   # If MySQL is installed as a service
+   Start-Service MySQL80  # or your MySQL service name
+   ```
+2. **Create a Database**: In the MySQL shell or your database GUI (like MySQL Workbench), create a database named `camptime`:
+   ```sql
+   CREATE DATABASE camptime;
+   ```
+3. **Import Schema**: Run the schema file to create tables:
+   ```powershell
+   mysql -u root -p camptime < database/schema.sql
+   ```
+4. **Initial Data Seeding** (optional): Run the initial data scripts provided in the `scripts/` folder to populate the database with necessary data:
+   ```powershell
    node scripts/seed.js
    ```
 
@@ -52,11 +66,12 @@ Before you begin, ensure you have the following installed on your system:
 
 ## Troubleshooting
 - **Application Won't Start**: Check for port conflicts or unfulfilled dependencies.
-- **Database Connection Errors**: Ensure your MongoDB server is running and the URI in the `.env` file is correct.
+- **Database Connection Errors**: Ensure your MySQL server is running and the credentials in the `.env` file are correct.
 - **Check Logs**: Review application logs for specific error messages that can help in diagnosing issues.
+- **MySQL Connection Issues**: Verify that MySQL is running with `Get-Service MySQL*` in PowerShell.
 
 ## Security Checklist
-- Ensure your MongoDB instance is secured (authentication enabled, appropriate network policies).
+- Ensure your MySQL instance is secured (strong passwords, appropriate user privileges, firewall rules).
 - Review comments and sensitive information in your `.env` file to ensure no leaking of secrets.
 - Regularly update dependencies to minimize security vulnerabilities.
 - Implement rate limiting and input validation to protect against common web vulnerabilities.

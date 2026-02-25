@@ -7,6 +7,7 @@ import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
 import Account from '../views/Account.vue'
 import Checkout from '../views/Checkout.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
 
 const routes = [
   {
@@ -50,6 +51,11 @@ const routes = [
     name: 'Checkout',
     component: Checkout,
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/admin',
+    name: 'AdminDashboard',
+    component: AdminDashboard,
   },
 ]
 

@@ -337,6 +337,47 @@
           </div>
         </section>
 
+        <!-- Product Import -->
+        <section v-if="activeTab === 'import'" class="import-tab">
+          <div class="section-header">
+            <h2>Product Import</h2>
+          </div>
+
+          <div class="import-card">
+            <div class="form-group">
+              <label for="csvFile">CSV File</label>
+              <input id="csvFile" type="file" accept=".csv" @change="onFileSelected" class="form-input" />
+            </div>
+
+            <div class="import-options">
+              <label class="checkbox-option">
+                <input type="checkbox" v-model="importDryRun" />
+                <span>Dry run (no database writes)</span>
+              </label>
+
+              <div class="form-group import-limit">
+                <label for="importLimit">Limit rows (optional)</label>
+                <input
+                  id="importLimit"
+                  v-model.number="importLimit"
+                  type="number"
+                  min="1"
+                  placeholder="e.g. 50"
+                  class="form-input"
+                />
+              </div>
+            </div>
+
+            <button class="btn btn-primary" :disabled="importing" @click="runImport">
+              {{ importing ? 'Running Import...' : 'Run Import' }}
+            </button>
+
+            <p v-if="importStatus" class="import-status">{{ importStatus }}</p>
+
+            <pre v-if="importResult" class="import-result">{{ JSON.stringify(importResult, null, 2) }}</pre>
+          </div>
+        </section>
+
         <!-- Settings -->
         <section v-if="activeTab === 'settings'" class="settings-tab">
           <div class="section-header">
@@ -417,6 +458,12 @@ export default {
     const productSearch = ref('')
     const customerSearch = ref('')
     const notificationCount = ref(5)
+    const importFile = ref(null)
+    const importDryRun = ref(true)
+    const importLimit = ref(null)
+    const importStatus = ref('')
+    const importResult = ref(null)
+    const importing = ref(false)
 
     const navItems = [
       { id: 'overview', label: 'Dashboard', icon: '📊' },
@@ -424,6 +471,7 @@ export default {
       { id: 'orders', label: 'Orders', icon: '🛍️' },
       { id: 'customers', label: 'Customers', icon: '👥' },
       { id: 'reports', label: 'Reports', icon: '📈' },
+      { id: 'import', label: 'Import', icon: '⬆️' },
       { id: 'settings', label: 'Settings', icon: '⚙️' },
     ]
 
@@ -478,11 +526,60 @@ export default {
       return item ? item.label : 'Dashboard'
     }
 
+    const onFileSelected = (event) => {
+      importFile.value = event.target.files?.[0] || null
+      importStatus.value = ''
+      importResult.value = null
+    }
+
+    const runImport = async () => {
+      if (!importFile.value) {
+        importStatus.value = 'Please choose a CSV file first.'
+        return
+      }
+
+      importing.value = true
+      importStatus.value = 'Uploading and processing...'
+      importResult.value = null
+
+      try {
+        const formData = new FormData()
+        formData.append('csvFile', importFile.value)
+        formData.append('dryRun', String(importDryRun.value))
+
+        if (importLimit.value && Number(importLimit.value) > 0) {
+          formData.append('limit', String(importLimit.value))
+        }
+
+        const response = await fetch('/api/admin/import-products', {
+          method: 'POST',
+          body: formData,
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Import request failed')
+        }
+
+        importResult.value = data
+        importStatus.value = data.message || 'Import completed.'
+      } catch (error) {
+        importStatus.value = error.message || 'Import failed'
+      } finally {
+        importing.value = false
+      }
+    }
+
     return {
       activeTab,
       productSearch,
       customerSearch,
       notificationCount,
+      importDryRun,
+      importLimit,
+      importStatus,
+      importResult,
+      importing,
       navItems,
       stats,
       topProducts,
@@ -491,6 +588,8 @@ export default {
       allOrders,
       customers,
       getCurrentTabName,
+      onFileSelected,
+      runImport,
     }
   },
 }
@@ -1083,6 +1182,45 @@ tr:hover {
   width: 18px;
   height: 18px;
   cursor: pointer;
+}
+
+/* Import */
+.import-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.import-options {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.import-limit {
+  min-width: 220px;
+}
+
+.import-status {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.import-result {
+  margin: 0;
+  padding: 1rem;
+  background: #f8f9fb;
+  border-radius: 6px;
+  border: 1px solid #e5e8ef;
+  font-size: 0.85rem;
+  max-height: 320px;
+  overflow: auto;
 }
 
 /* Buttons */

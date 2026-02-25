@@ -3,10 +3,33 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mysql = require('mysql2/promise');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const { importProducts } = require('./importProducts');
 
 dotenv.config();
 
 const app = express();
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadsDir),
+    filename: (req, file, cb) => {
+      const safeName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
+      cb(null, safeName);
+    }
+  }),
+  fileFilter: (req, file, cb) => {
+    const isCsv = file.mimetype.includes('csv') || file.originalname.toLowerCase().endsWith('.csv');
+    cb(isCsv ? null : new Error('Only CSV files are allowed'), isCsv);
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -31,6 +54,32 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
+});
+
+app.post('/api/admin/import-products', upload.single('csvFile'), async (req, res) => {
+  const uploadedFile = req.file;
+
+  if (!uploadedFile) {
+    return res.status(400).json({ error: 'CSV file is required (field name: csvFile)' });
+  }
+
+  const dryRun = String(req.body.dryRun || 'false').toLowerCase() === 'true';
+  const parsedLimit = Number(req.body.limit);
+  const limit = Number.isInteger(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
+
+  try {
+    const result = await importProducts(uploadedFile.path, { dryRun, limit });
+    return res.json({
+      message: dryRun ? 'Dry run completed' : 'Import completed',
+      result
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Import failed' });
+  } finally {
+    if (uploadedFile?.path && fs.existsSync(uploadedFile.path)) {
+      fs.unlinkSync(uploadedFile.path);
+    }
+  }
 });
 
 // Import routes (to be created)

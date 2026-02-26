@@ -139,17 +139,21 @@
         <section v-if="activeTab === 'products'" class="products-tab">
           <div class="section-header">
             <h2>Products Management</h2>
-            <button class="btn btn-primary">+ Add Product</button>
+            <div class="action-buttons">
+              <button class="btn btn-secondary" @click="loadProducts" :disabled="productsLoading">Refresh</button>
+              <button class="btn btn-primary" @click="createProduct">+ Add Product</button>
+            </div>
           </div>
 
           <div class="products-controls">
             <input 
               v-model="productSearch"
+              @input="loadProducts"
               type="text"
               placeholder="Search products..."
               class="search-input"
             />
-            <select class="filter-select">
+            <select class="filter-select" v-model="productCategory" @change="loadProducts">
               <option value="">All Categories</option>
               <option value="tents">Tents</option>
               <option value="sleeping">Sleeping Bags</option>
@@ -157,42 +161,48 @@
             </select>
           </div>
 
+          <p v-if="productsError" class="import-status">{{ productsError }}</p>
+          <p v-else-if="productsLoading" class="import-status">Loading products...</p>
+
           <table class="products-table">
             <thead>
               <tr>
                 <th>Product Name</th>
+                <th>SKU</th>
                 <th>Category</th>
                 <th>Price</th>
                 <th>Stock</th>
-                <th>Sales</th>
-                <th>Rating</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="product in products" :key="product.id">
+              <tr v-for="product in products" :key="product.product_id">
                 <td class="product-name">
-                  <img :src="product.image" :alt="product.name" class="product-thumb" />
+                  <img :src="getProductImage(product)" :alt="product.name" class="product-thumb" />
                   {{ product.name }}
                 </td>
+                <td>{{ product.sku_code || '-' }}</td>
                 <td>{{ product.category }}</td>
-                <td>${{ product.price }}</td>
+                <td>${{ Number(product.price || 0).toFixed(2) }}</td>
                 <td>
-                  <span class="stock" :class="{ low: product.stock < 10 }">
-                    {{ product.stock }}
+                  <span class="stock" :class="{ low: Number(product.stock_quantity || 0) < 10 }">
+                    {{ product.stock_quantity }}
                   </span>
                 </td>
-                <td>{{ product.sales }}</td>
-                <td>
-                  <span class="rating">★ {{ product.rating }}</span>
-                </td>
                 <td class="action-buttons">
-                  <button class="edit-btn" title="Edit">✎</button>
-                  <button class="delete-btn" title="Delete">🗑️</button>
+                  <button class="edit-btn" title="Edit" @click="editProduct(product)">✎</button>
+                  <button class="delete-btn" title="Delete" @click="deleteProduct(product)">🗑️</button>
                 </td>
+              </tr>
+              <tr v-if="!productsLoading && products.length === 0">
+                <td colspan="6" class="center">No products found.</td>
               </tr>
             </tbody>
           </table>
+
+          <p class="subtitle mt-2" v-if="productPagination.total !== null">
+            Showing {{ products.length }} of {{ productPagination.total }} products
+          </p>
         </section>
 
         <!-- Orders Management -->
@@ -449,13 +459,18 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 export default {
   name: 'AdminDashboard',
   setup() {
     const activeTab = ref('overview')
     const productSearch = ref('')
+    const productCategory = ref('')
+    const products = ref([])
+    const productsLoading = ref(false)
+    const productsError = ref('')
+    const productPagination = ref({ page: 1, limit: 20, total: null, pages: 0 })
     const customerSearch = ref('')
     const notificationCount = ref(5)
     const importFile = ref(null)
@@ -497,14 +512,6 @@ export default {
       { id: 'ORD-2597', customer: 'David Wilson', amount: '499.97', status: 'Delivered', date: '2026-02-16' },
     ]
 
-    const products = [
-      { id: 1, name: 'Mountain Tent Pro', category: 'Tents', price: 199.99, stock: 15, sales: 342, rating: 4.8, image: '/images/tent.jpg' },
-      { id: 2, name: 'Sleeping Bag Deluxe', category: 'Sleeping Bags', price: 89.99, stock: 32, sales: 287, rating: 4.7, image: '/images/sleeping-bag.jpg' },
-      { id: 3, name: 'Hiking Backpack 65L', category: 'Backpacks', price: 129.99, stock: 8, sales: 256, rating: 4.6, image: '/images/backpack.jpg' },
-      { id: 4, name: 'Camping Stove', category: 'Cooking', price: 45.99, stock: 42, sales: 198, rating: 4.5, image: '/images/stove.jpg' },
-      { id: 5, name: 'Sleeping Pad', category: 'Sleeping Gear', price: 59.99, stock: 5, sales: 165, rating: 4.4, image: '/images/pad.jpg' },
-    ]
-
     const allOrders = [
       { id: 'ORD-2601', customer: 'John Smith', email: 'john@example.com', amount: 249.99, items: 3, status: 'shipped', date: '2026-02-20' },
       { id: 'ORD-2600', customer: 'Sarah Johnson', email: 'sarah@example.com', amount: 189.99, items: 2, status: 'processing', date: '2026-02-19' },
@@ -525,6 +532,151 @@ export default {
       const item = navItems.find(i => i.id === activeTab.value)
       return item ? item.label : 'Dashboard'
     }
+
+    const loadProducts = async () => {
+      productsLoading.value = true
+      productsError.value = ''
+
+      try {
+        const params = new URLSearchParams({
+          page: String(productPagination.value.page || 1),
+          limit: String(productPagination.value.limit || 20),
+        })
+
+        if (productSearch.value) {
+          params.append('search', productSearch.value)
+        }
+
+        if (productCategory.value) {
+          params.append('category', productCategory.value)
+        }
+
+        const response = await fetch(`/api/products?${params.toString()}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load products')
+        }
+
+        products.value = Array.isArray(data.data) ? data.data : []
+        if (data.pagination) {
+          productPagination.value = data.pagination
+        }
+      } catch (error) {
+        productsError.value = error.message || 'Failed to load products'
+      } finally {
+        productsLoading.value = false
+      }
+    }
+
+    const createProduct = async () => {
+      const name = window.prompt('Product name?')
+      if (!name) {
+        return
+      }
+
+      const skuCode = window.prompt('SKU code? (optional)') || null
+      const category = window.prompt('Category? (optional)') || null
+      const priceInput = window.prompt('Price? (default 0)', '0')
+      const stockInput = window.prompt('Stock quantity? (default 0)', '0')
+
+      const payload = {
+        name,
+        sku_code: skuCode,
+        category,
+        price: Number(priceInput || 0),
+        stock_quantity: Number(stockInput || 0),
+      }
+
+      try {
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create product')
+        }
+
+        await loadProducts()
+      } catch (error) {
+        productsError.value = error.message || 'Failed to create product'
+      }
+    }
+
+    const editProduct = async (product) => {
+      const name = window.prompt('Product name?', product.name || '')
+      if (!name) {
+        return
+      }
+
+      const category = window.prompt('Category?', product.category || '')
+      const priceInput = window.prompt('Price?', String(product.price ?? 0))
+      const stockInput = window.prompt('Stock quantity?', String(product.stock_quantity ?? 0))
+
+      const payload = {
+        ...product,
+        name,
+        category,
+        price: Number(priceInput || 0),
+        stock_quantity: Number(stockInput || 0),
+      }
+
+      try {
+        const response = await fetch(`/api/products/${product.product_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update product')
+        }
+
+        await loadProducts()
+      } catch (error) {
+        productsError.value = error.message || 'Failed to update product'
+      }
+    }
+
+    const deleteProduct = async (product) => {
+      const confirmed = window.confirm(`Delete ${product.name}?`)
+      if (!confirmed) {
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/products/${product.product_id}`, {
+          method: 'DELETE',
+        })
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || 'Failed to delete product')
+        }
+
+        await loadProducts()
+      } catch (error) {
+        productsError.value = error.message || 'Failed to delete product'
+      }
+    }
+
+    const getProductImage = () => 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="%23e8ecf5"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="16">%F0%9F%93%A6</text></svg>'
+
+    watch(activeTab, async (tab) => {
+      if (tab === 'products' && products.value.length === 0) {
+        await loadProducts()
+      }
+    })
+
+    onMounted(async () => {
+      if (activeTab.value === 'products') {
+        await loadProducts()
+      }
+    })
 
     const onFileSelected = (event) => {
       importFile.value = event.target.files?.[0] || null
@@ -573,6 +725,11 @@ export default {
     return {
       activeTab,
       productSearch,
+      productCategory,
+      products,
+      productsLoading,
+      productsError,
+      productPagination,
       customerSearch,
       notificationCount,
       importDryRun,
@@ -584,10 +741,14 @@ export default {
       stats,
       topProducts,
       recentOrders,
-      products,
       allOrders,
       customers,
       getCurrentTabName,
+      loadProducts,
+      createProduct,
+      editProduct,
+      deleteProduct,
+      getProductImage,
       onFileSelected,
       runImport,
     }

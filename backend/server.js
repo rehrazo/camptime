@@ -7,6 +7,7 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const { importProducts } = require('./importProducts');
+const productsRouter = require('./routes/products');
 
 dotenv.config();
 
@@ -47,6 +48,8 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+app.locals.pool = pool;
+
 // Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Camptime Backend API', version: '1.0.0', health: '/api/health' });
@@ -84,7 +87,7 @@ app.post('/api/admin/import-products', upload.single('csvFile'), async (req, res
 
 // Import routes (to be created)
 // app.use('/api/auth', require('./routes/auth')); 
-// app.use('/api/products', require('./routes/products')); 
+app.use('/api/products', productsRouter);
 // app.use('/api/cart', require('./routes/cart')); 
 // app.use('/api/orders', require('./routes/orders')); 
 // app.use('/api/payments', require('./routes/payments'));

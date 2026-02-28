@@ -157,7 +157,11 @@ function mapProductRow(row) {
     maxChars: 750,
   });
 
-  const dropship = cleanNumber(pick(row, ['dropshipping price', 'dropshipping_price']));
+  const msrp = cleanNumber(pick(row, ['msrp us', 'msrp']));
+  const mapPrice = cleanNumber(pick(row, ['map us', 'map']));
+  const dropship = cleanNumber(pick(row, ['dropshipping price us', 'dropshipping price', 'dropshipping_price']));
+  const salePrice = cleanNumber(pick(row, ['sale price us', 'sale price']));
+  const effectivePrice = salePrice ?? dropship ?? mapPrice ?? msrp ?? 0;
   const mapped = {
     spu_no: cleanText(pick(row, ['spu no', 'spu_no'])),
     item_no: cleanText(pick(row, ['item plus no', 'item no', 'item_no'])),
@@ -167,9 +171,9 @@ function mapProductRow(row) {
     supplier: cleanText(pick(row, ['supplier'])),
     brand: cleanText(pick(row, ['brand'])),
     sku_code: cleanText(pick(row, ['sku code', 'sku_code'])),
-    price: dropship ?? 0,
-    msrp: cleanNumber(pick(row, ['msrp'])),
-    map: cleanNumber(pick(row, ['map'])),
+    price: effectivePrice,
+    msrp,
+    map: mapPrice,
     dropshipping_price: dropship,
     stock_quantity: cleanNumber(pick(row, ['inventory qty', 'inventory_quantity'])) ?? 0,
     inventory_location: cleanText(pick(row, ['inventory location'])),

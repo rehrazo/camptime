@@ -49,12 +49,14 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'Products',
   setup() {
+    const route = useRoute()
     const products = ref([])
     const categoryTree = ref([])
     const searchQuery = ref('')
@@ -76,6 +78,41 @@ export default {
       const response = await fetch('/api/categories/tree')
       const data = await response.json()
       categoryTree.value = Array.isArray(data?.data) ? data.data : []
+    }
+
+    const findParentForCategory = (targetCategoryId) => {
+      for (const category of categoryTree.value) {
+        if (category.category_id === targetCategoryId) {
+          return { parentId: category.category_id, childId: null }
+        }
+
+        const child = (category.children || []).find((item) => item.category_id === targetCategoryId)
+        if (child) {
+          return { parentId: category.category_id, childId: child.category_id }
+        }
+      }
+
+      return null
+    }
+
+    const syncCategoryFromQuery = () => {
+      const queryCategoryId = Number(route.query.category_id)
+
+      if (!Number.isFinite(queryCategoryId) || queryCategoryId <= 0) {
+        selectedParentCategoryId.value = null
+        selectedChildCategoryId.value = null
+        return
+      }
+
+      const match = findParentForCategory(queryCategoryId)
+      if (!match) {
+        selectedParentCategoryId.value = null
+        selectedChildCategoryId.value = null
+        return
+      }
+
+      selectedParentCategoryId.value = match.parentId
+      selectedChildCategoryId.value = match.childId
     }
 
     const effectiveCategoryId = computed(() => {
@@ -106,11 +143,21 @@ export default {
 
     onMounted(async () => {
       try {
-        await Promise.all([fetchCategoryTree(), fetchProducts()])
+        await fetchCategoryTree()
+        syncCategoryFromQuery()
+        await fetchProducts()
       } catch (error) {
         console.error('Error fetching products:', error)
       }
     })
+
+    watch(
+      () => route.query.category_id,
+      async () => {
+        syncCategoryFromQuery()
+        await fetchProducts()
+      }
+    )
 
     const parentCategories = computed(() => categoryTree.value)
 

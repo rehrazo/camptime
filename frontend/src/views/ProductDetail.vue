@@ -4,7 +4,19 @@
     
     <div v-if="product" class="product-container">
       <div class="product-image">
-        <img :src="product.image" :alt="product.name" />
+        <img :src="selectedImage || product.image" :alt="product.name" />
+        <div v-if="product.images.length > 1" class="image-thumbnails">
+          <button
+            v-for="(image, index) in product.images"
+            :key="`${image}-${index}`"
+            type="button"
+            class="thumbnail-btn"
+            :class="{ active: (selectedImage || product.image) === image }"
+            @click="selectedImage = image"
+          >
+            <img :src="image" :alt="`${product.name} thumbnail ${index + 1}`" />
+          </button>
+        </div>
       </div>
 
       <div class="product-info">
@@ -85,11 +97,12 @@
               class="variant-select"
             >
               <option value="">Select {{ group.theme }}</option>
-              <option v-for="value in group.values" :key="`${group.theme}-${value}`" :value="value">
-                {{ value }}
+              <option v-for="option in group.options" :key="`${group.theme}-${option.value}`" :value="option.value">
+                {{ option.value }}{{ option.sku ? ` (SKU: ${option.sku})` : '' }}
               </option>
             </select>
           </div>
+          <p v-if="selectedVariantSku" class="variant-sku">Selected variant SKU: {{ selectedVariantSku }}</p>
           <p v-if="variantError" class="variant-error">{{ variantError }}</p>
         </div>
 
@@ -99,7 +112,7 @@
         </div>
 
         <div class="product-meta">
-          <p><strong>SKU:</strong> {{ product.sku }}</p>
+          <p><strong>SKU:</strong> {{ displaySku }}</p>
           <p><strong>Stock:</strong> {{ product.stock > 0 ? `${product.stock} available` : 'Out of Stock' }}</p>
           <p><strong>Shipping:</strong> Free shipping on orders over $50</p>
         </div>
@@ -113,7 +126,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 
@@ -124,6 +137,7 @@ export default {
     const product = ref(null)
     const quantity = ref(1)
     const selectedVariants = ref({})
+    const selectedImage = ref('')
     const variantError = ref('')
     const cartStore = useCartStore()
 
@@ -141,23 +155,62 @@ export default {
           groups[theme] = []
         }
 
-        if (!groups[theme].includes(value)) {
-          groups[theme].push(value)
+        const sku = String(variation?.variation_sku || '').trim() || null
+        const existingOption = groups[theme].find((option) => option.value === value)
+        if (!existingOption) {
+          groups[theme].push({ value, sku })
+        } else if (!existingOption.sku && sku) {
+          existingOption.sku = sku
         }
       })
 
       return Object.keys(groups).map((theme) => ({
         theme,
-        values: groups[theme],
+        options: groups[theme],
       }))
     }
+
+    const selectedVariantSku = computed(() => {
+      const currentProduct = product.value
+      if (!currentProduct || !Array.isArray(currentProduct.variantGroups)) {
+        return null
+      }
+
+      const selectedEntries = Object.entries(selectedVariants.value || {}).filter(([, value]) => String(value || '').trim())
+      if (!selectedEntries.length) {
+        return null
+      }
+
+      const skuCandidates = selectedEntries
+        .map(([theme, value]) => {
+          const group = currentProduct.variantGroups.find((item) => item.theme === theme)
+          const option = group?.options?.find((item) => item.value === value)
+          return option?.sku || null
+        })
+        .filter(Boolean)
+
+      if (!skuCandidates.length) {
+        return null
+      }
+
+      const uniqueSkus = [...new Set(skuCandidates)]
+      return uniqueSkus.length === 1 ? uniqueSkus[0] : null
+    })
+
+    const displaySku = computed(() => selectedVariantSku.value || product.value?.sku || 'N/A')
 
     const mapProduct = (data) => {
       const primaryImage = Array.isArray(data?.images) && data.images.length ? data.images[0].image_url : null
       return {
         ...data,
         id: data.product_id,
+        sku: data.sku_code || data.sku || data.item_no || data.spu_no || 'N/A',
         image: primaryImage || data.image || '/images/placeholder-product.jpg',
+        images: Array.isArray(data?.images)
+          ? data.images
+              .map((item) => item?.image_url)
+              .filter((value, index, arr) => value && arr.indexOf(value) === index)
+          : [],
         price: Number(data.price) || 0,
         stock: Number(data.stock_quantity) || 0,
         briefDescription: data.brief_description || null,
@@ -193,6 +246,7 @@ export default {
         const response = await fetch(`/api/products/${route.params.id}`)
         const data = await response.json()
         product.value = mapProduct(data)
+        selectedImage.value = product.value.image
         selectedVariants.value = {}
         variantError.value = ''
       } catch (error) {
@@ -220,6 +274,7 @@ export default {
           {
             ...product.value,
             variantSelections,
+            variantSku: selectedVariantSku.value,
           },
           quantity.value
         )
@@ -238,6 +293,9 @@ export default {
       product,
       quantity,
       selectedVariants,
+      selectedImage,
+      selectedVariantSku,
+      displaySku,
       variantError,
       addToCart,
       addToWishlist,
@@ -276,6 +334,35 @@ export default {
   width: 100%;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.image-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.thumbnail-btn {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+}
+
+.thumbnail-btn img {
+  width: 100%;
+  height: 74px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+  box-shadow: none;
+}
+
+.thumbnail-btn.active {
+  border-color: #2F4F3E;
 }
 
 .product-info h1 {
@@ -402,6 +489,13 @@ export default {
   color: #c62828;
   margin: 0.5rem 0 0;
   font-size: 0.9rem;
+}
+
+.variant-sku {
+  color: #2F4F3E;
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .actions {

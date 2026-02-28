@@ -10,6 +10,7 @@
           <div class="item-details">
             <h3>{{ item.name }}</h3>
             <p v-if="item.variantSummary" class="item-variant">{{ item.variantSummary }}</p>
+            <p class="item-sku">SKU: {{ item.displaySku || item.sku }}</p>
             <p class="item-category">{{ item.category }}</p>
             <p class="item-price">${{ item.price.toFixed(2) }}</p>
           </div>
@@ -238,6 +239,12 @@ export default {
 
 .item-variant {
   color: #444;
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.item-sku {
+  color: #2F4F3E;
   font-size: 0.85rem;
   margin: 0.25rem 0;
 }

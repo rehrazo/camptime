@@ -33,6 +33,8 @@ export const useCartStore = defineStore('cart', () => {
     const productId = product.productId ?? product.id ?? product.product_id
     const variantSelections = normalizeVariantSelections(product.variantSelections)
     const variantSummary = product.variantSummary || buildVariantSummary(variantSelections)
+    const baseSku = String(product.sku || product.sku_code || '').trim() || 'N/A'
+    const variantSku = String(product.variantSku || '').trim() || null
     const lineId = Object.keys(variantSelections).length
       ? `${productId}::${JSON.stringify(variantSelections)}`
       : String(productId)
@@ -47,6 +49,9 @@ export const useCartStore = defineStore('cart', () => {
       quantity: Math.max(1, Number(product.quantity) || 1),
       variantSelections,
       variantSummary,
+      sku: baseSku,
+      variantSku,
+      displaySku: variantSku || baseSku,
     }
   }
 

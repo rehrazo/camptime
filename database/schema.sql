@@ -105,6 +105,7 @@ CREATE TABLE product_variations (
     product_id INT NOT NULL,
     theme_name VARCHAR(255),
     variation_value VARCHAR(255),
+    variation_sku VARCHAR(255),
     variation_order INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,

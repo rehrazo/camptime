@@ -121,7 +121,7 @@ async function fetchProductById(connection, productId) {
     [productId]
   );
   const [variations] = await connection.execute(
-    'SELECT variation_id, theme_name, variation_value, variation_order FROM product_variations WHERE product_id = ? ORDER BY variation_order ASC',
+    'SELECT variation_id, theme_name, variation_value, variation_sku, variation_order FROM product_variations WHERE product_id = ? ORDER BY variation_order ASC',
     [productId]
   );
   const [packaging] = await connection.execute(
@@ -326,7 +326,7 @@ router.post('/', async (req, res) => {
     const productId = result.insertId;
 
     await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], images);
-    await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], variations);
+    await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_sku', 'variation_order'], variations);
     await replaceChildRows(connection, 'product_packaging', productId, ['package_number', 'size', 'weight', 'content'], packaging);
     await replaceChildRows(connection, 'product_parameters', productId, ['parameter_name', 'parameter_value', 'parameter_order'], parameters);
 
@@ -409,7 +409,7 @@ router.put('/:id', async (req, res) => {
     );
 
     await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], images);
-    await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], variations);
+    await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_sku', 'variation_order'], variations);
     await replaceChildRows(connection, 'product_packaging', productId, ['package_number', 'size', 'weight', 'content'], packaging);
     await replaceChildRows(connection, 'product_parameters', productId, ['parameter_name', 'parameter_value', 'parameter_order'], parameters);
 

@@ -257,11 +257,50 @@ function mapVariations(row) {
   for (let index = 1; index <= 10; index += 1) {
     const theme = cleanText(pick(row, [`variation theme ${index}`, `theme ${index}`]));
     const value = cleanText(pick(row, [`variation value ${index}`, `value ${index}`]));
+    const sku = cleanText(
+      pick(row, [
+        `variation sku ${index}`,
+        `variation_sku_${index}`,
+        'variation sku',
+        'variation_sku',
+        'sku code',
+        'sku_code'
+      ])
+    );
     if (theme || value) {
-      variations.push({ theme_name: theme, variation_value: value, variation_order: index });
+      variations.push({ theme_name: theme, variation_value: value, variation_sku: sku, variation_order: index });
     }
   }
   return variations;
+}
+
+function mergeVariationRows(existingRows = [], incomingRows = []) {
+  const merged = new Map();
+
+  const upsert = (row) => {
+    const key = `${row.theme_name || ''}|${row.variation_value || ''}`.toLowerCase();
+    if (!key.trim()) {
+      return;
+    }
+
+    if (!merged.has(key)) {
+      merged.set(key, { ...row });
+      return;
+    }
+
+    const current = merged.get(key);
+    if (!current.variation_sku && row.variation_sku) {
+      current.variation_sku = row.variation_sku;
+    }
+  };
+
+  existingRows.forEach(upsert);
+  incomingRows.forEach(upsert);
+
+  return Array.from(merged.values()).map((item, variationIndex) => ({
+    ...item,
+    variation_order: variationIndex + 1,
+  }));
 }
 
 function getGroupKey(mapped, index) {
@@ -355,13 +394,7 @@ function aggregateProductRows(records = []) {
       image_order: imageIndex + 1,
     }));
 
-    current.variations = dedupeRows(
-      current.variations.concat(variations),
-      (item) => `${item.theme_name || ''}|${item.variation_value || ''}`.toLowerCase()
-    ).map((item, variationIndex) => ({
-      ...item,
-      variation_order: variationIndex + 1,
-    }));
+    current.variations = mergeVariationRows(current.variations, variations);
 
     current.packaging = dedupeRows(
       current.packaging.concat(packaging),
@@ -517,7 +550,7 @@ async function importProducts(csvFilePath, options = {}) {
         const productId = await getOrCreateProduct(connection, mappedWithCategory);
 
         await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], images);
-        await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], variations);
+        await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_sku', 'variation_order'], variations);
         await replaceChildRows(connection, 'product_packaging', productId, ['package_number', 'size', 'weight', 'content'], packaging);
         await replaceChildRows(connection, 'product_parameters', productId, ['parameter_name', 'parameter_value', 'parameter_order'], parameters);
 

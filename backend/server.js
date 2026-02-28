@@ -8,6 +8,8 @@ const fs = require('fs');
 const path = require('path');
 const { importProducts } = require('./importProducts');
 const productsRouter = require('./routes/products');
+const categoriesRouter = require('./routes/categories');
+const ordersRouter = require('./routes/orders');
 
 dotenv.config();
 
@@ -88,8 +90,9 @@ app.post('/api/admin/import-products', upload.single('csvFile'), async (req, res
 // Import routes (to be created)
 // app.use('/api/auth', require('./routes/auth')); 
 app.use('/api/products', productsRouter);
+app.use('/api/categories', categoriesRouter);
 // app.use('/api/cart', require('./routes/cart')); 
-// app.use('/api/orders', require('./routes/orders')); 
+app.use('/api/orders', ordersRouter);
 // app.use('/api/payments', require('./routes/payments'));
 
 // Error handling middleware

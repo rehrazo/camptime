@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 const { parse } = require('csv-parse/sync');
+const { ensureCategoryPath } = require('./utils/categories');
 
 dotenv.config({ path: path.resolve(__dirname, '.env'), override: false });
 dotenv.config({ path: path.resolve(__dirname, '../.env'), override: false });
@@ -81,7 +82,7 @@ async function getOrCreateProduct(connection, mapped) {
     const productId = existingRows[0].product_id;
     await connection.execute(
       `UPDATE products SET
-        spu_no = ?, item_no = ?, url = ?, category = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
+        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
         description = ?, html_description = ?, upc = ?, asin = ?,
@@ -93,7 +94,7 @@ async function getOrCreateProduct(connection, mapped) {
         updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?`,
       [
-        mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
+        mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.category_id, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
         mapped.price, mapped.msrp, mapped.map, mapped.dropshipping_price,
         mapped.stock_quantity, mapped.inventory_location, mapped.shipping_method, mapped.shipping_limitations, mapped.processing_time,
         mapped.description, mapped.html_description, mapped.upc, mapped.asin,
@@ -110,7 +111,7 @@ async function getOrCreateProduct(connection, mapped) {
 
   const [result] = await connection.execute(
     `INSERT INTO products (
-      spu_no, item_no, url, category, name, supplier, brand, sku_code,
+      spu_no, item_no, url, category, category_id, name, supplier, brand, sku_code,
       price, msrp, map, dropshipping_price,
       stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
       description, html_description, upc, asin,
@@ -119,9 +120,9 @@ async function getOrCreateProduct(connection, mapped) {
       product_length, product_width, product_height, product_size_unit,
       product_weight, product_weight_unit,
       number_of_packages, packaging_size_unit, packaging_weight_unit
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
     [
-      mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
+      mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.category_id, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
       mapped.price, mapped.msrp, mapped.map, mapped.dropshipping_price,
       mapped.stock_quantity, mapped.inventory_location, mapped.shipping_method, mapped.shipping_limitations, mapped.processing_time,
       mapped.description, mapped.html_description, mapped.upc, mapped.asin,
@@ -177,6 +178,19 @@ function mapProductRow(row) {
   };
 
   return mapped;
+}
+
+async function enrichMappedProductWithCategory(connection, mapped) {
+  if (!mapped.category) {
+    return mapped;
+  }
+
+  const ensured = await ensureCategoryPath(connection, mapped.category);
+  return {
+    ...mapped,
+    category: ensured.categoryPath,
+    category_id: ensured.categoryId,
+  };
 }
 
 function mapImages(row) {
@@ -348,7 +362,8 @@ async function importProducts(csvFilePath, options = {}) {
       try {
         await connection.beginTransaction();
 
-        const productId = await getOrCreateProduct(connection, mapped);
+        const mappedWithCategory = await enrichMappedProductWithCategory(connection, mapped);
+        const productId = await getOrCreateProduct(connection, mappedWithCategory);
 
         await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], mapImages(row));
         await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], mapVariations(row));

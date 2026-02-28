@@ -261,11 +261,13 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'Checkout',
   setup() {
     const router = useRouter()
+    const cartStore = useCartStore()
     
     const form = ref({
       firstName: '',
@@ -285,21 +287,7 @@ export default {
       agreeTerms: false,
     })
 
-    // Mock order items
-    const orderItems = ref([
-      {
-        id: 1,
-        name: 'Mountain Tent',
-        price: 199.99,
-        quantity: 1,
-      },
-      {
-        id: 2,
-        name: 'Sleeping Bag',
-        price: 79.99,
-        quantity: 2,
-      },
-    ])
+    const orderItems = computed(() => cartStore.items)
 
     const subtotal = computed(() => {
       return orderItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -324,6 +312,12 @@ export default {
     })
 
     const submitOrder = async () => {
+      if (!orderItems.value.length) {
+        alert('Your cart is empty.')
+        router.push('/products')
+        return
+      }
+
       try {
         const orderData = {
           customer: {
@@ -339,7 +333,13 @@ export default {
             zip: form.value.zip,
             method: form.value.shippingMethod,
           },
-          items: orderItems.value,
+          items: orderItems.value.map((item) => ({
+            id: item.id,
+            productId: item.productId || item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
           totals: {
             subtotal: subtotal.value,
             shipping: shippingCost.value,
@@ -359,6 +359,7 @@ export default {
 
         if (response.ok) {
           const result = await response.json()
+          cartStore.clearCart()
           // Redirect to order confirmation
           router.push(`/order-confirmation/${result.orderId}`)
         } else {

@@ -9,12 +9,22 @@
         placeholder="Search products..."
         class="search-input"
       />
-      <select v-model="selectedCategory" class="category-select">
-        <option value="">All Categories</option>
-        <option value="tents">Tents</option>
-        <option value="sleeping-bags">Sleeping Bags</option>
-        <option value="backpacks">Backpacks</option>
-        <option value="cooking">Cooking Gear</option>
+      <select v-model="selectedParentCategoryId" class="category-select" @change="handleParentCategoryChange">
+        <option :value="null">All Parent Categories</option>
+        <option v-for="category in parentCategories" :key="category.category_id" :value="category.category_id">
+          {{ category.name }}
+        </option>
+      </select>
+      <select
+        v-model="selectedChildCategoryId"
+        class="category-select"
+        :disabled="!childCategories.length"
+        @change="handleChildCategoryChange"
+      >
+        <option :value="null">All Child Categories</option>
+        <option v-for="category in childCategories" :key="category.category_id" :value="category.category_id">
+          {{ category.name }}
+        </option>
       </select>
     </div>
 
@@ -22,7 +32,7 @@
       <div v-for="product in filteredProducts" :key="product.id" class="product-card">
         <img :src="product.image" :alt="product.name" />
         <h3>{{ product.name }}</h3>
-        <p class="category">{{ product.category }}</p>
+        <p class="category">{{ product.categoryPath || product.category }}</p>
         <p class="description">{{ product.description }}</p>
         <p class="price">${{ product.price.toFixed(2) }}</p>
         <div class="actions">
@@ -40,43 +50,109 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
+import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'Products',
   setup() {
     const products = ref([])
+    const categoryTree = ref([])
     const searchQuery = ref('')
-    const selectedCategory = ref('')
+    const selectedParentCategoryId = ref(null)
+    const selectedChildCategoryId = ref(null)
+    const cartStore = useCartStore()
+
+    const mapProduct = (product) => ({
+      ...product,
+      id: product.product_id,
+      image: product.image || '/images/placeholder-product.jpg',
+      price: Number(product.price) || 0,
+      description: product.description || 'No description available.',
+      categoryPath: product.category_path || product.category_name || product.category || '',
+      categoryId: product.category_id ?? null,
+    })
+
+    const fetchCategoryTree = async () => {
+      const response = await fetch('/api/categories/tree')
+      const data = await response.json()
+      categoryTree.value = Array.isArray(data?.data) ? data.data : []
+    }
+
+    const effectiveCategoryId = computed(() => {
+      const selectedChild = Number(selectedChildCategoryId.value)
+      if (Number.isFinite(selectedChild) && selectedChild > 0) {
+        return selectedChild
+      }
+
+      const selectedParent = Number(selectedParentCategoryId.value)
+      if (Number.isFinite(selectedParent) && selectedParent > 0) {
+        return selectedParent
+      }
+
+      return null
+    })
+
+    const fetchProducts = async () => {
+      const params = new URLSearchParams()
+      if (effectiveCategoryId.value) {
+        params.set('category_id', String(effectiveCategoryId.value))
+      }
+
+      const endpoint = params.toString() ? `/api/products?${params.toString()}` : '/api/products'
+      const response = await fetch(endpoint)
+      const data = await response.json()
+      products.value = Array.isArray(data?.data) ? data.data.map(mapProduct) : []
+    }
 
     onMounted(async () => {
       try {
-        const response = await fetch('/api/products')
-        const data = await response.json()
-        products.value = data
+        await Promise.all([fetchCategoryTree(), fetchProducts()])
       } catch (error) {
         console.error('Error fetching products:', error)
       }
+    })
+
+    const parentCategories = computed(() => categoryTree.value)
+
+    const childCategories = computed(() => {
+      const selectedParent = categoryTree.value.find(
+        (category) => category.category_id === selectedParentCategoryId.value
+      )
+
+      return selectedParent?.children || []
     })
 
     const filteredProducts = computed(() => {
       return products.value.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                              product.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-        const matchesCategory = !selectedCategory.value || product.category === selectedCategory.value
-        return matchesSearch && matchesCategory
+        return matchesSearch
       })
     })
 
+    const handleParentCategoryChange = async () => {
+      selectedChildCategoryId.value = null
+      await fetchProducts()
+    }
+
+    const handleChildCategoryChange = async () => {
+      await fetchProducts()
+    }
+
     const addToCart = (product) => {
-      console.log('Added to cart:', product)
-      // Emit event or call store action to add to cart
+      cartStore.addItem(product, 1)
     }
 
     return {
       products,
+      parentCategories,
+      childCategories,
       searchQuery,
-      selectedCategory,
+      selectedParentCategoryId,
+      selectedChildCategoryId,
       filteredProducts,
+      handleParentCategoryChange,
+      handleChildCategoryChange,
       addToCart,
     }
   },

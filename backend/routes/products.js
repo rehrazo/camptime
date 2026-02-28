@@ -1,4 +1,9 @@
 const express = require('express');
+const {
+  getCategoryById,
+  ensureCategoryPath,
+  getDescendantCategoryIds,
+} = require('../utils/categories');
 
 const router = express.Router();
 
@@ -38,6 +43,7 @@ function mapProductPayload(payload = {}) {
     item_no: payload.item_no || null,
     url: payload.url || null,
     category: payload.category || null,
+    category_id: toNumber(payload.category_id),
     name: payload.name || 'Unnamed Product',
     supplier: payload.supplier || null,
     brand: payload.brand || null,
@@ -73,7 +79,13 @@ function mapProductPayload(payload = {}) {
 }
 
 async function fetchProductById(connection, productId) {
-  const [[product]] = await connection.execute('SELECT * FROM products WHERE product_id = ?', [productId]);
+  const [[product]] = await connection.execute(
+    `SELECT p.*, c.name AS category_name, c.path AS category_path, c.parent_id AS category_parent_id
+     FROM products p
+     LEFT JOIN categories c ON c.category_id = p.category_id
+     WHERE p.product_id = ?`,
+    [productId]
+  );
 
   if (!product) {
     return null;
@@ -114,33 +126,64 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
     const search = req.query.search ? `%${req.query.search}%` : null;
     const category = req.query.category || null;
+    const categoryId = toNumber(req.query.category_id);
     const brand = req.query.brand || null;
 
     const where = [];
     const params = [];
 
     if (search) {
-      where.push('(name LIKE ? OR sku_code LIKE ? OR spu_no LIKE ?)');
+      where.push('(p.name LIKE ? OR p.sku_code LIKE ? OR p.spu_no LIKE ?)');
       params.push(search, search, search);
     }
+    if (categoryId) {
+      const connection = await pool.getConnection();
+      try {
+        const descendantIds = await getDescendantCategoryIds(connection, categoryId);
+        if (!descendantIds.length) {
+          return res.json({
+            data: [],
+            pagination: {
+              page,
+              limit,
+              total: 0,
+              pages: 0,
+            },
+          });
+        }
+
+        where.push(`p.category_id IN (${descendantIds.map(() => '?').join(', ')})`);
+        params.push(...descendantIds);
+      } finally {
+        connection.release();
+      }
+    }
     if (category) {
-      where.push('category = ?');
+      where.push('p.category = ?');
       params.push(category);
     }
     if (brand) {
-      where.push('brand = ?');
+      where.push('p.brand = ?');
       params.push(brand);
     }
 
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
     const [rows] = await pool.execute(
-      `SELECT * FROM products ${whereSql} ORDER BY updated_at DESC LIMIT ${limit} OFFSET ${offset}`,
+      `SELECT p.*, c.name AS category_name, c.path AS category_path, c.parent_id AS category_parent_id
+       FROM products p
+       LEFT JOIN categories c ON c.category_id = p.category_id
+       ${whereSql}
+       ORDER BY p.updated_at DESC
+       LIMIT ${limit} OFFSET ${offset}`,
       params
     );
 
     const [[countRow]] = await pool.execute(
-      `SELECT COUNT(*) AS total FROM products ${whereSql}`,
+      `SELECT COUNT(*) AS total
+       FROM products p
+       LEFT JOIN categories c ON c.category_id = p.category_id
+       ${whereSql}`,
       params
     );
 
@@ -197,9 +240,22 @@ router.post('/', async (req, res) => {
   try {
     await connection.beginTransaction();
 
+    let resolvedCategoryId = payload.category_id || null;
+    let resolvedCategoryPath = payload.category || null;
+
+    if (payload.category) {
+      const ensured = await ensureCategoryPath(connection, payload.category);
+      resolvedCategoryId = ensured.categoryId;
+      resolvedCategoryPath = ensured.categoryPath;
+    } else if (payload.category_id) {
+      const categoryRow = await getCategoryById(connection, payload.category_id);
+      resolvedCategoryId = categoryRow?.category_id || null;
+      resolvedCategoryPath = categoryRow?.path || null;
+    }
+
     const [result] = await connection.execute(
       `INSERT INTO products (
-        spu_no, item_no, url, category, name, supplier, brand, sku_code,
+        spu_no, item_no, url, category, category_id, name, supplier, brand, sku_code,
         price, msrp, map, dropshipping_price,
         stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
         description, html_description, upc, asin,
@@ -208,9 +264,9 @@ router.post('/', async (req, res) => {
         product_length, product_width, product_height, product_size_unit,
         product_weight, product_weight_unit,
         number_of_packages, packaging_size_unit, packaging_weight_unit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        payload.spu_no, payload.item_no, payload.url, payload.category, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.upc, payload.asin,
@@ -267,9 +323,22 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    let resolvedCategoryId = payload.category_id || null;
+    let resolvedCategoryPath = payload.category || null;
+
+    if (payload.category) {
+      const ensured = await ensureCategoryPath(connection, payload.category);
+      resolvedCategoryId = ensured.categoryId;
+      resolvedCategoryPath = ensured.categoryPath;
+    } else if (payload.category_id) {
+      const categoryRow = await getCategoryById(connection, payload.category_id);
+      resolvedCategoryId = categoryRow?.category_id || null;
+      resolvedCategoryPath = categoryRow?.path || null;
+    }
+
     await connection.execute(
       `UPDATE products SET
-        spu_no = ?, item_no = ?, url = ?, category = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
+        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
         description = ?, html_description = ?, upc = ?, asin = ?,
@@ -281,7 +350,7 @@ router.put('/:id', async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?`,
       [
-        payload.spu_no, payload.item_no, payload.url, payload.category, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.upc, payload.asin,

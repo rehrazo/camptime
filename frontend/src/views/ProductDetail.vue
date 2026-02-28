@@ -61,6 +61,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'ProductDetail',
@@ -68,12 +69,24 @@ export default {
     const route = useRoute()
     const product = ref(null)
     const quantity = ref(1)
+    const cartStore = useCartStore()
+
+    const mapProduct = (data) => {
+      const primaryImage = Array.isArray(data?.images) && data.images.length ? data.images[0].image_url : null
+      return {
+        ...data,
+        id: data.product_id,
+        image: primaryImage || data.image || '/images/placeholder-product.jpg',
+        price: Number(data.price) || 0,
+        stock: Number(data.stock_quantity) || 0,
+      }
+    }
 
     onMounted(async () => {
       try {
         const response = await fetch(`/api/products/${route.params.id}`)
         const data = await response.json()
-        product.value = data
+        product.value = mapProduct(data)
       } catch (error) {
         console.error('Error fetching product:', error)
       }
@@ -81,8 +94,7 @@ export default {
 
     const addToCart = () => {
       if (product.value) {
-        console.log(`Added ${quantity.value} of ${product.value.name} to cart`)
-        // Call store action or emit event
+        cartStore.addItem(product.value, quantity.value)
         quantity.value = 1
       }
     }

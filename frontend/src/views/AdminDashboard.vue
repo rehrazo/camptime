@@ -141,7 +141,7 @@
             <h2>Products Management</h2>
             <div class="action-buttons">
               <button class="btn btn-secondary" @click="loadProducts" :disabled="productsLoading">Refresh</button>
-              <button class="btn btn-primary" @click="createProduct">+ Add Product</button>
+              <button class="btn btn-primary" @click="openCreateProductForm">+ Add Product</button>
             </div>
           </div>
 
@@ -154,11 +154,51 @@
               class="search-input"
             />
             <select class="filter-select" v-model="productCategory" @change="loadProducts">
-              <option value="">All Categories</option>
-              <option value="tents">Tents</option>
-              <option value="sleeping">Sleeping Bags</option>
-              <option value="backpacks">Backpacks</option>
+              <option :value="null">All Categories</option>
+              <option v-for="category in categoryOptions" :key="category.category_id" :value="category.category_id">
+                {{ category.label }}
+              </option>
             </select>
+          </div>
+
+          <div v-if="productFormVisible" class="import-card mb-2">
+            <div class="section-header">
+              <h3>{{ productFormMode === 'create' ? 'Create Product' : 'Edit Product' }}</h3>
+              <div class="action-buttons">
+                <button class="btn btn-secondary" @click="closeProductForm">Cancel</button>
+                <button class="btn btn-primary" @click="saveProduct" :disabled="productsLoading">
+                  {{ productFormMode === 'create' ? 'Create' : 'Update' }}
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-grid">
+              <div class="form-group">
+                <label for="productName">Name</label>
+                <input id="productName" v-model="productForm.name" type="text" class="form-input" placeholder="Product name" />
+              </div>
+              <div class="form-group">
+                <label for="productSku">SKU</label>
+                <input id="productSku" v-model="productForm.sku_code" type="text" class="form-input" placeholder="SKU code" />
+              </div>
+              <div class="form-group">
+                <label for="productCategoryId">Category</label>
+                <select id="productCategoryId" v-model="productForm.category_id" class="form-input">
+                  <option :value="null">Uncategorized</option>
+                  <option v-for="category in categoryOptions" :key="category.category_id" :value="category.category_id">
+                    {{ category.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="productPrice">Price</label>
+                <input id="productPrice" v-model.number="productForm.price" type="number" min="0" step="0.01" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label for="productStock">Stock</label>
+                <input id="productStock" v-model.number="productForm.stock_quantity" type="number" min="0" step="1" class="form-input" />
+              </div>
+            </div>
           </div>
 
           <p v-if="productsError" class="import-status">{{ productsError }}</p>
@@ -182,7 +222,7 @@
                   {{ product.name }}
                 </td>
                 <td>{{ product.sku_code || '-' }}</td>
-                <td>{{ product.category }}</td>
+                <td>{{ product.category_path || product.category }}</td>
                 <td>${{ Number(product.price || 0).toFixed(2) }}</td>
                 <td>
                   <span class="stock" :class="{ low: Number(product.stock_quantity || 0) < 10 }">
@@ -190,7 +230,7 @@
                   </span>
                 </td>
                 <td class="action-buttons">
-                  <button class="edit-btn" title="Edit" @click="editProduct(product)">✎</button>
+                  <button class="edit-btn" title="Edit" @click="openEditProductForm(product)">✎</button>
                   <button class="delete-btn" title="Delete" @click="deleteProduct(product)">🗑️</button>
                 </td>
               </tr>
@@ -203,6 +243,64 @@
           <p class="subtitle mt-2" v-if="productPagination.total !== null">
             Showing {{ products.length }} of {{ productPagination.total }} products
           </p>
+        </section>
+
+        <!-- Categories Management -->
+        <section v-if="activeTab === 'categories'" class="categories-tab">
+          <div class="section-header">
+            <h2>Categories Management</h2>
+            <div class="action-buttons">
+              <button class="btn btn-secondary" @click="loadCategories" :disabled="categoriesLoading">Refresh</button>
+            </div>
+          </div>
+
+          <div class="products-controls">
+            <div class="form-group">
+              <label for="newCategoryName">Category Name</label>
+              <input id="newCategoryName" v-model="newCategoryName" type="text" class="form-input" placeholder="e.g. Tents" />
+            </div>
+            <div class="form-group">
+              <label for="newCategoryParent">Parent Category</label>
+              <select id="newCategoryParent" v-model="newCategoryParentId" class="filter-select">
+                <option :value="null">None (root category)</option>
+                <option v-for="category in categoryOptions" :key="category.category_id" :value="category.category_id">
+                  {{ category.label }}
+                </option>
+              </select>
+            </div>
+            <button class="btn btn-primary" @click="createCategory" :disabled="categoriesLoading">+ Add Category</button>
+          </div>
+
+          <p v-if="categoriesError" class="import-status">{{ categoriesError }}</p>
+          <p v-else-if="categoriesLoading" class="import-status">Loading categories...</p>
+
+          <table class="products-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Path</th>
+                <th>Parent</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="category in categoryOptions" :key="category.category_id">
+                <td>{{ category.category_id }}</td>
+                <td>{{ category.label }}</td>
+                <td>{{ category.path }}</td>
+                <td>{{ getCategoryParentPath(category) }}</td>
+                <td class="action-buttons">
+                  <button class="edit-btn" title="Rename" @click="renameCategory(category)">✎</button>
+                  <button class="view-btn" title="Move" @click="moveCategory(category)">⇄</button>
+                  <button class="delete-btn" title="Delete" @click="deleteCategory(category)">🗑️</button>
+                </td>
+              </tr>
+              <tr v-if="!categoriesLoading && categoryOptions.length === 0">
+                <td colspan="5" class="center">No categories found.</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
 
         <!-- Orders Management -->
@@ -466,11 +564,27 @@ export default {
   setup() {
     const activeTab = ref('overview')
     const productSearch = ref('')
-    const productCategory = ref('')
+    const productCategory = ref(null)
     const products = ref([])
     const productsLoading = ref(false)
     const productsError = ref('')
     const productPagination = ref({ page: 1, limit: 20, total: null, pages: 0 })
+    const productFormVisible = ref(false)
+    const productFormMode = ref('create')
+    const productForm = ref({
+      product_id: null,
+      name: '',
+      sku_code: '',
+      category_id: null,
+      price: 0,
+      stock_quantity: 0,
+    })
+    const categoryTree = ref([])
+    const categoryOptions = ref([])
+    const categoriesLoading = ref(false)
+    const categoriesError = ref('')
+    const newCategoryName = ref('')
+    const newCategoryParentId = ref(null)
     const customerSearch = ref('')
     const notificationCount = ref(5)
     const importFile = ref(null)
@@ -483,6 +597,7 @@ export default {
     const navItems = [
       { id: 'overview', label: 'Dashboard', icon: '📊' },
       { id: 'products', label: 'Products', icon: '📦' },
+      { id: 'categories', label: 'Categories', icon: '🗂️' },
       { id: 'orders', label: 'Orders', icon: '🛍️' },
       { id: 'customers', label: 'Customers', icon: '👥' },
       { id: 'reports', label: 'Reports', icon: '📈' },
@@ -547,8 +662,9 @@ export default {
           params.append('search', productSearch.value)
         }
 
-        if (productCategory.value) {
-          params.append('category', productCategory.value)
+        const categoryId = Number(productCategory.value)
+        if (Number.isFinite(categoryId) && categoryId > 0) {
+          params.append('category_id', String(categoryId))
         }
 
         const response = await fetch(`/api/products?${params.toString()}`)
@@ -569,76 +685,86 @@ export default {
       }
     }
 
-    const createProduct = async () => {
-      const name = window.prompt('Product name?')
-      if (!name) {
-        return
-      }
-
-      const skuCode = window.prompt('SKU code? (optional)') || null
-      const category = window.prompt('Category? (optional)') || null
-      const priceInput = window.prompt('Price? (default 0)', '0')
-      const stockInput = window.prompt('Stock quantity? (default 0)', '0')
-
-      const payload = {
-        name,
-        sku_code: skuCode,
-        category,
-        price: Number(priceInput || 0),
-        stock_quantity: Number(stockInput || 0),
-      }
-
-      try {
-        const response = await fetch('/api/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        })
-
-        const data = await response.json()
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to create product')
-        }
-
-        await loadProducts()
-      } catch (error) {
-        productsError.value = error.message || 'Failed to create product'
+    const resetProductForm = () => {
+      productForm.value = {
+        product_id: null,
+        name: '',
+        sku_code: '',
+        category_id: null,
+        price: 0,
+        stock_quantity: 0,
       }
     }
 
-    const editProduct = async (product) => {
-      const name = window.prompt('Product name?', product.name || '')
+    const openCreateProductForm = async () => {
+      productsError.value = ''
+      if (!categoryOptions.value.length) {
+        await loadCategories()
+      }
+
+      resetProductForm()
+      productFormMode.value = 'create'
+      productFormVisible.value = true
+    }
+
+    const openEditProductForm = async (product) => {
+      productsError.value = ''
+      if (!categoryOptions.value.length) {
+        await loadCategories()
+      }
+
+      productForm.value = {
+        product_id: product.product_id,
+        name: product.name || '',
+        sku_code: product.sku_code || '',
+        category_id: product.category_id || null,
+        price: Number(product.price || 0),
+        stock_quantity: Number(product.stock_quantity || 0),
+      }
+      productFormMode.value = 'edit'
+      productFormVisible.value = true
+    }
+
+    const closeProductForm = () => {
+      productFormVisible.value = false
+      resetProductForm()
+    }
+
+    const saveProduct = async () => {
+      const name = String(productForm.value.name || '').trim()
       if (!name) {
+        productsError.value = 'Product name is required'
         return
       }
 
-      const category = window.prompt('Category?', product.category || '')
-      const priceInput = window.prompt('Price?', String(product.price ?? 0))
-      const stockInput = window.prompt('Stock quantity?', String(product.stock_quantity ?? 0))
-
       const payload = {
-        ...product,
         name,
-        category,
-        price: Number(priceInput || 0),
-        stock_quantity: Number(stockInput || 0),
+        sku_code: String(productForm.value.sku_code || '').trim() || null,
+        category_id: productForm.value.category_id || null,
+        price: Number(productForm.value.price || 0),
+        stock_quantity: Number(productForm.value.stock_quantity || 0),
       }
 
       try {
-        const response = await fetch(`/api/products/${product.product_id}`, {
-          method: 'PUT',
+        const isCreate = productFormMode.value === 'create'
+        const endpoint = isCreate ? '/api/products' : `/api/products/${productForm.value.product_id}`
+        const method = isCreate ? 'POST' : 'PUT'
+
+        const response = await fetch(endpoint, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
 
         const data = await response.json()
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to update product')
+          throw new Error(data.error || `Failed to ${isCreate ? 'create' : 'update'} product`)
         }
 
+        closeProductForm()
         await loadProducts()
       } catch (error) {
-        productsError.value = error.message || 'Failed to update product'
+        productsError.value = error.message || 'Failed to save product'
       }
     }
 
@@ -666,15 +792,192 @@ export default {
 
     const getProductImage = () => 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="%23e8ecf5"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="16">%F0%9F%93%A6</text></svg>'
 
+    const flattenCategoryTree = (nodes = [], depth = 0) => {
+      return nodes.flatMap((node) => {
+        const prefix = depth > 0 ? `${'— '.repeat(depth)}` : ''
+        const current = {
+          ...node,
+          label: `${prefix}${node.name}`,
+          depth,
+        }
+
+        return [current, ...flattenCategoryTree(node.children || [], depth + 1)]
+      })
+    }
+
+    const loadCategories = async () => {
+      categoriesLoading.value = true
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch('/api/categories/tree')
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load categories')
+        }
+
+        categoryTree.value = Array.isArray(data.data) ? data.data : []
+        categoryOptions.value = flattenCategoryTree(categoryTree.value)
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to load categories'
+      } finally {
+        categoriesLoading.value = false
+      }
+    }
+
+    const createCategory = async () => {
+      const name = newCategoryName.value.trim()
+      if (!name) {
+        categoriesError.value = 'Category name is required'
+        return
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            parent_id: newCategoryParentId.value || null,
+          }),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create category')
+        }
+
+        newCategoryName.value = ''
+        newCategoryParentId.value = null
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to create category'
+      }
+    }
+
+    const renameCategory = async (category) => {
+      const name = window.prompt('Rename category:', category.name)
+      if (!name || name.trim() === category.name) {
+        return
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch(`/api/categories/${category.category_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim() }),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to rename category')
+        }
+
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to rename category'
+      }
+    }
+
+    const moveCategory = async (category) => {
+      const input = window.prompt(
+        'Enter new parent category ID (leave blank for root):',
+        category.parent_id || ''
+      )
+
+      if (input === null) {
+        return
+      }
+
+      const parentId = input.trim() === '' ? null : Number(input)
+      if (parentId !== null && (!Number.isInteger(parentId) || parentId <= 0)) {
+        categoriesError.value = 'Parent ID must be a positive integer or blank'
+        return
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch(`/api/categories/${category.category_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ parent_id: parentId }),
+        })
+
+        const data = await response.json()
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to move category')
+        }
+
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to move category'
+      }
+    }
+
+    const deleteCategory = async (category) => {
+      if (!window.confirm(`Delete category "${category.name}"?`)) {
+        return
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch(`/api/categories/${category.category_id}`, {
+          method: 'DELETE',
+        })
+
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to delete category')
+        }
+
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to delete category'
+      }
+    }
+
+    const getCategoryParentPath = (category) => {
+      if (!category?.path) {
+        return '-'
+      }
+
+      const parts = String(category.path).split(' > ').filter(Boolean)
+      if (parts.length <= 1) {
+        return '-'
+      }
+
+      parts.pop()
+      return parts.join(' > ')
+    }
+
     watch(activeTab, async (tab) => {
       if (tab === 'products' && products.value.length === 0) {
         await loadProducts()
+      }
+
+      if (tab === 'products' && categoryOptions.value.length === 0) {
+        await loadCategories()
+      }
+
+      if (tab === 'categories' && categoryOptions.value.length === 0) {
+        await loadCategories()
       }
     })
 
     onMounted(async () => {
       if (activeTab.value === 'products') {
         await loadProducts()
+      }
+
+      if (activeTab.value === 'categories') {
+        await loadCategories()
       }
     })
 
@@ -730,6 +1033,11 @@ export default {
       productsLoading,
       productsError,
       productPagination,
+      categoryOptions,
+      categoriesLoading,
+      categoriesError,
+      newCategoryName,
+      newCategoryParentId,
       customerSearch,
       notificationCount,
       importDryRun,
@@ -745,10 +1053,21 @@ export default {
       customers,
       getCurrentTabName,
       loadProducts,
-      createProduct,
-      editProduct,
+      openCreateProductForm,
+      openEditProductForm,
+      closeProductForm,
+      saveProduct,
       deleteProduct,
       getProductImage,
+      productFormVisible,
+      productFormMode,
+      productForm,
+      loadCategories,
+      createCategory,
+      renameCategory,
+      moveCategory,
+      deleteCategory,
+      getCategoryParentPath,
       onFileSelected,
       runImport,
     }

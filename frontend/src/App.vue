@@ -7,7 +7,7 @@
       <ul class="nav-links">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/products">Products</router-link></li>
-        <li><router-link to="/cart">Cart</router-link></li>
+        <li><router-link to="/cart">Cart ({{ cartItemCount }})</router-link></li>
         <li v-if="!isLoggedIn"><router-link to="/login">Login</router-link></li>
         <li v-if="isLoggedIn"><router-link to="/account">Account</router-link></li>
       </ul>
@@ -24,15 +24,19 @@
 <script>
 import { computed } from 'vue'
 import { useAuthStore } from './stores/auth'
+import { useCartStore } from './stores/cart'
 
 export default {
   name: 'App',
   setup() {
     const authStore = useAuthStore()
+    const cartStore = useCartStore()
     const isLoggedIn = computed(() => authStore.isLoggedIn)
+    const cartItemCount = computed(() => cartStore.itemCount)
 
     return {
       isLoggedIn,
+      cartItemCount,
     }
   },
 }

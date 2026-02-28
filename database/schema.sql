@@ -9,6 +9,20 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE categories (
+    category_id INT PRIMARY KEY AUTO_INCREMENT,
+    parent_id INT NULL,
+    name VARCHAR(255) NOT NULL,
+    slug VARCHAR(255) NOT NULL,
+    path VARCHAR(1000) NOT NULL,
+    level INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_categories_parent FOREIGN KEY (parent_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+    UNIQUE KEY uq_categories_parent_name (parent_id, name),
+    INDEX idx_categories_parent (parent_id)
+);
+
 CREATE TABLE products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     -- Basic Information
@@ -16,6 +30,7 @@ CREATE TABLE products (
     item_no VARCHAR(255),
     url VARCHAR(500),
     category VARCHAR(255),
+    category_id INT,
     name VARCHAR(255) NOT NULL,
     supplier VARCHAR(255),
     brand VARCHAR(255),
@@ -67,7 +82,9 @@ CREATE TABLE products (
     packaging_weight_unit VARCHAR(50),
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+    INDEX (category_id)
 );
 
 CREATE TABLE product_images (

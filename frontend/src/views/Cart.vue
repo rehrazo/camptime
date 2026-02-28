@@ -89,30 +89,14 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'Cart',
   setup() {
     const router = useRouter()
-    const cartItems = ref([
-      // Mock data for demonstration
-      {
-        id: 1,
-        name: 'Mountain Tent',
-        category: 'Tents',
-        price: 199.99,
-        image: '/images/tent.jpg',
-        quantity: 1,
-      },
-      {
-        id: 2,
-        name: 'Sleeping Bag',
-        category: 'Sleeping Bags',
-        price: 79.99,
-        image: '/images/sleeping-bag.jpg',
-        quantity: 2,
-      },
-    ])
+    const cartStore = useCartStore()
+    const cartItems = computed(() => cartStore.items)
     const couponCode = ref('')
     const couponApplied = ref(false)
     const discountPercentage = ref(0)
@@ -138,28 +122,25 @@ export default {
     })
 
     const incrementQuantity = (itemId) => {
-      const item = cartItems.value.find(i => i.id === itemId)
+      const item = cartItems.value.find((currentItem) => currentItem.id === itemId)
       if (item && item.quantity < 99) {
-        item.quantity++
+        cartStore.updateQuantity(itemId, item.quantity + 1)
       }
     }
 
     const decrementQuantity = (itemId) => {
-      const item = cartItems.value.find(i => i.id === itemId)
+      const item = cartItems.value.find((currentItem) => currentItem.id === itemId)
       if (item && item.quantity > 1) {
-        item.quantity--
+        cartStore.updateQuantity(itemId, item.quantity - 1)
       }
     }
 
     const updateQuantity = (itemId, newQuantity) => {
-      const item = cartItems.value.find(i => i.id === itemId)
-      if (item) {
-        item.quantity = Math.max(1, Math.min(99, newQuantity))
-      }
+      cartStore.updateQuantity(itemId, Math.max(1, Math.min(99, Number(newQuantity) || 1)))
     }
 
     const removeItem = (itemId) => {
-      cartItems.value = cartItems.value.filter(item => item.id !== itemId)
+      cartStore.removeItem(itemId)
     }
 
     const applyCoupon = () => {
@@ -175,6 +156,9 @@ export default {
     }
 
     const checkout = () => {
+      if (!cartItems.value.length) {
+        return
+      }
       router.push('/checkout')
     }
 

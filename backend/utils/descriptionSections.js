@@ -45,6 +45,19 @@ function isPolicyNoise(sentence) {
     /some remote states/i,
     /warm\s*tip/i,
     /no refund will be given/i,
+    /for any product problems?/i,
+    /must provide communication vouchers?/i,
+    /pictures?,\s*videos?/i,
+    /orders must meet the following requirements?/i,
+    /accept returns? and refunds?/i,
+    /with the buyer/i,
+    /product photos? or dynamic videos? showing the product in question/i,
+    /please provide a complete and detailed physical address/i,
+    /please provide a complete and ed physical address/i,
+    /delivery to po box addresses?/i,
+    /please refer to the actual product for accuracy/i,
+    /measurement allowed error is \+\/-?\s*1-?3\s*cm/i,
+    /\+\/-?\s*10\s*g/i,
   ]
 
   return blocked.some((pattern) => pattern.test(text))

@@ -18,6 +18,7 @@
 
         <p class="price">${{ product.price.toFixed(2) }}</p>
 
+        <p v-if="product.briefDescription" class="brief-description">{{ product.briefDescription }}</p>
         <p class="description">{{ product.description }}</p>
 
         <div class="features" v-if="product.features">
@@ -79,6 +80,8 @@ export default {
         image: primaryImage || data.image || '/images/placeholder-product.jpg',
         price: Number(data.price) || 0,
         stock: Number(data.stock_quantity) || 0,
+        briefDescription: data.brief_description || null,
+        description: data.long_description || data.description || data.brief_description || 'No description available.',
       }
     }
 
@@ -188,6 +191,14 @@ export default {
   line-height: 1.6;
   margin-bottom: 2rem;
   font-size: 1rem;
+}
+
+.brief-description {
+  color: #444;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .features {

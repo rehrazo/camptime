@@ -256,7 +256,7 @@
                 </div>
 
                 <div v-if="viewMode === 'list'" class="product-description">
-                  {{ product.description }}
+                  {{ product.brief_description || product.description }}
                 </div>
 
                 <div class="price-section">
@@ -512,7 +512,7 @@ export default {
         const matchesSearch = !searchQuery.value || 
           product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
           product.brand.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+          (product.brief_description || product.description || '').toLowerCase().includes(searchQuery.value.toLowerCase())
 
         // Filter search
         const matchesFilterSearch = !filterSearch.value ||

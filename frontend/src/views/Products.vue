@@ -67,7 +67,7 @@ export default {
       id: product.product_id,
       image: product.image || '/images/placeholder-product.jpg',
       price: Number(product.price) || 0,
-      description: product.description || 'No description available.',
+      description: product.brief_description || product.description || 'No description available.',
       categoryPath: product.category_path || product.category_name || product.category || '',
       categoryId: product.category_id ?? null,
     })
@@ -125,7 +125,7 @@ export default {
     const filteredProducts = computed(() => {
       return products.value.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                             product.description.toLowerCase().includes(searchQuery.value.toLowerCase())
+                             (product.description || '').toLowerCase().includes(searchQuery.value.toLowerCase())
         return matchesSearch
       })
     })

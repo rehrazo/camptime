@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <section class="hero">
+    <section class="hero" :style="heroStyle">
       <div class="hero-content">
         <h1>Welcome to It's Camp Time</h1>
         <p>Your ultimate destination for premium camping gear and outdoor equipment</p>
@@ -43,10 +43,19 @@
 </template>
 
 <script>
+import homeBanner from '../assets/images/site/home_page_banner_cropped.jpg'
+
 export default {
   name: 'Home',
   setup() {
-    return {}
+    const heroStyle = {
+      backgroundImage: `linear-gradient(rgba(43, 43, 43, 0.35), rgba(43, 43, 43, 0.35)), url(${homeBanner})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    }
+
+    return { heroStyle }
   },
 }
 </script>
@@ -57,9 +66,12 @@ export default {
 }
 
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 6rem 2rem;
+  color: #fff;
+  min-height: 86vh;
+  padding: 7rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
@@ -84,19 +96,19 @@ export default {
 }
 
 .btn-primary {
-  background-color: white;
-  color: #667eea;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
 }
 
 .btn-primary:hover {
-  background-color: #f0f0f0;
+  background-color: #2B2B2B;
   transform: translateY(-2px);
 }
 
 .btn-secondary {
-  background-color: #667eea;
-  color: white;
-  border: 2px solid #667eea;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
+  border: 2px solid #2F4F3E;
 }
 
 .btn-secondary:hover {
@@ -106,7 +118,7 @@ export default {
 
 .features {
   padding: 4rem 2rem;
-  background-color: #f9f9f9;
+  background-color: #D9C7A3;
 }
 
 .features h2 {
@@ -124,7 +136,7 @@ export default {
 }
 
 .feature {
-  background: white;
+  background: #fff;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -132,13 +144,13 @@ export default {
 }
 
 .feature h3 {
-  color: #667eea;
+  color: #2F4F3E;
   margin-bottom: 1rem;
 }
 
 .cta {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #2F4F3E;
+  color: #D9C7A3;
   padding: 4rem 2rem;
   text-align: center;
 }

@@ -21,6 +21,41 @@
         <p v-if="product.briefDescription" class="brief-description">{{ product.briefDescription }}</p>
         <p class="description">{{ product.description }}</p>
 
+        <div v-if="product.sections.highlights.length" class="features">
+          <h3>Highlights</h3>
+          <ul>
+            <li v-for="item in product.sections.highlights" :key="`highlight-${item}`">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div v-if="product.sections.options.length" class="features">
+          <h3>Options</h3>
+          <ul>
+            <li v-for="item in product.sections.options" :key="`option-${item}`">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div v-if="product.sections.specifications.length" class="features">
+          <h3>Specifications</h3>
+          <ul>
+            <li v-for="item in product.sections.specifications" :key="`spec-${item}`">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div v-if="product.sections.packaging.length" class="features">
+          <h3>Packaging</h3>
+          <ul>
+            <li v-for="item in product.sections.packaging" :key="`packaging-${item}`">{{ item }}</li>
+          </ul>
+        </div>
+
+        <div v-if="product.sections.shipping.length" class="features">
+          <h3>Shipping</h3>
+          <ul>
+            <li v-for="item in product.sections.shipping" :key="`shipping-${item}`">{{ item }}</li>
+          </ul>
+        </div>
+
         <div class="features" v-if="product.features">
           <h3>Features</h3>
           <ul>
@@ -81,7 +116,29 @@ export default {
         price: Number(data.price) || 0,
         stock: Number(data.stock_quantity) || 0,
         briefDescription: data.brief_description || null,
-        description: data.long_description || data.description || data.brief_description || 'No description available.',
+        description:
+          data.description_sections?.description ||
+          data.long_description ||
+          data.description ||
+          data.brief_description ||
+          'No description available.',
+        sections: {
+          highlights: Array.isArray(data.description_sections?.highlights)
+            ? data.description_sections.highlights
+            : [],
+          options: Array.isArray(data.description_sections?.options)
+            ? data.description_sections.options
+            : [],
+          specifications: Array.isArray(data.description_sections?.specifications)
+            ? data.description_sections.specifications
+            : [],
+          packaging: Array.isArray(data.description_sections?.packaging)
+            ? data.description_sections.packaging
+            : [],
+          shipping: Array.isArray(data.description_sections?.shipping)
+            ? data.description_sections.shipping
+            : [],
+        },
       }
     }
 

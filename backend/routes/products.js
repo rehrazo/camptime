@@ -6,6 +6,7 @@ const {
 } = require('../utils/categories');
 const { generateBriefDescription } = require('../utils/briefDescription');
 const { cleanDescriptionForStorage } = require('../utils/descriptionCleaner');
+const { buildDescriptionSections } = require('../utils/descriptionSections');
 
 const router = express.Router();
 
@@ -132,12 +133,25 @@ async function fetchProductById(connection, productId) {
     [productId]
   );
 
+  const description_sections = buildDescriptionSections({
+    name: product.name,
+    longDescription: product.long_description,
+    description: product.description,
+    variations,
+    parameters,
+    packaging,
+    shippingMethod: product.shipping_method,
+    shippingLimitations: product.shipping_limitations,
+    processingTime: product.processing_time,
+  });
+
   return {
     ...product,
     images,
     variations,
     packaging,
-    parameters
+    parameters,
+    description_sections,
   };
 }
 

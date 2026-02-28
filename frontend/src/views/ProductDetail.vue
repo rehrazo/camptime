@@ -75,6 +75,24 @@
           />
         </div>
 
+        <div v-if="product.variantGroups.length" class="variant-selector">
+          <h3>Choose Variant</h3>
+          <div v-for="group in product.variantGroups" :key="group.theme" class="variant-group">
+            <label :for="`variant-${group.theme}`">{{ group.theme }}:</label>
+            <select
+              :id="`variant-${group.theme}`"
+              v-model="selectedVariants[group.theme]"
+              class="variant-select"
+            >
+              <option value="">Select {{ group.theme }}</option>
+              <option v-for="value in group.values" :key="`${group.theme}-${value}`" :value="value">
+                {{ value }}
+              </option>
+            </select>
+          </div>
+          <p v-if="variantError" class="variant-error">{{ variantError }}</p>
+        </div>
+
         <div class="actions">
           <button @click="addToCart" class="btn btn-primary btn-large">Add to Cart</button>
           <button @click="addToWishlist" class="btn btn-secondary btn-large">♥ Add to Wishlist</button>
@@ -105,7 +123,34 @@ export default {
     const route = useRoute()
     const product = ref(null)
     const quantity = ref(1)
+    const selectedVariants = ref({})
+    const variantError = ref('')
     const cartStore = useCartStore()
+
+    const groupVariations = (variations = []) => {
+      const groups = {}
+
+      variations.forEach((variation) => {
+        const theme = String(variation?.theme_name || 'Variant').trim() || 'Variant'
+        const value = String(variation?.variation_value || '').trim()
+        if (!value) {
+          return
+        }
+
+        if (!groups[theme]) {
+          groups[theme] = []
+        }
+
+        if (!groups[theme].includes(value)) {
+          groups[theme].push(value)
+        }
+      })
+
+      return Object.keys(groups).map((theme) => ({
+        theme,
+        values: groups[theme],
+      }))
+    }
 
     const mapProduct = (data) => {
       const primaryImage = Array.isArray(data?.images) && data.images.length ? data.images[0].image_url : null
@@ -139,6 +184,7 @@ export default {
             ? data.description_sections.shipping
             : [],
         },
+        variantGroups: groupVariations(data.variations),
       }
     }
 
@@ -147,6 +193,8 @@ export default {
         const response = await fetch(`/api/products/${route.params.id}`)
         const data = await response.json()
         product.value = mapProduct(data)
+        selectedVariants.value = {}
+        variantError.value = ''
       } catch (error) {
         console.error('Error fetching product:', error)
       }
@@ -154,7 +202,27 @@ export default {
 
     const addToCart = () => {
       if (product.value) {
-        cartStore.addItem(product.value, quantity.value)
+        const requiredGroups = product.value.variantGroups || []
+        const missingGroup = requiredGroups.find((group) => !selectedVariants.value[group.theme])
+
+        if (missingGroup) {
+          variantError.value = `Please select ${missingGroup.theme} before adding to cart.`
+          return
+        }
+
+        variantError.value = ''
+        const variantSelections = requiredGroups.reduce((result, group) => {
+          result[group.theme] = selectedVariants.value[group.theme]
+          return result
+        }, {})
+
+        cartStore.addItem(
+          {
+            ...product.value,
+            variantSelections,
+          },
+          quantity.value
+        )
         quantity.value = 1
       }
     }
@@ -169,6 +237,8 @@ export default {
     return {
       product,
       quantity,
+      selectedVariants,
+      variantError,
       addToCart,
       addToWishlist,
     }
@@ -304,6 +374,34 @@ export default {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+.variant-selector {
+  margin-bottom: 2rem;
+}
+
+.variant-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+  gap: 0.4rem;
+}
+
+.variant-group label {
+  font-weight: 600;
+}
+
+.variant-select {
+  padding: 0.55rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.variant-error {
+  color: #c62828;
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
 }
 
 .actions {

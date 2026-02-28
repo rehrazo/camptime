@@ -4,16 +4,49 @@ import { ref, computed } from 'vue'
 export const useCartStore = defineStore('cart', () => {
   const items = ref(JSON.parse(localStorage.getItem('cartItems')) || [])
 
+  const normalizeVariantSelections = (value) => {
+    if (!value || typeof value !== 'object') {
+      return {}
+    }
+
+    return Object.keys(value)
+      .sort()
+      .reduce((result, key) => {
+        const cleanedValue = String(value[key] || '').trim()
+        if (cleanedValue) {
+          result[key] = cleanedValue
+        }
+        return result
+      }, {})
+  }
+
+  const buildVariantSummary = (variantSelections = {}) => {
+    const entries = Object.entries(variantSelections)
+    if (!entries.length) {
+      return null
+    }
+
+    return entries.map(([key, value]) => `${key}: ${value}`).join(' • ')
+  }
+
   const normalizeProduct = (product = {}) => {
-    const id = product.id ?? product.product_id
+    const productId = product.productId ?? product.id ?? product.product_id
+    const variantSelections = normalizeVariantSelections(product.variantSelections)
+    const variantSummary = product.variantSummary || buildVariantSummary(variantSelections)
+    const lineId = Object.keys(variantSelections).length
+      ? `${productId}::${JSON.stringify(variantSelections)}`
+      : String(productId)
+
     return {
-      id,
-      productId: id,
+      id: lineId,
+      productId,
       name: product.name || 'Product',
       category: product.category || '',
       price: Number(product.price) || 0,
       image: product.image || product.image_url || '/images/placeholder-product.jpg',
       quantity: Math.max(1, Number(product.quantity) || 1),
+      variantSelections,
+      variantSummary,
     }
   }
 

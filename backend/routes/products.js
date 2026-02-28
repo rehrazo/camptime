@@ -208,7 +208,14 @@ router.get('/', async (req, res) => {
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
     const [rows] = await pool.execute(
-      `SELECT p.*, c.name AS category_name, c.path AS category_path, c.parent_id AS category_parent_id
+      `SELECT p.*, c.name AS category_name, c.path AS category_path, c.parent_id AS category_parent_id,
+              (
+                SELECT pi.image_url
+                FROM product_images pi
+                WHERE pi.product_id = p.product_id
+                ORDER BY COALESCE(pi.image_order, 2147483647), pi.image_id ASC
+                LIMIT 1
+              ) AS primary_image_url
        FROM products p
        LEFT JOIN categories c ON c.category_id = p.category_id
        ${whereSql}

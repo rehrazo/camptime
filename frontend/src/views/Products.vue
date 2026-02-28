@@ -65,7 +65,7 @@ export default {
     const mapProduct = (product) => ({
       ...product,
       id: product.product_id,
-      image: product.image || '/images/placeholder-product.jpg',
+      image: product.primary_image_url || product.image || '/images/placeholder-product.jpg',
       price: Number(product.price) || 0,
       description: product.brief_description || product.description || 'No description available.',
       categoryPath: product.category_path || product.category_name || product.category || '',

@@ -238,7 +238,7 @@
               :class="{ 'list-view': viewMode === 'list' }"
             >
               <div class="product-image">
-                <img :src="product.image" :alt="product.name" />
+                <img :src="product.image" :alt="product.name" @error="handleImageError" />
                 <div v-if="product.onSale" class="badge sale">SALE</div>
                 <div v-if="!product.inStock" class="badge out-of-stock">Out of Stock</div>
                 <div v-if="product.isNew" class="badge new">NEW</div>
@@ -333,11 +333,13 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 export default {
   name: 'ProductSearch',
   setup() {
+    const fallbackImage = '/images/placeholder-product.jpg'
+
     const searchQuery = ref('')
     const filterSearch = ref('')
     const brandSearch = ref('')
@@ -366,144 +368,57 @@ export default {
       sizes: [],
     })
 
-    // Mock product data
-    const allProducts = ref([
-      {
-        id: 1,
-        name: 'Mountain Tent Pro',
-        brand: 'CampGear',
-        category: 'Tents',
-        price: 199.99,
-        originalPrice: 249.99,
-        image: '/images/tent.jpg',
-        rating: 5,
-        reviews: 145,
-        inStock: true,
-        onSale: true,
-        isNew: false,
-        description: 'Professional grade 4-season mountain tent with excellent ventilation',
-        size: 'Large',
-      },
-      {
-        id: 2,
-        name: 'Compact Sleeping Bag',
-        brand: 'NatureRest',
-        category: 'Sleeping Bags',
-        price: 79.99,
-        originalPrice: 79.99,
-        image: '/images/sleeping-bag.jpg',
-        rating: 4,
-        reviews: 98,
-        inStock: true,
-        onSale: false,
-        isNew: true,
-        description: 'Lightweight and compact sleeping bag perfect for backpacking',
-        size: 'Small',
-      },
-      {
-        id: 3,
-        name: 'Hiking Backpack 65L',
-        brand: 'TrailBlaze',
-        category: 'Backpacks',
-        price: 129.99,
-        originalPrice: 159.99,
-        image: '/images/backpack.jpg',
-        rating: 4,
-        reviews: 76,
-        inStock: false,
-        onSale: true,
-        isNew: false,
-        description: 'Premium 65-liter hiking backpack with ergonomic design',
-        size: 'Large',
-      },
-      {
-        id: 4,
-        name: 'Portable Camping Stove',
-        brand: 'CookWild',
-        category: 'Cooking Gear',
-        price: 45.99,
-        originalPrice: 45.99,
-        image: '/images/stove.jpg',
-        rating: 5,
-        reviews: 52,
-        inStock: true,
-        onSale: false,
-        isNew: false,
-        description: 'Lightweight portable stove for outdoor cooking',
-        size: 'Small',
-      },
-      {
-        id: 5,
-        name: 'Sleeping Pad Deluxe',
-        brand: 'ComfortCamp',
-        category: 'Sleeping Gear',
-        price: 89.99,
-        originalPrice: 119.99,
-        image: '/images/pad.jpg',
-        rating: 5,
-        reviews: 203,
-        inStock: true,
-        onSale: true,
-        isNew: false,
-        description: 'Self-inflating sleeping pad with premium cushioning',
-        size: 'Large',
-      },
-      {
-        id: 6,
-        name: 'Camping Lantern LED',
-        brand: 'LightPath',
-        category: 'Lighting',
-        price: 34.99,
-        originalPrice: 34.99,
-        image: '/images/lantern.jpg',
-        rating: 4,
-        reviews: 87,
-        inStock: true,
-        onSale: false,
-        isNew: true,
-        description: 'Bright LED lantern with adjustable brightness levels',
-        size: 'Small',
-      },
-      {
-        id: 7,
-        name: 'Water Bottle Pro',
-        brand: 'HydroGear',
-        category: 'Accessories',
-        price: 24.99,
-        originalPrice: 24.99,
-        image: '/images/bottle.jpg',
-        rating: 4,
-        reviews: 156,
-        inStock: true,
-        onSale: false,
-        isNew: false,
-        description: 'Insulated water bottle keeps drinks hot or cold for hours',
-        size: 'Medium',
-      },
-      {
-        id: 8,
-        name: 'Tent Footprint',
-        brand: 'CampGear',
-        category: 'Tents',
-        price: 34.99,
-        originalPrice: 39.99,
-        image: '/images/footprint.jpg',
-        rating: 5,
-        reviews: 64,
-        inStock: true,
-        onSale: true,
-        isNew: false,
-        description: 'Protective ground sheet for tent base',
-        size: 'Medium',
-      },
-    ])
+    const allProducts = ref([])
 
-    const categories = ['Tents', 'Sleeping Bags', 'Backpacks', 'Cooking Gear', 'Sleeping Gear', 'Lighting', 'Accessories']
-    const brands = ['CampGear', 'NatureRest', 'TrailBlaze', 'CookWild', 'ComfortCamp', 'LightPath', 'HydroGear']
-    const sizes = ['Small', 'Medium', 'Large', 'Extra Large']
+    const mapApiProduct = (product = {}) => {
+      const basePrice = Number(product.price) || 0
+      const msrp = Number(product.msrp)
+      const hasMsrp = Number.isFinite(msrp) && msrp > 0
+
+      return {
+        id: product.product_id,
+        name: product.name || 'Unnamed Product',
+        brand: product.brand || 'Unknown Brand',
+        category: product.category_path || product.category || 'Uncategorized',
+        price: basePrice,
+        originalPrice: hasMsrp ? msrp : basePrice,
+        image: product.primary_image_url || product.image || fallbackImage,
+        rating: 4,
+        reviews: 0,
+        inStock: Number(product.stock_quantity) > 0,
+        onSale: hasMsrp && basePrice < msrp,
+        isNew: false,
+        description: product.brief_description || product.description || 'No description available.',
+        brief_description: product.brief_description || null,
+        size: null,
+      }
+    }
+
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products?limit=100')
+        const data = await response.json()
+        allProducts.value = Array.isArray(data?.data) ? data.data.map(mapApiProduct) : []
+      } catch (error) {
+        console.error('Failed to load products for search view:', error)
+        allProducts.value = []
+      }
+    }
+
+    const categories = computed(() => {
+      return [...new Set(allProducts.value.map((product) => product.category).filter(Boolean))]
+    })
+
+    const brands = computed(() => {
+      return [...new Set(allProducts.value.map((product) => product.brand).filter(Boolean))]
+    })
+
+    const sizes = computed(() => {
+      return [...new Set(allProducts.value.map((product) => product.size).filter(Boolean))]
+    })
 
     const filteredBrands = computed(() => {
-      return brands.filter(b => b.toLowerCase().includes(brandSearch.value.toLowerCase()))
+      return brands.value.filter(b => b.toLowerCase().includes(brandSearch.value.toLowerCase()))
     })
 
     const filteredProducts = computed(() => {
@@ -622,6 +537,19 @@ export default {
       alert(`${product.name} added to cart!`)
     }
 
+    const handleImageError = (event) => {
+      if (!event?.target) {
+        return
+      }
+
+      event.target.onerror = null
+      event.target.src = fallbackImage
+    }
+
+    onMounted(() => {
+      fetchProducts()
+    })
+
     return {
       searchQuery,
       filterSearch,
@@ -646,6 +574,7 @@ export default {
       clearAllFilters,
       performSearch,
       addToCart,
+      handleImageError,
     }
   },
 }

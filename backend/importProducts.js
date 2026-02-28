@@ -254,7 +254,7 @@ function mapImages(row) {
 
 function mapVariations(row) {
   const variations = [];
-  for (let index = 1; index <= 2; index += 1) {
+  for (let index = 1; index <= 10; index += 1) {
     const theme = cleanText(pick(row, [`variation theme ${index}`, `theme ${index}`]));
     const value = cleanText(pick(row, [`variation value ${index}`, `value ${index}`]));
     if (theme || value) {
@@ -262,6 +262,122 @@ function mapVariations(row) {
     }
   }
   return variations;
+}
+
+function getGroupKey(mapped, index) {
+  if (mapped.spu_no) {
+    return `spu:${mapped.spu_no}`;
+  }
+
+  if (mapped.sku_code) {
+    return `sku:${mapped.sku_code}`;
+  }
+
+  return `row:${index}`;
+}
+
+function dedupeRows(rows = [], keyBuilder) {
+  const seen = new Set();
+  const result = [];
+
+  rows.forEach((row) => {
+    const key = keyBuilder(row);
+    if (!key || seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    result.push(row);
+  });
+
+  return result;
+}
+
+function mergeMappedProduct(base, incoming) {
+  const merged = { ...base };
+
+  Object.keys(incoming).forEach((key) => {
+    const incomingValue = incoming[key];
+    const baseValue = merged[key];
+
+    if (incomingValue === null || incomingValue === undefined || incomingValue === '') {
+      return;
+    }
+
+    if (baseValue === null || baseValue === undefined || baseValue === '') {
+      merged[key] = incomingValue;
+      return;
+    }
+
+    if (key === 'stock_quantity') {
+      merged[key] = (Number(baseValue) || 0) + (Number(incomingValue) || 0);
+      return;
+    }
+
+    if (key === 'price' && Number(baseValue) === 0 && Number(incomingValue) > 0) {
+      merged[key] = incomingValue;
+    }
+  });
+
+  return merged;
+}
+
+function aggregateProductRows(records = []) {
+  const grouped = new Map();
+
+  records.forEach((row, index) => {
+    const mapped = mapProductRow(row);
+    const key = getGroupKey(mapped, index);
+    const images = mapImages(row);
+    const variations = mapVariations(row);
+    const packaging = mapPackaging(row);
+    const parameters = mapParameters(row);
+
+    if (!grouped.has(key)) {
+      grouped.set(key, {
+        key,
+        mapped,
+        images,
+        variations,
+        packaging,
+        parameters,
+      });
+      return;
+    }
+
+    const current = grouped.get(key);
+    current.mapped = mergeMappedProduct(current.mapped, mapped);
+    current.images = dedupeRows(
+      current.images.concat(images),
+      (item) => `${item.image_url || ''}`.toLowerCase()
+    ).map((item, imageIndex) => ({
+      ...item,
+      image_order: imageIndex + 1,
+    }));
+
+    current.variations = dedupeRows(
+      current.variations.concat(variations),
+      (item) => `${item.theme_name || ''}|${item.variation_value || ''}`.toLowerCase()
+    ).map((item, variationIndex) => ({
+      ...item,
+      variation_order: variationIndex + 1,
+    }));
+
+    current.packaging = dedupeRows(
+      current.packaging.concat(packaging),
+      (item) => `${item.package_number || ''}|${item.size || ''}|${item.weight || ''}|${item.content || ''}`.toLowerCase()
+    );
+
+    current.parameters = dedupeRows(
+      current.parameters.concat(parameters),
+      (item) => `${item.parameter_name || ''}|${item.parameter_value || ''}`.toLowerCase()
+    ).map((item, parameterIndex) => ({
+      ...item,
+      parameter_order: parameterIndex + 1,
+    }));
+  });
+
+  return Array.from(grouped.values());
 }
 
 function mapPackaging(row) {
@@ -320,18 +436,16 @@ async function importProducts(csvFilePath, options = {}) {
       console.log(`Applying limit: processing first ${records.length} row(s)`);
     }
 
+    const aggregatedProducts = aggregateProductRows(records);
+
     if (options.dryRun) {
       let totalImages = 0;
       let totalVariations = 0;
       let totalPackaging = 0;
       let totalParameters = 0;
 
-      const preview = records.slice(0, 5).map((row) => {
-        const mapped = mapProductRow(row);
-        const images = mapImages(row);
-        const variations = mapVariations(row);
-        const packaging = mapPackaging(row);
-        const parameters = mapParameters(row);
+      const preview = aggregatedProducts.slice(0, 5).map((product) => {
+        const { mapped, images, variations, packaging, parameters } = product;
 
         totalImages += images.length;
         totalVariations += variations.length;
@@ -349,16 +463,17 @@ async function importProducts(csvFilePath, options = {}) {
         };
       });
 
-      for (let index = 5; index < records.length; index += 1) {
-        const row = records[index];
-        totalImages += mapImages(row).length;
-        totalVariations += mapVariations(row).length;
-        totalPackaging += mapPackaging(row).length;
-        totalParameters += mapParameters(row).length;
+      for (let index = 5; index < aggregatedProducts.length; index += 1) {
+        const product = aggregatedProducts[index];
+        totalImages += product.images.length;
+        totalVariations += product.variations.length;
+        totalPackaging += product.packaging.length;
+        totalParameters += product.parameters.length;
       }
 
       console.log('--- Dry run summary (no writes performed) ---');
       console.log(`Rows parsed: ${records.length}`);
+      console.log(`Grouped products: ${aggregatedProducts.length}`);
       console.log(`Total image rows: ${totalImages}`);
       console.log(`Total variation rows: ${totalVariations}`);
       console.log(`Total packaging rows: ${totalPackaging}`);
@@ -372,6 +487,7 @@ async function importProducts(csvFilePath, options = {}) {
       return {
         mode: 'dry-run',
         rowsParsed: records.length,
+        groupedProducts: aggregatedProducts.length,
         totalImages,
         totalVariations,
         totalPackaging,
@@ -390,8 +506,8 @@ async function importProducts(csvFilePath, options = {}) {
     let imported = 0;
     let failed = 0;
 
-    for (const row of records) {
-      const mapped = mapProductRow(row);
+    for (const product of aggregatedProducts) {
+      const { mapped, images, variations, packaging, parameters } = product;
       const label = mapped.sku_code || mapped.spu_no || mapped.name;
 
       try {
@@ -400,16 +516,16 @@ async function importProducts(csvFilePath, options = {}) {
         const mappedWithCategory = await enrichMappedProductWithCategory(connection, mapped);
         const productId = await getOrCreateProduct(connection, mappedWithCategory);
 
-        await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], mapImages(row));
-        await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], mapVariations(row));
-        await replaceChildRows(connection, 'product_packaging', productId, ['package_number', 'size', 'weight', 'content'], mapPackaging(row));
-        await replaceChildRows(connection, 'product_parameters', productId, ['parameter_name', 'parameter_value', 'parameter_order'], mapParameters(row));
+        await replaceChildRows(connection, 'product_images', productId, ['image_url', 'image_order', 'is_additional'], images);
+        await replaceChildRows(connection, 'product_variations', productId, ['theme_name', 'variation_value', 'variation_order'], variations);
+        await replaceChildRows(connection, 'product_packaging', productId, ['package_number', 'size', 'weight', 'content'], packaging);
+        await replaceChildRows(connection, 'product_parameters', productId, ['parameter_name', 'parameter_value', 'parameter_order'], parameters);
 
         await connection.commit();
         imported += 1;
 
         if (imported % 25 === 0) {
-          console.log(`Imported ${imported}/${records.length}`);
+          console.log(`Imported ${imported}/${aggregatedProducts.length}`);
         }
       } catch (error) {
         await connection.rollback();
@@ -424,6 +540,7 @@ async function importProducts(csvFilePath, options = {}) {
     return {
       mode: 'import',
       rowsParsed: records.length,
+      groupedProducts: aggregatedProducts.length,
       imported,
       failed
     };

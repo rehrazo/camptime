@@ -36,6 +36,11 @@ The architecture of CampTime follows a microservices approach to ensure scalabil
 4. **Access the Application**:  
    Open your browser and go to `http://localhost:3000`.
 
+### Design Assets
+- **Non-product images** (hero backgrounds, brand graphics, UI decorative imagery) should be stored in `frontend/src/assets/images/site/`.
+- Keep **product catalog images** separate from this folder.
+- The file `frontend/src/assets/images/site/.gitkeep` is included so the folder remains tracked in git.
+
 ### Development Roadmap
 - **Q1 2026**: Implement additional features and integrate user feedback.
 - **Q2 2026**: Release mobile applications for iOS and Android.

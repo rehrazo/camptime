@@ -123,8 +123,8 @@ export default {
 
 <style scoped>
 .footer {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
   margin-top: 4rem;
 }
 
@@ -135,12 +135,12 @@ export default {
 }
 
 .newsletter-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #D9C7A3;
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 3rem;
   text-align: center;
-  color: white;
+  color: #2B2B2B;
 }
 
 .newsletter-section h3 {
@@ -171,8 +171,8 @@ export default {
 
 .newsletter-btn {
   padding: 0.75rem 1.5rem;
-  background-color: #fff;
-  color: #667eea;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
   border: none;
   border-radius: 4px;
   font-weight: 600;
@@ -181,7 +181,7 @@ export default {
 }
 
 .newsletter-btn:hover {
-  background-color: #f0f0f0;
+  background-color: #2B2B2B;
 }
 
 .footer-links {
@@ -194,7 +194,7 @@ export default {
 .footer-column h4 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: white;
+  color: #D9C7A3;
   font-size: 1rem;
 }
 
@@ -209,14 +209,14 @@ export default {
 }
 
 .footer-column a {
-  color: #ecf0f1;
+  color: #D9C7A3;
   text-decoration: none;
   transition: color 0.3s;
   font-size: 0.95rem;
 }
 
 .footer-column a:hover {
-  color: #667eea;
+  color: #2B2B2B;
 }
 
 .social-links {
@@ -230,27 +230,27 @@ export default {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(217, 199, 163, 0.2);
   border-radius: 4px;
-  color: white;
+  color: #D9C7A3;
   text-decoration: none;
   transition: background-color 0.3s;
   font-weight: 600;
 }
 
 .social-link:hover {
-  background-color: #667eea;
+  background-color: #2B2B2B;
 }
 
 .payment-methods {
   padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(217, 199, 163, 0.3);
 }
 
 .payment-methods h4 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: white;
+  color: #D9C7A3;
 }
 
 .payment-icons {
@@ -273,19 +273,19 @@ export default {
   margin-top: 2rem;
   text-align: center;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(217, 199, 163, 0.3);
 }
 
 .copyright {
   margin: 0 0 0.5rem 0;
   font-size: 0.95rem;
-  color: #bdc3c7;
+  color: #D9C7A3;
 }
 
 .footer-text {
   margin: 0;
   font-size: 0.9rem;
-  color: #95a5a6;
+  color: rgba(217, 199, 163, 0.9);
 }
 
 @media (max-width: 768px) {

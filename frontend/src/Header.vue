@@ -164,12 +164,12 @@ export default {
 
 <style scoped>
 .header {
-  background-color: white;
-  border-bottom: 1px solid #ddd;
+  background-color: #D9C7A3;
+  border-bottom: 1px solid #2F4F3E;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px rgba(43, 43, 43, 0.1);
 }
 
 .header-container {
@@ -186,7 +186,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  color: #667eea;
+  color: #2F4F3E;
   font-weight: 700;
   font-size: 1.3rem;
   white-space: nowrap;
@@ -211,7 +211,7 @@ export default {
   display: flex;
   flex: 1;
   max-width: 400px;
-  border: 1px solid #ddd;
+  border: 1px solid #2F4F3E;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -229,14 +229,15 @@ export default {
 
 .search-btn {
   padding: 0.75rem 1rem;
-  background-color: #f5f5f5;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .search-btn:hover {
-  background-color: #e0e0e0;
+  background-color: #2B2B2B;
 }
 
 .nav-menu {
@@ -252,18 +253,18 @@ export default {
 
 .nav-link {
   text-decoration: none;
-  color: #333;
+  color: #2B2B2B;
   font-weight: 500;
   transition: color 0.3s;
   position: relative;
 }
 
 .nav-link:hover {
-  color: #667eea;
+  color: #2F4F3E;
 }
 
 .nav-link.active {
-  color: #667eea;
+  color: #2F4F3E;
 }
 
 .nav-link.active::after {
@@ -273,7 +274,7 @@ export default {
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #667eea;
+  background-color: #2F4F3E;
 }
 
 .header-icons {
@@ -286,7 +287,7 @@ export default {
 .icon-link {
   position: relative;
   text-decoration: none;
-  color: #333;
+  color: #2B2B2B;
   cursor: pointer;
   border: none;
   background: none;
@@ -295,7 +296,7 @@ export default {
 }
 
 .icon-link:hover {
-  color: #667eea;
+  color: #2F4F3E;
 }
 
 .icon {
@@ -306,8 +307,8 @@ export default {
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: #ff6b6b;
-  color: white;
+  background-color: #2F4F3E;
+  color: #D9C7A3;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -326,8 +327,8 @@ export default {
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: #D9C7A3;
+  border: 1px solid #2F4F3E;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   min-width: 200px;
@@ -341,7 +342,7 @@ export default {
   padding: 0.75rem 1rem;
   text-align: left;
   text-decoration: none;
-  color: #333;
+  color: #2B2B2B;
   border: none;
   background: none;
   cursor: pointer;
@@ -350,21 +351,21 @@ export default {
 }
 
 .dropdown-item:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(47, 79, 62, 0.12);
 }
 
 .divider {
   margin: 0.5rem 0;
   border: none;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #2F4F3E;
 }
 
 .logout-btn {
-  color: #ff6b6b;
+  color: #2B2B2B;
 }
 
 .logout-btn:hover {
-  background-color: #fff5f5;
+  background-color: rgba(47, 79, 62, 0.18);
 }
 
 .mobile-menu-btn {
@@ -386,15 +387,15 @@ export default {
 .mobile-menu-btn span {
   width: 25px;
   height: 2px;
-  background-color: #333;
+  background-color: #2B2B2B;
   border-radius: 2px;
   transition: all 0.3s;
 }
 
 .mobile-menu {
   display: none;
-  background-color: #f9f9f9;
-  border-top: 1px solid #ddd;
+  background-color: #D9C7A3;
+  border-top: 1px solid #2F4F3E;
 }
 
 @media (max-width: 767px) {
@@ -407,14 +408,14 @@ export default {
 .mobile-nav-link {
   padding: 1rem 2rem;
   text-decoration: none;
-  color: #333;
-  border-bottom: 1px solid #e0e0e0;
+  color: #2B2B2B;
+  border-bottom: 1px solid rgba(43, 43, 43, 0.15);
   transition: background-color 0.3s;
 }
 
 .mobile-nav-link:hover {
-  background-color: #e8f0ff;
-  color: #667eea;
+  background-color: rgba(47, 79, 62, 0.12);
+  color: #2F4F3E;
 }
 
 @media (max-width: 767px) {

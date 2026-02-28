@@ -54,6 +54,8 @@ CREATE TABLE products (
     -- Content
     description TEXT,
     html_description LONGTEXT,
+    long_description LONGTEXT,
+    brief_description VARCHAR(320),
     
     -- Identifiers
     upc VARCHAR(255),

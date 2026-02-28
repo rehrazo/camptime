@@ -4,6 +4,8 @@ const {
   ensureCategoryPath,
   getDescendantCategoryIds,
 } = require('../utils/categories');
+const { generateBriefDescription } = require('../utils/briefDescription');
+const { cleanDescriptionForStorage } = require('../utils/descriptionCleaner');
 
 const router = express.Router();
 
@@ -38,6 +40,22 @@ async function replaceChildRows(connection, tableName, productId, columns, rows 
 }
 
 function mapProductPayload(payload = {}) {
+  const rawDescription = payload.description || null;
+  const htmlDescription = payload.html_description || null;
+  const longDescription = cleanDescriptionForStorage({
+    description: rawDescription,
+    htmlDescription,
+    name: payload.name,
+    maxChars: 4000,
+  }) || null;
+
+  const description = cleanDescriptionForStorage({
+    description: longDescription,
+    htmlDescription: null,
+    name: payload.name,
+    maxChars: 750,
+  }) || null;
+
   return {
     spu_no: payload.spu_no || null,
     item_no: payload.item_no || null,
@@ -57,8 +75,14 @@ function mapProductPayload(payload = {}) {
     shipping_method: payload.shipping_method || null,
     shipping_limitations: payload.shipping_limitations || null,
     processing_time: payload.processing_time || null,
-    description: payload.description || null,
-    html_description: payload.html_description || null,
+    description,
+    html_description: htmlDescription,
+    long_description: longDescription,
+    brief_description: payload.brief_description || generateBriefDescription({
+      description,
+      htmlDescription,
+      name: payload.name,
+    }),
     upc: payload.upc || null,
     asin: payload.asin || null,
     product_video: payload.product_video || null,
@@ -258,18 +282,18 @@ router.post('/', async (req, res) => {
         spu_no, item_no, url, category, category_id, name, supplier, brand, sku_code,
         price, msrp, map, dropshipping_price,
         stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
-        description, html_description, upc, asin,
+        description, html_description, long_description, brief_description, upc, asin,
         product_video, additional_resources, prohibited_marketplace,
         return_refund_policy, return_address,
         product_length, product_width, product_height, product_size_unit,
         product_weight, product_weight_unit,
         number_of_packages, packaging_size_unit, packaging_weight_unit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
       [
         payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
-        payload.description, payload.html_description, payload.upc, payload.asin,
+        payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,
         payload.product_video, payload.additional_resources, payload.prohibited_marketplace,
         payload.return_refund_policy, payload.return_address,
         payload.product_length, payload.product_width, payload.product_height, payload.product_size_unit,
@@ -341,7 +365,7 @@ router.put('/:id', async (req, res) => {
         spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
-        description = ?, html_description = ?, upc = ?, asin = ?,
+        description = ?, html_description = ?, long_description = ?, brief_description = ?, upc = ?, asin = ?,
         product_video = ?, additional_resources = ?, prohibited_marketplace = ?,
         return_refund_policy = ?, return_address = ?,
         product_length = ?, product_width = ?, product_height = ?, product_size_unit = ?,
@@ -353,7 +377,7 @@ router.put('/:id', async (req, res) => {
         payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
-        payload.description, payload.html_description, payload.upc, payload.asin,
+        payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,
         payload.product_video, payload.additional_resources, payload.prohibited_marketplace,
         payload.return_refund_policy, payload.return_address,
         payload.product_length, payload.product_width, payload.product_height, payload.product_size_unit,

@@ -8,7 +8,11 @@
         "dev": "nodemon server.js",
         "test": "jest",
         "import:products": "node importProducts.js",
-        "backfill:categories": "node scripts/backfillCategories.js"
+        "backfill:categories": "node scripts/backfillCategories.js",
+        "reassign:categories": "node scripts/reassignProductCategories.js",
+        "backfill:brief-descriptions": "node scripts/backfillBriefDescriptions.js",
+        "clean:descriptions": "node scripts/cleanProductDescriptions.js",
+        "backfill:long-descriptions": "node scripts/backfillLongDescriptions.js"
     },
     "keywords": ["ecommerce", "camping", "api"],
     "author": "",

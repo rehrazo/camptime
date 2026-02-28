@@ -4,6 +4,9 @@ const path = require('path');
 const dotenv = require('dotenv');
 const { parse } = require('csv-parse/sync');
 const { ensureCategoryPath } = require('./utils/categories');
+const { normalizeProductCategory } = require('./utils/categoryRules');
+const { generateBriefDescription } = require('./utils/briefDescription');
+const { cleanDescriptionForStorage } = require('./utils/descriptionCleaner');
 
 dotenv.config({ path: path.resolve(__dirname, '.env'), override: false });
 dotenv.config({ path: path.resolve(__dirname, '../.env'), override: false });
@@ -85,7 +88,7 @@ async function getOrCreateProduct(connection, mapped) {
         spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
-        description = ?, html_description = ?, upc = ?, asin = ?,
+        description = ?, html_description = ?, long_description = ?, brief_description = ?, upc = ?, asin = ?,
         product_video = ?, additional_resources = ?, prohibited_marketplace = ?,
         return_refund_policy = ?, return_address = ?,
         product_length = ?, product_width = ?, product_height = ?, product_size_unit = ?,
@@ -97,7 +100,7 @@ async function getOrCreateProduct(connection, mapped) {
         mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.category_id, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
         mapped.price, mapped.msrp, mapped.map, mapped.dropshipping_price,
         mapped.stock_quantity, mapped.inventory_location, mapped.shipping_method, mapped.shipping_limitations, mapped.processing_time,
-        mapped.description, mapped.html_description, mapped.upc, mapped.asin,
+        mapped.description, mapped.html_description, mapped.long_description, mapped.brief_description, mapped.upc, mapped.asin,
         mapped.product_video, mapped.additional_resources, mapped.prohibited_marketplace,
         mapped.return_refund_policy, mapped.return_address,
         mapped.product_length, mapped.product_width, mapped.product_height, mapped.product_size_unit,
@@ -114,18 +117,18 @@ async function getOrCreateProduct(connection, mapped) {
       spu_no, item_no, url, category, category_id, name, supplier, brand, sku_code,
       price, msrp, map, dropshipping_price,
       stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
-      description, html_description, upc, asin,
+      description, html_description, long_description, brief_description, upc, asin,
       product_video, additional_resources, prohibited_marketplace,
       return_refund_policy, return_address,
       product_length, product_width, product_height, product_size_unit,
       product_weight, product_weight_unit,
       number_of_packages, packaging_size_unit, packaging_weight_unit
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
     [
       mapped.spu_no, mapped.item_no, mapped.url, mapped.category, mapped.category_id, mapped.name, mapped.supplier, mapped.brand, mapped.sku_code,
       mapped.price, mapped.msrp, mapped.map, mapped.dropshipping_price,
       mapped.stock_quantity, mapped.inventory_location, mapped.shipping_method, mapped.shipping_limitations, mapped.processing_time,
-      mapped.description, mapped.html_description, mapped.upc, mapped.asin,
+      mapped.description, mapped.html_description, mapped.long_description, mapped.brief_description, mapped.upc, mapped.asin,
       mapped.product_video, mapped.additional_resources, mapped.prohibited_marketplace,
       mapped.return_refund_policy, mapped.return_address,
       mapped.product_length, mapped.product_width, mapped.product_height, mapped.product_size_unit,
@@ -138,13 +141,29 @@ async function getOrCreateProduct(connection, mapped) {
 }
 
 function mapProductRow(row) {
+  const rawDescription = cleanText(pick(row, ['description']));
+  const htmlDescription = cleanText(pick(row, ['html description']));
+  const name = cleanText(pick(row, ['product name', 'name'])) || 'Unnamed Product';
+  const longDescription = cleanDescriptionForStorage({
+    description: rawDescription,
+    htmlDescription,
+    name,
+    maxChars: 4000,
+  });
+  const description = cleanDescriptionForStorage({
+    description: longDescription,
+    htmlDescription: null,
+    name,
+    maxChars: 750,
+  });
+
   const dropship = cleanNumber(pick(row, ['dropshipping price', 'dropshipping_price']));
   const mapped = {
     spu_no: cleanText(pick(row, ['spu no', 'spu_no'])),
     item_no: cleanText(pick(row, ['item plus no', 'item no', 'item_no'])),
     url: cleanText(pick(row, ['url'])),
     category: cleanText(pick(row, ['category'])),
-    name: cleanText(pick(row, ['product name', 'name'])) || 'Unnamed Product',
+    name,
     supplier: cleanText(pick(row, ['supplier'])),
     brand: cleanText(pick(row, ['brand'])),
     sku_code: cleanText(pick(row, ['sku code', 'sku_code'])),
@@ -157,8 +176,14 @@ function mapProductRow(row) {
     shipping_method: cleanText(pick(row, ['shipping method'])),
     shipping_limitations: cleanText(pick(row, ['shipping limitations'])),
     processing_time: cleanText(pick(row, ['processing time'])),
-    description: cleanText(pick(row, ['description'])),
-    html_description: cleanText(pick(row, ['html description'])),
+    description,
+    html_description: htmlDescription,
+    long_description: longDescription,
+    brief_description: generateBriefDescription({
+      description,
+      htmlDescription,
+      name,
+    }),
     upc: cleanText(pick(row, ['upc'])),
     asin: cleanText(pick(row, ['asin'])),
     product_video: cleanText(pick(row, ['product video'])),
@@ -181,11 +206,17 @@ function mapProductRow(row) {
 }
 
 async function enrichMappedProductWithCategory(connection, mapped) {
-  if (!mapped.category) {
-    return mapped;
+  const normalizedCategory = normalizeProductCategory(mapped);
+
+  if (!normalizedCategory) {
+    return {
+      ...mapped,
+      category: null,
+      category_id: null,
+    };
   }
 
-  const ensured = await ensureCategoryPath(connection, mapped.category);
+  const ensured = await ensureCategoryPath(connection, normalizedCategory);
   return {
     ...mapped,
     category: ensured.categoryPath,

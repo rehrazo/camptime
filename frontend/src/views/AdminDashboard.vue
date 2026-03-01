@@ -790,7 +790,52 @@ export default {
       }
     }
 
-    const getProductImage = () => 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="%23e8ecf5"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="16">%F0%9F%93%A6</text></svg>'
+    const getPlaceholderImage = () => 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="100%" height="100%" fill="%23e8ecf5"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="16">%F0%9F%93%A6</text></svg>'
+
+    const getImageDedupKey = (imageUrl) => {
+      const raw = String(imageUrl || '').trim()
+      if (!raw) {
+        return ''
+      }
+
+      const normalized = raw.replace(/[?#].*$/, '').toLowerCase()
+      const parts = normalized.split('/').filter(Boolean)
+      return parts.length ? parts[parts.length - 1] : normalized
+    }
+
+    const getProductImage = (product = {}) => {
+      const directCandidates = [
+        product.primary_image_url,
+        product.image,
+        product.image_url,
+      ]
+        .map((value) => String(value || '').trim())
+        .filter(Boolean)
+
+      if (directCandidates.length) {
+        return directCandidates[0]
+      }
+
+      if (Array.isArray(product.images) && product.images.length) {
+        const seen = new Set()
+        for (const item of product.images) {
+          const imageUrl = String(item?.image_url || item || '').trim()
+          if (!imageUrl) {
+            continue
+          }
+
+          const dedupKey = getImageDedupKey(imageUrl)
+          if (!dedupKey || seen.has(dedupKey)) {
+            continue
+          }
+
+          seen.add(dedupKey)
+          return imageUrl
+        }
+      }
+
+      return getPlaceholderImage()
+    }
 
     const flattenCategoryTree = (nodes = [], depth = 0) => {
       return nodes.flatMap((node) => {

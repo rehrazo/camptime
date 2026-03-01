@@ -170,6 +170,40 @@ export default {
       }))
     }
 
+    const getImageDedupKey = (imageUrl) => {
+      const raw = String(imageUrl || '').trim()
+      if (!raw) {
+        return ''
+      }
+
+      const normalized = raw.replace(/[?#].*$/, '').toLowerCase()
+      const parts = normalized.split('/').filter(Boolean)
+      const filename = parts.length ? parts[parts.length - 1] : normalized
+      return filename || normalized
+    }
+
+    const dedupeImages = (images = []) => {
+      const seen = new Set()
+      const result = []
+
+      images.forEach((item) => {
+        const url = String(item?.image_url || '').trim()
+        if (!url) {
+          return
+        }
+
+        const key = getImageDedupKey(url)
+        if (!key || seen.has(key)) {
+          return
+        }
+
+        seen.add(key)
+        result.push(url)
+      })
+
+      return result
+    }
+
     const selectedVariantSku = computed(() => {
       const currentProduct = product.value
       if (!currentProduct || !Array.isArray(currentProduct.variantGroups)) {
@@ -206,11 +240,7 @@ export default {
         id: data.product_id,
         sku: data.sku_code || data.sku || data.item_no || data.spu_no || 'N/A',
         image: primaryImage || data.image || '/images/placeholder-product.jpg',
-        images: Array.isArray(data?.images)
-          ? data.images
-              .map((item) => item?.image_url)
-              .filter((value, index, arr) => value && arr.indexOf(value) === index)
-          : [],
+        images: Array.isArray(data?.images) ? dedupeImages(data.images) : [],
         price: Number(data.price) || 0,
         stock: Number(data.stock_quantity) || 0,
         briefDescription: data.brief_description || null,

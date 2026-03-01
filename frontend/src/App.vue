@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="app">
-    <nav class="navbar">
+    <nav v-if="showTopNavbar" class="navbar">
       <div class="navbar-brand">
         <router-link to="/">It's Camp Time</router-link>
       </div>
@@ -12,7 +12,7 @@
         <li v-if="isLoggedIn"><router-link to="/account">Account</router-link></li>
       </ul>
     </nav>
-    <nav class="category-navbar" aria-label="Product categories">
+    <nav v-if="showCategoryNavbar" class="category-navbar" aria-label="Product categories">
       <div class="category-nav-inner">
         <router-link
           class="category-link"
@@ -57,6 +57,9 @@ export default {
     const cartItemCount = computed(() => cartStore.itemCount)
     const categoryMenuItems = ref([])
 
+    const showTopNavbar = computed(() => !String(route.path || '').startsWith('/admin'))
+    const showCategoryNavbar = computed(() => !String(route.path || '').startsWith('/admin'))
+
     const isAllCategoriesActive = computed(() => {
       return route.path === '/products' && !route.query.category_id
     })
@@ -84,6 +87,8 @@ export default {
       isLoggedIn,
       cartItemCount,
       categoryMenuItems,
+      showTopNavbar,
+      showCategoryNavbar,
       isCategoryActive,
       isAllCategoriesActive,
     }

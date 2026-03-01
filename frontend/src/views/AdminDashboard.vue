@@ -18,6 +18,10 @@
           <span class="nav-icon">{{ item.icon }}</span>
           <span class="nav-text">{{ item.label }}</span>
         </button>
+        <button class="nav-item" @click="openCategoryManager">
+          <span class="nav-icon">🧩</span>
+          <span class="nav-text">Category Manager</span>
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -326,6 +330,7 @@
           <div class="section-header">
             <h2>Categories Management</h2>
             <div class="action-buttons">
+              <button class="btn btn-primary" @click="openCategoryManager">Drag & Drop Manager</button>
               <button class="btn btn-secondary" @click="loadCategories" :disabled="categoriesLoading">Refresh</button>
             </div>
           </div>
@@ -353,15 +358,31 @@
           <table class="products-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Path</th>
-                <th>Parent</th>
+                <th>
+                  <button class="sort-btn" @click="toggleCategorySort('category_id')">
+                    ID {{ getSortIndicator('category_id') }}
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn" @click="toggleCategorySort('name')">
+                    Name {{ getSortIndicator('name') }}
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn" @click="toggleCategorySort('path')">
+                    Path {{ getSortIndicator('path') }}
+                  </button>
+                </th>
+                <th>
+                  <button class="sort-btn" @click="toggleCategorySort('parent')">
+                    Parent {{ getSortIndicator('parent') }}
+                  </button>
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="category in categoryOptions" :key="category.category_id">
+              <tr v-for="category in sortedCategoryRows" :key="category.category_id">
                 <td>{{ category.category_id }}</td>
                 <td>{{ category.label }}</td>
                 <td>{{ category.path }}</td>
@@ -633,7 +654,7 @@
 </template>
 
 <script>
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export default {
@@ -674,6 +695,8 @@ export default {
     const categoriesError = ref('')
     const newCategoryName = ref('')
     const newCategoryParentId = ref(null)
+    const categorySortKey = ref('name')
+    const categorySortDirection = ref('asc')
     const customerSearch = ref('')
     const notificationCount = ref(5)
     const importFile = ref(null)
@@ -1143,6 +1166,73 @@ export default {
       return parts.join(' > ')
     }
 
+    const getCategorySortValue = (category, key) => {
+      if (key === 'category_id') {
+        return Number(category?.category_id || 0)
+      }
+
+      if (key === 'name') {
+        return String(category?.name || '').toLowerCase()
+      }
+
+      if (key === 'path') {
+        return String(category?.path || '').toLowerCase()
+      }
+
+      if (key === 'parent') {
+        return String(getCategoryParentPath(category) || '').toLowerCase()
+      }
+
+      return ''
+    }
+
+    const sortedCategoryRows = computed(() => {
+      const rows = [...categoryOptions.value]
+      const direction = categorySortDirection.value === 'asc' ? 1 : -1
+      const key = categorySortKey.value
+
+      rows.sort((a, b) => {
+        const valueA = getCategorySortValue(a, key)
+        const valueB = getCategorySortValue(b, key)
+
+        if (typeof valueA === 'number' && typeof valueB === 'number') {
+          return (valueA - valueB) * direction
+        }
+
+        return String(valueA).localeCompare(String(valueB), undefined, { numeric: true, sensitivity: 'base' }) * direction
+      })
+
+      return rows
+    })
+
+    const toggleCategorySort = (key) => {
+      if (categorySortKey.value === key) {
+        categorySortDirection.value = categorySortDirection.value === 'asc' ? 'desc' : 'asc'
+        return
+      }
+
+      categorySortKey.value = key
+      categorySortDirection.value = 'asc'
+    }
+
+    const getSortIndicator = (key) => {
+      if (categorySortKey.value !== key) {
+        return ''
+      }
+
+      return categorySortDirection.value === 'asc' ? '↑' : '↓'
+    }
+
+    const openCategoryManager = async () => {
+      await router.push('/admin/categories/manager')
+    }
+
+    const applyProductCategoryFromQuery = () => {
+      const rawValue = String(route.query.category_id || '').trim()
+      const parsedValue = Number(rawValue)
+      productCategory.value = Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null
+    }
+
     watch(activeTab, async (tab) => {
       if (tab === 'products' && products.value.length === 0) {
         await loadProducts()
@@ -1159,10 +1249,25 @@ export default {
 
     watch(
       () => route.query.tab,
-      (tabValue) => {
+      async (tabValue) => {
         const nextTab = String(tabValue || '').trim()
         if (nextTab && navItems.some((item) => item.id === nextTab)) {
           activeTab.value = nextTab
+
+          if (nextTab === 'products') {
+            applyProductCategoryFromQuery()
+            await loadProducts()
+          }
+        }
+      }
+    )
+
+    watch(
+      () => route.query.category_id,
+      async () => {
+        applyProductCategoryFromQuery()
+        if (activeTab.value === 'products') {
+          await loadProducts()
         }
       }
     )
@@ -1172,6 +1277,8 @@ export default {
       if (queryTab && navItems.some((item) => item.id === queryTab)) {
         activeTab.value = queryTab
       }
+
+      applyProductCategoryFromQuery()
 
       if (activeTab.value === 'products') {
         await loadProducts()
@@ -1235,10 +1342,13 @@ export default {
       productsError,
       productPagination,
       categoryOptions,
+      sortedCategoryRows,
       categoriesLoading,
       categoriesError,
       newCategoryName,
       newCategoryParentId,
+      categorySortKey,
+      categorySortDirection,
       customerSearch,
       notificationCount,
       importDryRun,
@@ -1269,6 +1379,9 @@ export default {
       moveCategory,
       deleteCategory,
       getCategoryParentPath,
+      toggleCategorySort,
+      getSortIndicator,
+      openCategoryManager,
       onFileSelected,
       runImport,
     }
@@ -1606,6 +1719,20 @@ th {
   font-weight: 600;
   color: #333;
   border-bottom: 2px solid #e0e0e0;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sort-btn:hover {
+  text-decoration: underline;
 }
 
 td {

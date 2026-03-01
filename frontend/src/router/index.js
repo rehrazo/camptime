@@ -9,6 +9,7 @@ import Account from '../views/Account.vue'
 import Checkout from '../views/Checkout.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import AdminProductEdit from '../views/AdminProductEdit.vue'
+import CategoryManager from '../views/CategoryManager.vue'
 import OrderConfirmation from '../views/OrderConfirmation.vue'
 
 const routes = [
@@ -63,6 +64,11 @@ const routes = [
     path: '/admin/products/:id/edit',
     name: 'AdminProductEdit',
     component: AdminProductEdit,
+  },
+  {
+    path: '/admin/categories/manager',
+    name: 'CategoryManager',
+    component: CategoryManager,
   },
   {
     path: '/order-confirmation/:orderId',

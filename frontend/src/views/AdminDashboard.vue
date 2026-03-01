@@ -178,8 +178,16 @@
                 <input id="productName" v-model="productForm.name" type="text" class="form-input" placeholder="Product name" />
               </div>
               <div class="form-group">
+                <label for="productBrand">Brand</label>
+                <input id="productBrand" v-model="productForm.brand" type="text" class="form-input" placeholder="Brand" />
+              </div>
+              <div class="form-group">
                 <label for="productSku">SKU</label>
                 <input id="productSku" v-model="productForm.sku_code" type="text" class="form-input" placeholder="SKU code" />
+              </div>
+              <div class="form-group">
+                <label for="productSpu">SPU</label>
+                <input id="productSpu" v-model="productForm.spu_no" type="text" class="form-input" placeholder="SPU number" />
               </div>
               <div class="form-group">
                 <label for="productCategoryId">Category</label>
@@ -197,6 +205,74 @@
               <div class="form-group">
                 <label for="productStock">Stock</label>
                 <input id="productStock" v-model.number="productForm.stock_quantity" type="number" min="0" step="1" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label for="productShippingMethod">Shipping Method</label>
+                <input id="productShippingMethod" v-model="productForm.shipping_method" type="text" class="form-input" placeholder="e.g. Standard, Air" />
+              </div>
+              <div class="form-group">
+                <label for="productProcessingTime">Processing Time</label>
+                <input id="productProcessingTime" v-model="productForm.processing_time" type="text" class="form-input" placeholder="e.g. 1-3 business days" />
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productBriefDescription">Brief Description</label>
+                <textarea
+                  id="productBriefDescription"
+                  v-model="productForm.brief_description"
+                  class="form-input form-textarea"
+                  rows="3"
+                  placeholder="Short summary shown in listing/detail contexts"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productDescription">Description</label>
+                <textarea
+                  id="productDescription"
+                  v-model="productForm.description"
+                  class="form-input form-textarea"
+                  rows="5"
+                  placeholder="Primary product description"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productLongDescription">Long Description</label>
+                <textarea
+                  id="productLongDescription"
+                  v-model="productForm.long_description"
+                  class="form-input form-textarea"
+                  rows="8"
+                  placeholder="Extended content used to derive sections/highlights/specifications"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productShippingLimitations">Shipping Limitations</label>
+                <textarea
+                  id="productShippingLimitations"
+                  v-model="productForm.shipping_limitations"
+                  class="form-input form-textarea"
+                  rows="3"
+                  placeholder="Shipping restrictions or notes"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productImageUrls">Image URLs (one per line)</label>
+                <textarea
+                  id="productImageUrls"
+                  v-model="productForm.image_urls_text"
+                  class="form-input form-textarea"
+                  rows="6"
+                  placeholder="https://.../image-1.jpg\nhttps://.../image-2.jpg"
+                ></textarea>
+              </div>
+              <div class="form-group form-group-full">
+                <label for="productVariations">Variations (one per line: Theme|Value|SKU)</label>
+                <textarea
+                  id="productVariations"
+                  v-model="productForm.variations_text"
+                  class="form-input form-textarea"
+                  rows="6"
+                  placeholder="Color|Red|SKU-RED\nColor|Blue|SKU-BLUE"
+                ></textarea>
               </div>
             </div>
           </div>
@@ -558,10 +634,13 @@
 
 <script>
 import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
   name: 'AdminDashboard',
   setup() {
+    const route = useRoute()
+    const router = useRouter()
     const activeTab = ref('overview')
     const productSearch = ref('')
     const productCategory = ref(null)
@@ -574,10 +653,20 @@ export default {
     const productForm = ref({
       product_id: null,
       name: '',
+      brand: '',
       sku_code: '',
+      spu_no: '',
       category_id: null,
       price: 0,
       stock_quantity: 0,
+      brief_description: '',
+      description: '',
+      long_description: '',
+      shipping_method: '',
+      shipping_limitations: '',
+      processing_time: '',
+      image_urls_text: '',
+      variations_text: '',
     })
     const categoryTree = ref([])
     const categoryOptions = ref([])
@@ -689,40 +778,29 @@ export default {
       productForm.value = {
         product_id: null,
         name: '',
+        brand: '',
         sku_code: '',
+        spu_no: '',
         category_id: null,
         price: 0,
         stock_quantity: 0,
+        brief_description: '',
+        description: '',
+        long_description: '',
+        shipping_method: '',
+        shipping_limitations: '',
+        processing_time: '',
+        image_urls_text: '',
+        variations_text: '',
       }
     }
 
     const openCreateProductForm = async () => {
-      productsError.value = ''
-      if (!categoryOptions.value.length) {
-        await loadCategories()
-      }
-
-      resetProductForm()
-      productFormMode.value = 'create'
-      productFormVisible.value = true
+      await router.push('/admin/products/new/edit')
     }
 
     const openEditProductForm = async (product) => {
-      productsError.value = ''
-      if (!categoryOptions.value.length) {
-        await loadCategories()
-      }
-
-      productForm.value = {
-        product_id: product.product_id,
-        name: product.name || '',
-        sku_code: product.sku_code || '',
-        category_id: product.category_id || null,
-        price: Number(product.price || 0),
-        stock_quantity: Number(product.stock_quantity || 0),
-      }
-      productFormMode.value = 'edit'
-      productFormVisible.value = true
+      await router.push(`/admin/products/${product.product_id}/edit`)
     }
 
     const closeProductForm = () => {
@@ -737,12 +815,75 @@ export default {
         return
       }
 
+      const parseLines = (value = '') => {
+        return String(value)
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+      }
+
+      const images = (() => {
+        const unique = new Set()
+        return parseLines(productForm.value.image_urls_text).reduce((result, url) => {
+          const key = url.toLowerCase()
+          if (unique.has(key)) {
+            return result
+          }
+
+          unique.add(key)
+          result.push({
+            image_url: url,
+            image_order: result.length + 1,
+            is_additional: false,
+          })
+          return result
+        }, [])
+      })()
+
+      const variations = (() => {
+        const unique = new Set()
+        return parseLines(productForm.value.variations_text).reduce((result, line) => {
+          const parts = line.split('|').map((part) => part.trim())
+          const theme_name = parts[0] || ''
+          const variation_value = parts[1] || ''
+          const variation_sku = parts[2] || null
+
+          if (!theme_name || !variation_value) {
+            return result
+          }
+
+          const key = `${theme_name}|${variation_value}`.toLowerCase()
+          if (unique.has(key)) {
+            return result
+          }
+
+          unique.add(key)
+          result.push({
+            theme_name,
+            variation_value,
+            variation_sku,
+            variation_order: result.length + 1,
+          })
+          return result
+        }, [])
+      })()
+
       const payload = {
         name,
+        brand: String(productForm.value.brand || '').trim() || null,
         sku_code: String(productForm.value.sku_code || '').trim() || null,
+        spu_no: String(productForm.value.spu_no || '').trim() || null,
         category_id: productForm.value.category_id || null,
         price: Number(productForm.value.price || 0),
         stock_quantity: Number(productForm.value.stock_quantity || 0),
+        brief_description: String(productForm.value.brief_description || '').trim() || null,
+        description: String(productForm.value.description || '').trim() || null,
+        long_description: String(productForm.value.long_description || '').trim() || null,
+        shipping_method: String(productForm.value.shipping_method || '').trim() || null,
+        shipping_limitations: String(productForm.value.shipping_limitations || '').trim() || null,
+        processing_time: String(productForm.value.processing_time || '').trim() || null,
+        images,
+        variations,
       }
 
       try {
@@ -1016,7 +1157,22 @@ export default {
       }
     })
 
+    watch(
+      () => route.query.tab,
+      (tabValue) => {
+        const nextTab = String(tabValue || '').trim()
+        if (nextTab && navItems.some((item) => item.id === nextTab)) {
+          activeTab.value = nextTab
+        }
+      }
+    )
+
     onMounted(async () => {
+      const queryTab = String(route.query.tab || '').trim()
+      if (queryTab && navItems.some((item) => item.id === queryTab)) {
+        activeTab.value = queryTab
+      }
+
       if (activeTab.value === 'products') {
         await loadProducts()
       }
@@ -1678,6 +1834,10 @@ tr:hover {
   gap: 0.5rem;
 }
 
+.form-group-full {
+  grid-column: 1 / -1;
+}
+
 .form-group label {
   font-weight: 600;
   color: #333;
@@ -1689,6 +1849,10 @@ tr:hover {
   border-radius: 4px;
   font-size: 0.9rem;
   font-family: inherit;
+}
+
+.form-textarea {
+  resize: vertical;
 }
 
 .form-input:focus {

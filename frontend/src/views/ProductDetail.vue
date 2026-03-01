@@ -30,7 +30,8 @@
         <p class="price">${{ product.price.toFixed(2) }}</p>
 
         <p v-if="product.briefDescription" class="brief-description">{{ product.briefDescription }}</p>
-        <p class="description">{{ product.description }}</p>
+        <div v-if="product.descriptionHtml" class="description html-description" v-html="product.descriptionHtml"></div>
+        <p v-else class="description">{{ product.description }}</p>
 
         <div v-if="product.sections.highlights.length" class="features">
           <h3>Highlights</h3>
@@ -128,6 +129,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import DOMPurify from 'dompurify'
 
 export default {
   name: 'ProductDetail',
@@ -236,6 +238,10 @@ export default {
 
     const mapProduct = (data) => {
       const primaryImage = Array.isArray(data?.images) && data.images.length ? data.images[0].image_url : null
+      const sanitizedDescriptionHtml = DOMPurify.sanitize(String(data?.html_description || ''), {
+        USE_PROFILES: { html: true },
+      }).trim()
+
       return {
         ...data,
         id: data.product_id,
@@ -245,9 +251,10 @@ export default {
         price: Number(data.price) || 0,
         stock: Number(data.stock_quantity) || 0,
         briefDescription: data.brief_description || null,
+        descriptionHtml: sanitizedDescriptionHtml || null,
         description:
-          data.description_sections?.description ||
           data.long_description ||
+          data.description_sections?.description ||
           data.description ||
           data.brief_description ||
           'No description available.',
@@ -440,6 +447,17 @@ export default {
   line-height: 1.6;
   margin-bottom: 2rem;
   font-size: 1rem;
+}
+
+.html-description :deep(p),
+.html-description :deep(ul),
+.html-description :deep(ol) {
+  margin: 0 0 0.9rem;
+}
+
+.html-description :deep(ul),
+.html-description :deep(ol) {
+  padding-left: 1.2rem;
 }
 
 .brief-description {

@@ -104,8 +104,20 @@
             v-model="form.description"
             class="form-input form-textarea"
             rows="5"
-            placeholder="Primary product description"
+            placeholder="Primary plain-text fallback description"
           ></textarea>
+        </div>
+        <div v-if="activeTab === 'descriptions'" class="form-group form-group-full">
+          <label for="productHtmlDescription">Description Editor (HTML)</label>
+          <QuillEditor
+            id="productHtmlDescription"
+            v-model:content="form.html_description"
+            contentType="html"
+            theme="snow"
+            :toolbar="editorToolbar"
+            class="description-editor"
+          />
+          <p class="subtitle">Use this for bullet points and line breaks on product detail pages.</p>
         </div>
         <div v-if="activeTab === 'descriptions'" class="form-group form-group-full">
           <label for="productLongDescription">Long Description</label>
@@ -181,9 +193,13 @@
 <script>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { QuillEditor } from '@vueup/vue-quill'
 
 export default {
   name: 'AdminProductEdit',
+  components: {
+    QuillEditor,
+  },
   setup() {
     const route = useRoute()
     const router = useRouter()
@@ -196,6 +212,12 @@ export default {
     const newImageUrl = ref('')
     const imageFormError = ref('')
     const imageFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220"><rect width="100%" height="100%" fill="%23ece3d1"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="%23666">Image unavailable</text></svg>'
+    const editorToolbar = [
+      ['bold', 'italic', 'underline'],
+      [{ list: 'ordered' }, { list: 'bullet' }],
+      ['link'],
+      ['clean'],
+    ]
 
     const form = ref({
       product_id: null,
@@ -208,6 +230,7 @@ export default {
       stock_quantity: 0,
       brief_description: '',
       description: '',
+      html_description: '',
       long_description: '',
       shipping_method: '',
       shipping_limitations: '',
@@ -240,6 +263,41 @@ export default {
         .split(/\r?\n/)
         .map((line) => line.trim())
         .filter(Boolean)
+    }
+
+    const escapeHtml = (value = '') => {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+    }
+
+    const textToEditorHtml = (value = '') => {
+      const text = String(value || '').trim()
+      if (!text) {
+        return ''
+      }
+
+      const blocks = text.split(/\n\s*\n/)
+      return blocks
+        .map((block) => `<p>${escapeHtml(block).replace(/\n/g, '<br>')}</p>`)
+        .join('')
+    }
+
+    const normalizeHtmlDescription = (value = '') => {
+      const html = String(value || '').trim()
+      if (!html) {
+        return null
+      }
+
+      const textOnly = html
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .trim()
+
+      return textOnly ? html : null
     }
 
     const normalizeImageUrl = (value) => String(value || '').trim()
@@ -351,6 +409,9 @@ export default {
         stock_quantity: Number(data.stock_quantity || 0),
         brief_description: data.brief_description || '',
         description: data.description || '',
+        html_description:
+          String(data.html_description || '').trim() ||
+          textToEditorHtml(data.long_description || data.description || ''),
         long_description: data.long_description || '',
         shipping_method: data.shipping_method || '',
         shipping_limitations: data.shipping_limitations || '',
@@ -422,6 +483,7 @@ export default {
         stock_quantity: Number(form.value.stock_quantity || 0),
         brief_description: String(form.value.brief_description || '').trim() || null,
         description: String(form.value.description || '').trim() || null,
+        html_description: normalizeHtmlDescription(form.value.html_description),
         long_description: String(form.value.long_description || '').trim() || null,
         shipping_method: String(form.value.shipping_method || '').trim() || null,
         shipping_limitations: String(form.value.shipping_limitations || '').trim() || null,
@@ -487,6 +549,7 @@ export default {
       error,
       activeTab,
       form,
+      editorToolbar,
       categoryOptions,
         newImageUrl,
         imageFormError,
@@ -599,6 +662,25 @@ export default {
 
 .form-textarea {
   resize: vertical;
+}
+
+.description-editor {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.description-editor :deep(.ql-toolbar) {
+  border: none;
+  border-bottom: 1px solid #ddd;
+}
+
+.description-editor :deep(.ql-container) {
+  border: none;
+  min-height: 210px;
+  font-family: inherit;
+  font-size: 0.95rem;
 }
 
 .image-add-row {

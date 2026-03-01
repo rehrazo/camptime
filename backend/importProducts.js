@@ -148,13 +148,13 @@ function mapProductRow(row) {
     description: rawDescription,
     htmlDescription,
     name,
-    maxChars: 4000,
+    maxChars: 60000,
   });
   const description = cleanDescriptionForStorage({
     description: longDescription,
     htmlDescription: null,
     name,
-    maxChars: 750,
+    maxChars: 12000,
   });
 
   const msrp = cleanNumber(pick(row, ['msrp us', 'msrp']));

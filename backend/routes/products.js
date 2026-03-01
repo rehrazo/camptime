@@ -42,19 +42,21 @@ async function replaceChildRows(connection, tableName, productId, columns, rows 
 
 function mapProductPayload(payload = {}) {
   const rawDescription = payload.description || null;
+  const rawLongDescription = payload.long_description || null;
   const htmlDescription = payload.html_description || null;
+  const longDescriptionSource = rawLongDescription || rawDescription;
   const longDescription = cleanDescriptionForStorage({
-    description: rawDescription,
+    description: longDescriptionSource,
     htmlDescription,
     name: payload.name,
-    maxChars: 4000,
+    maxChars: 60000,
   }) || null;
 
   const description = cleanDescriptionForStorage({
-    description: longDescription,
+    description: rawDescription || longDescription,
     htmlDescription: null,
     name: payload.name,
-    maxChars: 750,
+    maxChars: 12000,
   }) || null;
 
   return {

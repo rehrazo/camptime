@@ -21,9 +21,8 @@
 
       <div class="product-info">
         <h1>{{ product.name }}</h1>
-        <p class="category">Category: {{ product.category }}</p>
         
-        <div class="rating">
+        <div v-if="showReviews" class="rating">
           <span class="stars">★★★★★</span>
           <span class="reviews">({{ product.reviews || 0 }} reviews)</span>
         </div>
@@ -233,6 +232,8 @@ export default {
 
     const displaySku = computed(() => selectedVariantSku.value || product.value?.sku || 'N/A')
 
+    const showReviews = computed(() => Number(product.value?.reviews || 0) >= 5)
+
     const mapProduct = (data) => {
       const primaryImage = Array.isArray(data?.images) && data.images.length ? data.images[0].image_url : null
       return {
@@ -326,6 +327,7 @@ export default {
       selectedImage,
       selectedVariantSku,
       displaySku,
+      showReviews,
       variantError,
       addToCart,
       addToWishlist,
@@ -358,6 +360,9 @@ export default {
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   align-items: start;
+  background-color: #ECE3D1;
+  padding: 1.5rem;
+  border-radius: 8px;
 }
 
 .product-image img {

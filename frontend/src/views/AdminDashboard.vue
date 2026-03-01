@@ -1,55 +1,54 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="logo">
-        <span class="logo-icon">⛺</span>
-        <span class="logo-text">Camptime Admin</span>
-      </div>
-
-      <nav class="sidebar-nav">
-        <button 
-          v-for="item in navItems"
-          :key="item.id"
-          @click="activeTab = item.id"
-          class="nav-item"
-          :class="{ active: activeTab === item.id }"
-        >
-          <span class="nav-icon">{{ item.icon }}</span>
-          <span class="nav-text">{{ item.label }}</span>
-        </button>
-        <button class="nav-item" @click="openCategoryManager">
-          <span class="nav-icon">🧩</span>
-          <span class="nav-text">Category Manager</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <button class="logout-btn">🚪 Logout</button>
-      </div>
-    </aside>
-
     <!-- Main Content -->
     <main class="main-content">
       <!-- Header -->
       <header class="dashboard-header">
+        <div class="admin-brand-row">
+          <div class="logo">
+            <span class="logo-icon">⛺</span>
+            <span class="logo-text">Camptime Admin</span>
+          </div>
+
+          <div class="header-actions">
+            <div class="notification-bell">
+              <button class="bell-btn">🔔</button>
+              <span v-if="notificationCount > 0" class="badge">{{ notificationCount }}</span>
+            </div>
+            <div class="user-profile">
+              <img src="https://i.pravatar.cc/150?img=1" alt="Admin" class="profile-pic" />
+              <div class="user-info">
+                <p class="user-name">John Martinez</p>
+                <p class="user-role">Administrator</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="header-nav">
+          <button
+            v-for="item in navItems"
+            :key="item.id"
+            @click="activeTab = item.id"
+            class="nav-item"
+            :class="{ active: activeTab === item.id }"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-text">{{ item.label }}</span>
+          </button>
+          <button class="nav-item" @click="openCategoryManager">
+            <span class="nav-icon">🧩</span>
+            <span class="nav-text">Category Manager</span>
+          </button>
+          <button class="nav-item nav-item-logout">
+            <span class="nav-icon">🚪</span>
+            <span class="nav-text">Logout</span>
+          </button>
+        </nav>
+
         <div class="header-title">
           <h1>{{ getCurrentTabName() }}</h1>
           <p class="subtitle">Manage your Camptime business</p>
-        </div>
-
-        <div class="header-actions">
-          <div class="notification-bell">
-            <button class="bell-btn">🔔</button>
-            <span v-if="notificationCount > 0" class="badge">{{ notificationCount }}</span>
-          </div>
-          <div class="user-profile">
-            <img src="https://i.pravatar.cc/150?img=1" alt="Admin" class="profile-pic" />
-            <div class="user-info">
-              <p class="user-name">John Martinez</p>
-              <p class="user-role">Administrator</p>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -1397,27 +1396,16 @@ export default {
 }
 
 .admin-dashboard {
-  display: grid;
-  grid-template-columns: 250px 1fr;
-  height: 100vh;
-  background-color: #f5f5f5;
-}
-
-/* Sidebar */
-.sidebar {
-  background-color: #2c3e50;
-  color: white;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid #34495e;
+  height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .logo {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 2rem;
   font-weight: 700;
   font-size: 1.3rem;
 }
@@ -1426,60 +1414,42 @@ export default {
   font-size: 1.8rem;
 }
 
-.sidebar-nav {
+
+.header-nav {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
-  flex: 1;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  padding: 0.55rem 0.8rem;
   background: none;
-  border: none;
-  color: #ecf0f1;
+  border: 1px solid #d9deea;
+  color: #2f3f5a;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 999px;
   transition: all 0.3s;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background-color: #eef2ff;
 }
 
 .nav-item.active {
   background-color: #667eea;
   color: white;
+  border-color: #667eea;
 }
 
 .nav-icon {
-  font-size: 1.2rem;
-}
-
-.sidebar-footer {
-  padding-top: 1rem;
-  border-top: 1px solid #34495e;
-}
-
-.logout-btn {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.3s;
-}
-
-.logout-btn:hover {
-  background-color: #c0392b;
+  font-size: 1rem;
 }
 
 /* Main Content */
@@ -1492,11 +1462,22 @@ export default {
 /* Header */
 .dashboard-header {
   background: white;
-  padding: 1.5rem 2rem;
+  padding: 1.2rem 2rem;
   border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.admin-brand-row {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-title {
+  width: 100%;
 }
 
 .header-title h1 {
@@ -1508,6 +1489,12 @@ export default {
 .subtitle {
   color: #999;
   font-size: 0.9rem;
+}
+
+.nav-item-logout {
+  margin-left: auto;
+  border-color: #f2c6c6;
+  color: #9b2d2d;
 }
 
 .header-actions {
@@ -2086,14 +2073,6 @@ tr:hover {
 }
 
 @media (max-width: 1024px) {
-  .admin-dashboard {
-    grid-template-columns: 200px 1fr;
-  }
-
-  .nav-text {
-    display: none;
-  }
-
   .charts-grid {
     grid-template-columns: 1fr;
   }
@@ -2104,14 +2083,6 @@ tr:hover {
 }
 
 @media (max-width: 768px) {
-  .admin-dashboard {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    display: none;
-  }
-
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -2125,9 +2096,22 @@ tr:hover {
   }
 
   .dashboard-header {
+    padding: 1rem 1rem;
+  }
+
+  .admin-brand-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .header-nav {
+    width: 100%;
   }
 }
 </style>

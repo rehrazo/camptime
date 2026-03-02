@@ -2,6 +2,17 @@
   <div class="checkout">
     <h1>Checkout</h1>
 
+    <div v-if="stripeMode !== 'unknown'" class="stripe-mode-banner" :class="stripeMode">
+      <strong>Stripe Mode:</strong>
+      <span v-if="stripeMode === 'test'">Test mode enabled (no real charges).</span>
+      <span v-else-if="stripeMode === 'live'">Live mode enabled (real charges).</span>
+    </div>
+
+    <div v-else class="stripe-mode-banner unknown">
+      <strong>Stripe Mode:</strong>
+      <span>Publishable key not set in frontend environment (`VITE_STRIPE_PUBLISHABLE_KEY`).</span>
+    </div>
+
     <div class="checkout-container">
       <div class="checkout-form">
         <form @submit.prevent="submitOrder">
@@ -143,59 +154,9 @@
           <!-- Payment Information -->
           <section class="form-section">
             <h2>Payment Information</h2>
-            
-            <div class="form-group">
-              <label for="cardName">Name on Card</label>
-              <input 
-                id="cardName"
-                v-model="form.cardName" 
-                type="text" 
-                required
-                class="form-input"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="cardNumber">Card Number</label>
-              <input 
-                id="cardNumber"
-                v-model="form.cardNumber" 
-                type="text" 
-                placeholder="1234 5678 9012 3456"
-                required
-                class="form-input"
-              />
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="expiry">Expiration Date</label>
-                <input 
-                  id="expiry"
-                  v-model="form.expiry" 
-                  type="text" 
-                  placeholder="MM/YY"
-                  required
-                  class="form-input"
-                />
-              </div>
-              <div class="form-group">
-                <label for="cvv">CVV</label>
-                <input 
-                  id="cvv"
-                  v-model="form.cvv" 
-                  type="text" 
-                  placeholder="123"
-                  required
-                  class="form-input"
-                />
-              </div>
-            </div>
-
-            <label class="checkbox-option">
-              <input v-model="form.billingSameAsShipping" type="checkbox" />
-              <span>Billing address same as shipping</span>
-            </label>
+            <p class="payment-note">
+              You will be securely redirected to Stripe to enter your card details and complete payment.
+            </p>
           </section>
 
           <!-- Terms and Conditions -->
@@ -206,8 +167,8 @@
             </label>
           </section>
 
-          <button type="submit" class="btn btn-primary btn-large">
-            Complete Order
+          <button type="submit" class="btn btn-primary btn-large" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Redirecting to Stripe...' : 'Continue to Secure Payment' }}
           </button>
         </form>
       </div>
@@ -262,6 +223,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { loadStripe } from '@stripe/stripe-js'
 
 export default {
   name: 'Checkout',
@@ -279,13 +241,10 @@ export default {
       state: '',
       zip: '',
       shippingMethod: 'standard',
-      cardName: '',
-      cardNumber: '',
-      expiry: '',
-      cvv: '',
-      billingSameAsShipping: true,
       agreeTerms: false,
     })
+
+    const isSubmitting = ref(false)
 
     const orderItems = computed(() => cartStore.items)
 
@@ -311,12 +270,37 @@ export default {
       return subtotal.value + shippingCost.value + tax.value
     })
 
+    const stripePublishableKey = computed(() => String(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '').trim())
+
+    const stripeMode = computed(() => {
+      const key = stripePublishableKey.value
+      if (!key) {
+        return 'unknown'
+      }
+
+      if (key.startsWith('pk_test_')) {
+        return 'test'
+      }
+
+      if (key.startsWith('pk_live_')) {
+        return 'live'
+      }
+
+      return 'unknown'
+    })
+
     const submitOrder = async () => {
       if (!orderItems.value.length) {
         alert('Your cart is empty.')
         router.push('/products')
         return
       }
+
+      if (isSubmitting.value) {
+        return
+      }
+
+      isSubmitting.value = true
 
       try {
         const orderData = {
@@ -348,8 +332,7 @@ export default {
           },
         }
 
-        // Send to backend
-        const response = await fetch('/api/orders', {
+        const response = await fetch('/api/payments/create-checkout-session', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -359,15 +342,33 @@ export default {
 
         if (response.ok) {
           const result = await response.json()
-          cartStore.clearCart()
-          // Redirect to order confirmation
-          router.push(`/order-confirmation/${result.orderId}`)
+          const publishableKey = result.publishableKey || import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+
+          if (publishableKey && result.sessionId) {
+            const stripe = await loadStripe(publishableKey)
+            const redirectResult = await stripe.redirectToCheckout({ sessionId: result.sessionId })
+
+            if (redirectResult?.error) {
+              throw new Error(redirectResult.error.message || 'Stripe redirect failed')
+            }
+            return
+          }
+
+          if (result.url) {
+            window.location.href = result.url
+            return
+          }
+
+          throw new Error('Stripe checkout session could not be started')
         } else {
-          alert('Error submitting order')
+          const errorData = await response.json().catch(() => ({}))
+          alert(errorData.error || 'Error starting Stripe checkout')
         }
       } catch (error) {
         console.error('Error submitting order:', error)
         alert('Error submitting order. Please try again.')
+      } finally {
+        isSubmitting.value = false
       }
     }
 
@@ -378,6 +379,8 @@ export default {
       shippingCost,
       tax,
       total,
+      stripeMode,
+      isSubmitting,
       submitOrder,
     }
   },
@@ -394,6 +397,32 @@ export default {
 .checkout h1 {
   font-size: 2rem;
   margin-bottom: 2rem;
+}
+
+.stripe-mode-banner {
+  margin: -0.8rem 0 1.2rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 0.92rem;
+}
+
+.stripe-mode-banner.test {
+  background: #fff9e8;
+  border-color: #efcf70;
+  color: #6b4f00;
+}
+
+.stripe-mode-banner.live {
+  background: #edf7ed;
+  border-color: #8ec58e;
+  color: #1b5e20;
+}
+
+.stripe-mode-banner.unknown {
+  background: #fff0f0;
+  border-color: #efb3b3;
+  color: #8a1f1f;
 }
 
 .checkout-container {
@@ -513,6 +542,15 @@ export default {
   border: none;
   padding: 0.5rem 0;
   gap: 0.75rem;
+}
+
+.payment-note {
+  margin: 0;
+  color: #555;
+  background: #f7f9ff;
+  border: 1px solid #dce3ff;
+  border-radius: 6px;
+  padding: 0.85rem;
 }
 
 .btn {

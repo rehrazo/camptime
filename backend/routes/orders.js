@@ -34,23 +34,13 @@ function calculateTotals(items, shipping, tax) {
   };
 }
 
-router.get('/:orderId', (req, res) => {
-  const orderId = req.params.orderId;
-  const order = orders.get(orderId);
-
-  if (!order) {
-    return res.status(404).json({ error: 'Order not found' });
-  }
-
-  return res.json(order);
-});
-
-router.post('/', (req, res) => {
-  const payload = req.body || {};
+function createOrderRecord(payload = {}, options = {}) {
   const items = normalizeItems(payload.items);
 
   if (!items.length) {
-    return res.status(400).json({ error: 'Order must include at least one item' });
+    const error = new Error('Order must include at least one item');
+    error.status = 400;
+    throw error;
   }
 
   const customer = {
@@ -70,22 +60,67 @@ router.post('/', (req, res) => {
 
   const totals = calculateTotals(items, payload.totals?.shipping, payload.totals?.tax);
 
-  const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const orderId = options.orderId || `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   const order = {
     orderId,
     createdAt: new Date().toISOString(),
+    status: options.status || 'created',
     customer,
     shipping,
     items,
-    totals
+    totals,
+    payment: options.payment || null
   };
 
   orders.set(orderId, order);
+  return order;
+}
 
-  return res.status(201).json({
-    orderId,
-    message: 'Order placed successfully'
-  });
+function getOrderById(orderId) {
+  return orders.get(orderId) || null;
+}
+
+function updateOrder(orderId, patch = {}) {
+  const existing = orders.get(orderId);
+  if (!existing) {
+    return null;
+  }
+
+  const next = {
+    ...existing,
+    ...patch
+  };
+
+  orders.set(orderId, next);
+  return next;
+}
+
+router.get('/:orderId', (req, res) => {
+  const orderId = req.params.orderId;
+  const order = orders.get(orderId);
+
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  return res.json(order);
+});
+
+router.post('/', (req, res) => {
+  try {
+    const payload = req.body || {};
+    const order = createOrderRecord(payload);
+
+    return res.status(201).json({
+      orderId: order.orderId,
+      message: 'Order placed successfully'
+    });
+  } catch (error) {
+    return res.status(error.status || 500).json({ error: error.message || 'Failed to create order' });
+  }
 });
 
 module.exports = router;
+module.exports.createOrderRecord = createOrderRecord;
+module.exports.getOrderById = getOrderById;
+module.exports.updateOrder = updateOrder;

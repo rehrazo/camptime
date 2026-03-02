@@ -123,11 +123,13 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useCartStore } from '../stores/cart'
 
 export default {
   name: 'OrderConfirmation',
   setup() {
     const route = useRoute()
+    const cartStore = useCartStore()
     const order = ref(null)
 
     onMounted(async () => {
@@ -135,6 +137,10 @@ export default {
         const response = await fetch(`/api/orders/${route.params.orderId}`)
         const data = await response.json()
         order.value = data
+
+        if (String(route.query.paid || '') === '1') {
+          cartStore.clearCart()
+        }
       } catch (error) {
         console.error('Error fetching order:', error)
       }

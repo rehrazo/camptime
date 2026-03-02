@@ -10,6 +10,7 @@ const { importProducts } = require('./importProducts');
 const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
 const ordersRouter = require('./routes/orders');
+const paymentsRouter = require('./routes/payments');
 
 dotenv.config();
 
@@ -93,7 +94,7 @@ app.use('/api/products', productsRouter);
 app.use('/api/categories', categoriesRouter);
 // app.use('/api/cart', require('./routes/cart')); 
 app.use('/api/orders', ordersRouter);
-// app.use('/api/payments', require('./routes/payments'));
+app.use('/api/payments', paymentsRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

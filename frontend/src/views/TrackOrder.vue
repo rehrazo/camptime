@@ -57,7 +57,7 @@ export default {
 
 <style scoped>
 .track-page {
-  background: #D9C7A3;
+  background: var(--color-sand);
   min-height: 100%;
 }
 
@@ -102,7 +102,7 @@ input {
 
 .btn-track {
   background: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   border: none;
   border-radius: 4px;
   padding: 0.7rem 1rem;

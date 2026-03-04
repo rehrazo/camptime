@@ -515,7 +515,7 @@ export default {
 
 .btn-primary {
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
 }
 
 .btn-secondary {

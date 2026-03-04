@@ -160,7 +160,7 @@ export default {
 
 .top-header {
   background-color: #2B2B2B;
-  color: #D9C7A3;
+  color: var(--color-sand);
   border-bottom: 1px solid rgba(217, 199, 163, 0.25);
 }
 
@@ -189,7 +189,7 @@ export default {
 }
 
 .social-links a {
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 600;
@@ -202,7 +202,7 @@ export default {
 
 .navbar {
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
@@ -212,7 +212,7 @@ export default {
 .navbar-brand a {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
 }
 
@@ -225,7 +225,7 @@ export default {
 }
 
 .nav-links a {
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
   transition: color 0.3s;
 }
@@ -237,7 +237,7 @@ export default {
 .main-content {
   flex: 1;
   padding: 2rem;
-  background-color: #D9C7A3;
+  background-color: var(--color-sand);
   color: #2B2B2B;
 }
 
@@ -259,7 +259,7 @@ export default {
 }
 
 .category-link {
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
@@ -275,7 +275,7 @@ export default {
 
 .category-link.active {
   color: #fff;
-  border-color: #D9C7A3;
+  border-color: var(--color-sand);
 }
 
 @media (max-width: 768px) {
@@ -298,7 +298,7 @@ export default {
 
 .footer {
   background-color: #2B2B2B;
-  color: #D9C7A3;
+  color: var(--color-sand);
   margin-top: 2rem;
 }
 
@@ -329,7 +329,7 @@ export default {
 .footer-column a {
   margin: 0;
   font-size: 0.87rem;
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
 }
 
@@ -362,7 +362,7 @@ export default {
 .footer-bottom p {
   margin: 0;
   font-size: 0.82rem;
-  color: #D9C7A3;
+  color: var(--color-sand);
 }
 
 @media (max-width: 980px) {

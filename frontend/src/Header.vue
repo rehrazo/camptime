@@ -164,7 +164,7 @@ export default {
 
 <style scoped>
 .header {
-  background-color: #D9C7A3;
+  background-color: var(--color-sand);
   border-bottom: 1px solid #2F4F3E;
   position: sticky;
   top: 0;
@@ -230,7 +230,7 @@ export default {
 .search-btn {
   padding: 0.75rem 1rem;
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   border: none;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -308,7 +308,7 @@ export default {
   top: -8px;
   right: -8px;
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -327,7 +327,7 @@ export default {
   position: absolute;
   top: 100%;
   right: 0;
-  background: #D9C7A3;
+  background: var(--color-sand);
   border: 1px solid #2F4F3E;
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -394,7 +394,7 @@ export default {
 
 .mobile-menu {
   display: none;
-  background-color: #D9C7A3;
+  background-color: var(--color-sand);
   border-top: 1px solid #2F4F3E;
 }
 

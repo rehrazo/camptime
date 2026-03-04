@@ -63,7 +63,7 @@ export default {
 
 <style scoped>
 .policy-page {
-  background: #D9C7A3;
+  background: var(--color-sand);
   min-height: 100%;
 }
 

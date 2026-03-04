@@ -124,7 +124,7 @@ export default {
 <style scoped>
 .footer {
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   margin-top: 4rem;
 }
 
@@ -135,7 +135,7 @@ export default {
 }
 
 .newsletter-section {
-  background: #D9C7A3;
+  background: var(--color-sand);
   border-radius: 8px;
   padding: 2rem;
   margin-bottom: 3rem;
@@ -172,7 +172,7 @@ export default {
 .newsletter-btn {
   padding: 0.75rem 1.5rem;
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   border: none;
   border-radius: 4px;
   font-weight: 600;
@@ -194,7 +194,7 @@ export default {
 .footer-column h4 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #D9C7A3;
+  color: var(--color-sand);
   font-size: 1rem;
 }
 
@@ -209,7 +209,7 @@ export default {
 }
 
 .footer-column a {
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
   transition: color 0.3s;
   font-size: 0.95rem;
@@ -232,7 +232,7 @@ export default {
   height: 40px;
   background-color: rgba(217, 199, 163, 0.2);
   border-radius: 4px;
-  color: #D9C7A3;
+  color: var(--color-sand);
   text-decoration: none;
   transition: background-color 0.3s;
   font-weight: 600;
@@ -250,7 +250,7 @@ export default {
 .payment-methods h4 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: #D9C7A3;
+  color: var(--color-sand);
 }
 
 .payment-icons {
@@ -279,7 +279,7 @@ export default {
 .copyright {
   margin: 0 0 0.5rem 0;
   font-size: 0.95rem;
-  color: #D9C7A3;
+  color: var(--color-sand);
 }
 
 .footer-text {

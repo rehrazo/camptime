@@ -735,7 +735,7 @@ export default {
   border: none;
   border-radius: 4px;
   background: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
   padding: 0.3rem 0.55rem;
   font-size: 0.78rem;
   font-weight: 600;
@@ -784,7 +784,7 @@ export default {
 
 .btn-primary {
   background-color: #2F4F3E;
-  color: #D9C7A3;
+  color: var(--color-sand);
 }
 
 .btn-secondary {
@@ -797,7 +797,7 @@ export default {
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 980px) {
   .page-header {
     flex-direction: column;
   }

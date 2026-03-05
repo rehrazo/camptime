@@ -123,7 +123,7 @@ export default {
 
 <style scoped>
 .footer {
-  background-color: #2F4F3E;
+  background-color: #6A4A30;
   color: var(--color-sand);
   margin-top: 4rem;
 }
@@ -171,7 +171,7 @@ export default {
 
 .newsletter-btn {
   padding: 0.75rem 1.5rem;
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
   border: none;
   border-radius: 4px;

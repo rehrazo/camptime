@@ -254,14 +254,14 @@ export default {
   font-size: 1.3rem;
   margin-bottom: 1rem;
   color: #333;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 0.5rem;
 }
 
 .order-number {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   margin: 0.5rem 0;
   font-family: 'Courier New', monospace;
 }
@@ -274,7 +274,7 @@ export default {
 
 .info-box {
   background-color: #f9f9f9;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
   padding: 1.5rem;
   border-radius: 4px;
 }
@@ -344,7 +344,7 @@ export default {
   border-bottom: none;
   font-size: 1.2rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   padding-top: 1rem;
 }
 
@@ -360,7 +360,7 @@ export default {
   background-color: #f9f9f9;
   padding: 1.5rem;
   border-radius: 4px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
 }
 
 .step-number {
@@ -369,7 +369,7 @@ export default {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -411,12 +411,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

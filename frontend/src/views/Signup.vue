@@ -348,7 +348,7 @@ export default {
 }
 
 .signup-branding {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 3rem 2rem;
   display: flex;
@@ -454,7 +454,7 @@ export default {
 }
 
 .social-btn:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
   background-color: #f9f9f9;
 }
 
@@ -528,7 +528,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -555,7 +555,7 @@ export default {
 }
 
 .password-toggle:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .password-strength {
@@ -616,13 +616,13 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
   margin-top: 2px;
   flex-shrink: 0;
 }
 
 .link {
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
 }
 
@@ -643,12 +643,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-primary:disabled {
@@ -667,7 +667,7 @@ export default {
 }
 
 .login-link {
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s;

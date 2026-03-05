@@ -481,7 +481,7 @@ export default {
   align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
 }
 
 .items-header h2 {
@@ -492,7 +492,7 @@ export default {
 .btn-link {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-accent);
   cursor: pointer;
   text-decoration: underline;
   font-size: 0.9rem;
@@ -500,7 +500,7 @@ export default {
 }
 
 .btn-link:hover {
-  color: #5568d3;
+  color: var(--color-accent-dark);
 }
 
 .cart-items {
@@ -596,14 +596,14 @@ export default {
 
 .item-price {
   margin: 0.25rem 0 0 0;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 700;
   font-size: 1.1rem;
 }
 
 .item-total {
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   text-align: right;
   font-size: 1rem;
 }
@@ -670,7 +670,7 @@ export default {
 }
 
 .rec-item .price {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
   margin: 0.5rem 0;
 }
@@ -691,7 +691,7 @@ export default {
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   color: #333;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 0.5rem;
 }
 
@@ -725,7 +725,7 @@ export default {
 
 .coupon-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -744,12 +744,12 @@ export default {
 }
 
 .btn-secondary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .coupon-applied {
@@ -833,7 +833,7 @@ export default {
   border-bottom: none;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   padding-top: 1rem;
   margin-bottom: 1rem;
 }
@@ -894,7 +894,7 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .option-text {
@@ -916,7 +916,7 @@ export default {
 
 .method-price {
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .promo-banner {
@@ -941,12 +941,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-large {
@@ -960,7 +960,7 @@ export default {
   background: #f0f8ff;
   padding: 1rem;
   border-radius: 4px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
 }
 
 .trust-badges p {

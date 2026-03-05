@@ -393,9 +393,9 @@ export default {
 }
 
 .drop-root.active {
-  border-color: #2F4F3E;
+  border-color: var(--color-forest);
   background: rgba(47, 79, 62, 0.08);
-  color: #2F4F3E;
+  color: var(--color-forest);
 }
 
 .tree-card {
@@ -425,8 +425,8 @@ export default {
 }
 
 .category-row.drop-target {
-  background: rgba(47, 79, 62, 0.08);
-  outline: 2px solid #2F4F3E;
+  background: rgba(63, 106, 84, 0.08);
+  outline: 2px solid var(--color-forest);
   outline-offset: -2px;
 }
 
@@ -463,7 +463,7 @@ export default {
 }
 
 .view-products-link {
-  color: #2F4F3E;
+  color: var(--color-forest);
   font-weight: 600;
   text-decoration: none;
 }
@@ -514,7 +514,7 @@ export default {
 }
 
 .btn-primary {
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
 }
 

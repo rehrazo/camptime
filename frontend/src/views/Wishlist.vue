@@ -309,7 +309,7 @@ export default {
 }
 
 .stat {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 1.5rem;
   border-radius: 8px;
@@ -360,7 +360,7 @@ export default {
 
 .select-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -485,7 +485,7 @@ export default {
 .price {
   margin: 0.25rem 0;
   font-size: 1.5rem;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 700;
 }
 
@@ -540,12 +540,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -585,7 +585,7 @@ export default {
 .text-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-accent);
   cursor: pointer;
   text-decoration: underline;
   padding: 0;
@@ -594,7 +594,7 @@ export default {
 }
 
 .text-btn:hover {
-  color: #5568d3;
+  color: var(--color-accent-dark);
 }
 
 .bulk-actions {

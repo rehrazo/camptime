@@ -1,6 +1,6 @@
 <template>
   <div class="products">
-    <h1>Our Products</h1>
+    <h1>{{ productsHeading }}</h1>
 
     <div class="products-layout">
       <aside class="category-sidebar">
@@ -200,6 +200,22 @@ export default {
       return categoryTree.value.find((category) => category.category_id === selectedParentCategoryId.value) || null
     })
 
+    const selectedChildCategory = computed(() => {
+      return visibleChildCategories.value.find((child) => child.category_id === selectedChildCategoryId.value) || null
+    })
+
+    const productsHeading = computed(() => {
+      if (selectedChildCategory.value?.name) {
+        return selectedChildCategory.value.name
+      }
+
+      if (selectedParentCategory.value?.name) {
+        return selectedParentCategory.value.name
+      }
+
+      return 'Our Products'
+    })
+
     const visibleChildCategories = computed(() => {
       return selectedParentCategory.value?.children || []
     })
@@ -246,7 +262,9 @@ export default {
       selectedParentCategoryId,
       selectedChildCategoryId,
       selectedParentCategory,
+      selectedChildCategory,
       visibleChildCategories,
+      productsHeading,
       filteredProducts,
       selectChildCategory,
       selectParentOnly,
@@ -307,11 +325,11 @@ export default {
 }
 
 .category-menu-link:hover {
-  background: rgba(47, 79, 62, 0.08);
+  background: rgba(63, 106, 84, 0.08);
 }
 
 .category-menu-link.active {
-  background: #2F4F3E;
+  background: var(--color-forest);
   color: var(--color-sand);
 }
 
@@ -347,7 +365,7 @@ export default {
 }
 
 .product-card:focus-visible {
-  outline: 2px solid #2F4F3E;
+  outline: 2px solid var(--color-forest);
   outline-offset: 2px;
 }
 
@@ -379,7 +397,7 @@ export default {
 
 .price {
   font-size: 1.6rem;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: bold;
   margin-bottom: 1.5rem;
 }
@@ -403,12 +421,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

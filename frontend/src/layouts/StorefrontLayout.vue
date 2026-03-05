@@ -182,7 +182,7 @@ export default {
 }
 
 .top-header {
-  background-color: #2B2B2B;
+  background-color: #6A4A30;
   color: var(--color-sand);
   border-bottom: 1px solid rgba(217, 199, 163, 0.25);
 }
@@ -224,7 +224,7 @@ export default {
 }
 
 .navbar {
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
   padding: 1rem 2rem;
   display: flex;
@@ -274,7 +274,7 @@ export default {
 
 .navbar-search button {
   border: none;
-  background: #2B2B2B;
+  background: #6A4A30;
   color: var(--color-sand);
   padding: 0.6rem 0.85rem;
   font-size: 0.85rem;
@@ -299,7 +299,7 @@ export default {
 }
 
 .category-navbar {
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   border-top: 1px solid rgba(217, 199, 163, 0.25);
   border-bottom: 1px solid rgba(217, 199, 163, 0.25);
   overflow-x: auto;
@@ -327,12 +327,15 @@ export default {
 }
 
 .category-link:hover {
-  color: #fff;
+  color: var(--color-sand);
 }
 
 .category-link.active {
-  color: #fff;
+  color: var(--color-sand);
   border-color: var(--color-sand);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  padding: 0.2rem 0.45rem 0.25rem;
 }
 
 @media (max-width: 768px) {
@@ -371,7 +374,7 @@ export default {
 }
 
 .footer {
-  background-color: #2B2B2B;
+  background-color: #6A4A30;
   color: var(--color-sand);
   margin-top: 2rem;
 }

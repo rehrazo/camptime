@@ -819,7 +819,7 @@ tr:hover {
 }
 
 .price {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -836,7 +836,7 @@ tr:hover {
   display: inline-block;
   padding: 0.4rem 0.8rem;
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   border-radius: 4px;
   font-weight: 600;
   font-size: 0.85rem;
@@ -895,7 +895,7 @@ tr:hover {
 }
 
 .btn-action.edit:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .btn-action.delete:hover {
@@ -972,12 +972,12 @@ tr:hover {
 }
 
 .form-tab:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .form-tab.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
 .tab-content {
@@ -1024,7 +1024,7 @@ tr:hover {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -1038,7 +1038,7 @@ tr:hover {
 .settings-info h3 {
   margin-top: 0;
   margin-bottom: 0.5rem;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .info-text {
@@ -1118,7 +1118,7 @@ tr:hover {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .form-actions {
@@ -1138,12 +1138,12 @@ tr:hover {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -1192,7 +1192,7 @@ tr:hover {
 
 .count {
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .unassigned-stats p {

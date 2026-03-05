@@ -625,13 +625,13 @@ export default {
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .search-btn {
   padding: 1rem 2rem;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border: none;
   border-radius: 4px;
@@ -641,7 +641,7 @@ export default {
 }
 
 .search-btn:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .search-layout {
@@ -676,7 +676,7 @@ export default {
 .clear-filters {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-accent);
   cursor: pointer;
   font-size: 0.85rem;
   text-decoration: underline;
@@ -684,7 +684,7 @@ export default {
 }
 
 .clear-filters:hover {
-  color: #5568d3;
+  color: var(--color-accent-dark);
 }
 
 .filter-section {
@@ -718,7 +718,7 @@ export default {
 }
 
 .filter-toggle:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .filter-input {
@@ -760,7 +760,7 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
   flex-shrink: 0;
 }
 
@@ -780,7 +780,7 @@ export default {
 .range-input {
   width: 100%;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .price-display {
@@ -791,7 +791,7 @@ export default {
   background-color: #f5f5f5;
   border-radius: 4px;
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .stars {
@@ -866,14 +866,14 @@ export default {
 }
 
 .view-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .view-btn.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .products-grid {
@@ -1018,7 +1018,7 @@ export default {
 .price {
   margin: 0;
   font-size: 1.3rem;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 700;
 }
 
@@ -1068,12 +1068,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -1115,9 +1115,9 @@ export default {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .pagination-btn:disabled {
@@ -1143,13 +1143,13 @@ export default {
 }
 
 .page-number:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .page-number.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 @media (max-width: 768px) {

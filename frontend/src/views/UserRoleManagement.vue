@@ -615,12 +615,12 @@ export default {
 }
 
 .tab-btn:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .tab-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
 /* Users Section */
@@ -753,7 +753,7 @@ tr:hover {
 }
 
 .btn-action.edit:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .btn-action.delete:hover {
@@ -820,7 +820,7 @@ tr:hover {
 
 .perm-badge {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   padding: 0.3rem 0.6rem;
   border-radius: 3px;
   font-size: 0.8rem;
@@ -888,7 +888,7 @@ tr:hover {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .save-permissions {
@@ -965,7 +965,7 @@ tr:hover {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .form-row {
@@ -1012,12 +1012,12 @@ tr:hover {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

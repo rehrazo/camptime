@@ -101,8 +101,8 @@ input {
 }
 
 .btn-track {
-  background: #2F4F3E;
-  color: var(--color-sand);
+  background: var(--color-forest);
+    background: var(--color-forest);
   border: none;
   border-radius: 4px;
   padding: 0.7rem 1rem;
@@ -124,8 +124,8 @@ input {
 }
 
 .help-box h2 {
-  color: #2F4F3E;
-  margin: 0 0 0.5rem;
+  color: var(--color-forest);
+    color: var(--color-forest);
   font-size: 1.1rem;
 }
 

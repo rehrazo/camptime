@@ -165,7 +165,7 @@ export default {
 <style scoped>
 .header {
   background-color: var(--color-sand);
-  border-bottom: 1px solid #2F4F3E;
+  border-bottom: 1px solid var(--color-forest);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -186,7 +186,7 @@ export default {
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  color: #2F4F3E;
+  color: var(--color-forest);
   font-weight: 700;
   font-size: 1.3rem;
   white-space: nowrap;
@@ -211,7 +211,7 @@ export default {
   display: flex;
   flex: 1;
   max-width: 400px;
-  border: 1px solid #2F4F3E;
+  border: 1px solid var(--color-forest);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -229,7 +229,7 @@ export default {
 
 .search-btn {
   padding: 0.75rem 1rem;
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
   border: none;
   cursor: pointer;
@@ -260,11 +260,11 @@ export default {
 }
 
 .nav-link:hover {
-  color: #2F4F3E;
+  color: var(--color-forest);
 }
 
 .nav-link.active {
-  color: #2F4F3E;
+  color: var(--color-forest);
 }
 
 .nav-link.active::after {
@@ -274,7 +274,7 @@ export default {
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
 }
 
 .header-icons {
@@ -296,7 +296,7 @@ export default {
 }
 
 .icon-link:hover {
-  color: #2F4F3E;
+  color: var(--color-forest);
 }
 
 .icon {
@@ -307,7 +307,7 @@ export default {
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
   border-radius: 50%;
   width: 20px;
@@ -328,7 +328,7 @@ export default {
   top: 100%;
   right: 0;
   background: var(--color-sand);
-  border: 1px solid #2F4F3E;
+  border: 1px solid var(--color-forest);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   min-width: 200px;
@@ -351,13 +351,13 @@ export default {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(47, 79, 62, 0.12);
+  background-color: rgba(63, 106, 84, 0.12);
 }
 
 .divider {
   margin: 0.5rem 0;
   border: none;
-  border-top: 1px solid #2F4F3E;
+  border-top: 1px solid var(--color-forest);
 }
 
 .logout-btn {
@@ -365,7 +365,7 @@ export default {
 }
 
 .logout-btn:hover {
-  background-color: rgba(47, 79, 62, 0.18);
+  background-color: rgba(63, 106, 84, 0.18);
 }
 
 .mobile-menu-btn {
@@ -395,7 +395,7 @@ export default {
 .mobile-menu {
   display: none;
   background-color: var(--color-sand);
-  border-top: 1px solid #2F4F3E;
+  border-top: 1px solid var(--color-forest);
 }
 
 @media (max-width: 767px) {
@@ -414,8 +414,8 @@ export default {
 }
 
 .mobile-nav-link:hover {
-  background-color: rgba(47, 79, 62, 0.12);
-  color: #2F4F3E;
+  background-color: rgba(63, 106, 84, 0.12);
+  color: var(--color-forest);
 }
 
 @media (max-width: 767px) {

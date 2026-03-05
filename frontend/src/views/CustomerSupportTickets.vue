@@ -483,7 +483,7 @@ export default {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .ticket-filters {
@@ -546,7 +546,7 @@ tr:hover {
 
 .id-badge {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
   font-weight: 600;
@@ -569,7 +569,7 @@ tr:hover {
 .subject-link {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--color-accent);
   cursor: pointer;
   text-decoration: underline;
   font-weight: 600;
@@ -577,7 +577,7 @@ tr:hover {
 }
 
 .subject-link:hover {
-  color: #5568d3;
+  color: var(--color-accent-dark);
 }
 
 .priority-badge {
@@ -644,7 +644,7 @@ tr:hover {
 
 .btn-reply:hover {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .btn-delete:hover {
@@ -809,7 +809,7 @@ tr:hover {
 
 .reply-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -843,12 +843,12 @@ tr:hover {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 @media (max-width: 768px) {

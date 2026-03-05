@@ -552,7 +552,7 @@ export default {
 .back-link {
   display: inline-block;
   margin-bottom: 2rem;
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
   font-size: 1rem;
 }
@@ -568,7 +568,7 @@ export default {
 }
 
 .breadcrumb-link {
-  color: #2F4F3E;
+  color: var(--color-forest);
   text-decoration: none;
 }
 
@@ -631,7 +631,7 @@ export default {
 }
 
 .thumbnail-btn.active {
-  border-color: #2F4F3E;
+  border-color: var(--color-forest);
 }
 
 .product-info h1 {
@@ -664,7 +664,7 @@ export default {
 
 .price {
   font-size: 2rem;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: bold;
   margin-bottom: 1.5rem;
 }
@@ -720,7 +720,7 @@ export default {
   content: "✓";
   position: absolute;
   left: 0;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: bold;
 }
 
@@ -782,7 +782,7 @@ export default {
 }
 
 .variant-sku {
-  color: #2F4F3E;
+  color: var(--color-forest);
   margin: 0.5rem 0 0;
   font-size: 0.9rem;
   font-weight: 600;
@@ -810,12 +810,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -831,7 +831,7 @@ export default {
   background-color: #f9f9f9;
   padding: 1.5rem;
   border-radius: 4px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
 }
 
 .product-meta p {

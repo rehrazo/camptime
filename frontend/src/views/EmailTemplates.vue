@@ -407,14 +407,14 @@ export default {
 }
 
 .category-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .category-btn.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .templates-grid {
@@ -466,7 +466,7 @@ export default {
 }
 
 .template-subject {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
   margin: 0.75rem 0;
   font-size: 0.9rem;
@@ -504,12 +504,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -631,7 +631,7 @@ export default {
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -664,9 +664,9 @@ export default {
 }
 
 .toolbar-btn:hover {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .toolbar-divider {

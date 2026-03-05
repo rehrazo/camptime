@@ -427,7 +427,7 @@ export default {
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   color: #333;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 0.5rem;
 }
 
@@ -465,7 +465,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -498,7 +498,7 @@ textarea.form-input {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .checkbox-option {
@@ -512,7 +512,7 @@ textarea.form-input {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .error-message {
@@ -548,12 +548,12 @@ textarea.form-input {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -592,7 +592,7 @@ textarea.form-input {
   margin-bottom: 1rem;
   color: #333;
   font-size: 1.2rem;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 0.5rem;
 }
 
@@ -622,7 +622,7 @@ textarea.form-input {
 }
 
 .contact-item a {
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 600;
 }
@@ -674,7 +674,7 @@ textarea.form-input {
   justify-content: center;
   width: 40px;
   height: 40px;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border-radius: 50%;
   text-decoration: none;
@@ -683,7 +683,7 @@ textarea.form-input {
 }
 
 .social-link:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
   transform: translateY(-2px);
 }
 
@@ -700,7 +700,7 @@ textarea.form-input {
   font-size: 1.8rem;
   color: #333;
   text-align: center;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 1rem;
 }
 
@@ -734,11 +734,11 @@ textarea.form-input {
 
 .faq-question:hover {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .faq-question.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 

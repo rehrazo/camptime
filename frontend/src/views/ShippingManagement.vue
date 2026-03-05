@@ -681,12 +681,12 @@ export default {
 }
 
 .tab-btn:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .tab-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
 }
 
 /* Shipping Groups Section */
@@ -792,7 +792,7 @@ export default {
 
 .method-badge {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   padding: 0.3rem 0.6rem;
   border-radius: 3px;
   font-size: 0.8rem;

@@ -484,7 +484,7 @@ export default {
 .filter-select:focus,
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .inventory-table-container {
@@ -536,7 +536,7 @@ tr:hover {
 
 .sku {
   font-family: monospace;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -669,7 +669,7 @@ tr:hover {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .current-value {
@@ -711,12 +711,12 @@ tr:hover {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -752,7 +752,7 @@ tr:hover {
   border-radius: 3px;
   font-size: 0.8rem;
   font-weight: 600;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -774,7 +774,7 @@ tr:hover {
 
 /* File Upload */
 .file-upload {
-  border: 2px dashed #667eea;
+  border: 2px dashed var(--color-accent);
   border-radius: 4px;
   padding: 2rem;
   text-align: center;

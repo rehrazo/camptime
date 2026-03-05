@@ -88,7 +88,7 @@ section {
 
 h2 {
   margin: 0 0 0.6rem;
-  color: #2F4F3E;
+  color: var(--color-forest);
   font-size: 1.15rem;
 }
 

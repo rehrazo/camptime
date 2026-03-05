@@ -1534,9 +1534,9 @@ export default {
 }
 
 .nav-item.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .nav-icon {
@@ -1749,7 +1749,7 @@ export default {
 }
 
 .product-sales {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -1825,7 +1825,7 @@ tr:hover {
 
 .order-id {
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .status-badge {
@@ -1863,7 +1863,7 @@ tr:hover {
 
 .action-btn {
   padding: 0.5rem 1rem;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border: none;
   border-radius: 4px;
@@ -1873,7 +1873,7 @@ tr:hover {
 }
 
 .action-btn:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 /* Products Specific */
@@ -1901,7 +1901,7 @@ tr:hover {
 .search-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .product-thumb {
@@ -1928,7 +1928,7 @@ tr:hover {
 
 .edit-btn,
 .view-btn {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border: none;
   padding: 0.5rem 0.75rem;
@@ -1948,7 +1948,7 @@ tr:hover {
 
 .edit-btn:hover,
 .view-btn:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .delete-btn:hover {
@@ -2062,7 +2062,7 @@ tr:hover {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .checkbox-option {
@@ -2128,12 +2128,12 @@ tr:hover {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

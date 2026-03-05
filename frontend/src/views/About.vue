@@ -376,7 +376,7 @@ export default {
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 6rem 2rem;
   text-align: center;
@@ -471,7 +471,7 @@ export default {
 /* Stats Section */
 .stats-section {
   padding: 4rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
 }
 
@@ -564,7 +564,7 @@ export default {
 }
 
 .member-role {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
   margin: 0 1rem 0.5rem 1rem;
 }
@@ -588,7 +588,7 @@ export default {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
@@ -598,7 +598,7 @@ export default {
 }
 
 .social-link:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
   transform: translateY(-3px);
 }
 
@@ -624,7 +624,7 @@ export default {
   background: white;
   padding: 2rem;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.3s;
 }
@@ -804,7 +804,7 @@ export default {
   transform: translateX(-50%);
   width: 2px;
   height: 100%;
-  background-color: #667eea;
+  background-color: var(--color-accent);
 }
 
 .timeline-item {
@@ -827,10 +827,10 @@ export default {
   position: relative;
   width: 16px;
   height: 16px;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   border: 4px solid white;
   border-radius: 50%;
-  box-shadow: 0 0 0 4px #667eea;
+  box-shadow: 0 0 0 4px var(--color-accent);
   justify-self: end;
 }
 
@@ -842,18 +842,18 @@ export default {
   padding: 1.5rem;
   background: white;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .timeline-item:nth-child(even) .timeline-content {
   border-left: none;
-  border-right: 4px solid #667eea;
+  border-right: 4px solid var(--color-accent);
 }
 
 .timeline-content h3 {
   margin: 0 0 0.5rem 0;
-  color: #667eea;
+  color: var(--color-accent);
   font-size: 1.3rem;
 }
 
@@ -866,7 +866,7 @@ export default {
 /* Contact CTA Section */
 .contact-cta {
   padding: 4rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   text-align: center;
 }
@@ -896,7 +896,7 @@ export default {
 
 .btn-primary {
   background-color: white;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .btn-primary:hover {
@@ -949,12 +949,12 @@ export default {
   }
 
   .timeline-content {
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--color-accent);
     border-right: none;
   }
 
   .timeline-item:nth-child(even) .timeline-content {
-    border-left: 4px solid #667eea;
+    border-left: 4px solid var(--color-accent);
     border-right: none;
   }
 

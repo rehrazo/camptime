@@ -640,12 +640,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -681,7 +681,7 @@ export default {
 .rating-number {
   font-size: 3rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   margin-bottom: 0.5rem;
 }
 
@@ -741,7 +741,7 @@ export default {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, var(--color-accent), #764ba2);
   transition: width 0.3s;
 }
 
@@ -812,13 +812,13 @@ export default {
 }
 
 .star-btn:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
   color: #ffc107;
 }
 
 .star-btn.active {
-  background-color: #667eea;
-  border-color: #667eea;
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
   color: #ffc107;
 }
 
@@ -833,7 +833,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -860,7 +860,7 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .checkbox-option input:disabled {
@@ -1019,7 +1019,7 @@ export default {
 .aspect-tag {
   display: inline-block;
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -1050,14 +1050,14 @@ export default {
 }
 
 .helpful-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .helpful-btn.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .report-btn {
@@ -1070,7 +1070,7 @@ export default {
 }
 
 .report-btn:hover {
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .no-reviews {
@@ -1099,9 +1099,9 @@ export default {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .pagination-btn:disabled {
@@ -1127,13 +1127,13 @@ export default {
 }
 
 .page-number:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .page-number.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 @media (max-width: 768px) {

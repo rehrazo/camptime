@@ -468,7 +468,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -500,7 +500,7 @@ export default {
 
 .radio-option:hover,
 .checkbox-option:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
   background-color: #f9f9f9;
 }
 
@@ -514,7 +514,7 @@ export default {
 
 .radio-option input[type="radio"]:checked,
 .checkbox-option input[type="checkbox"]:checked {
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .option-text {
@@ -529,7 +529,7 @@ export default {
 }
 
 .option-price {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -560,13 +560,13 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   margin-top: 1rem;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-large {
@@ -615,7 +615,7 @@ export default {
 
 .item-price {
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .summary-divider {
@@ -634,7 +634,7 @@ export default {
 .summary-row.total {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   padding-top: 1rem;
   margin-bottom: 1.5rem;
 }

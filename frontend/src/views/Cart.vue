@@ -244,13 +244,13 @@ export default {
 }
 
 .item-sku {
-  color: #2F4F3E;
+  color: var(--color-forest);
   font-size: 0.85rem;
   margin: 0.25rem 0;
 }
 
 .item-price {
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: 600;
   margin: 0.5rem 0 0 0;
 }
@@ -288,7 +288,7 @@ export default {
 
 .item-total {
   font-weight: 600;
-  color: #667eea;
+  color: var(--color-accent);
   text-align: right;
 }
 
@@ -334,7 +334,7 @@ export default {
   border-bottom: none;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--color-accent);
   margin-bottom: 1.5rem;
   padding-bottom: 0;
 }
@@ -379,12 +379,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

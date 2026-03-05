@@ -75,7 +75,7 @@ export default {
 
 h1 {
   margin: 0 0 0.75rem;
-  color: #2B2B2B;
+    color: var(--color-forest);
 }
 
 .intro {
@@ -92,7 +92,7 @@ section {
 
 h2 {
   margin: 0 0 0.6rem;
-  color: #2F4F3E;
+  color: var(--color-forest);
   font-size: 1.15rem;
 }
 

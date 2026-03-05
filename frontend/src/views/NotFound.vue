@@ -94,7 +94,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   padding: 2rem;
 }
 
@@ -111,7 +111,7 @@ export default {
 .error-code {
   font-size: 6rem;
   font-weight: 900;
-  color: #667eea;
+  color: var(--color-accent);
   margin-bottom: 0.5rem;
   line-height: 1;
 }
@@ -188,7 +188,7 @@ export default {
 }
 
 .link-card:hover {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   transform: translateY(-4px);
 }
@@ -230,7 +230,7 @@ export default {
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -239,7 +239,7 @@ export default {
   padding: 1.5rem;
   background-color: #e8f0ff;
   border-radius: 8px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid var(--color-accent);
 }
 
 .support-section h3 {
@@ -254,7 +254,7 @@ export default {
 }
 
 .support-section a {
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 600;
 }
@@ -278,12 +278,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
   transform: translateY(-2px);
 }
 

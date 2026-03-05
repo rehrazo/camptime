@@ -364,7 +364,7 @@ export default {
 
 /* Header */
 .faq-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
@@ -405,7 +405,7 @@ export default {
 
 .faq-search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -462,11 +462,11 @@ export default {
 
 .category-btn:hover {
   background-color: #f0f0f0;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .category-btn.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -508,12 +508,12 @@ export default {
 
 .faq-question:hover {
   background-color: #f9f9f9;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .faq-question.active {
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .faq-icon {
@@ -522,7 +522,7 @@ export default {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   border-radius: 50%;
   font-weight: 700;
@@ -578,7 +578,7 @@ export default {
   content: '✓';
   position: absolute;
   left: 0;
-  color: #667eea;
+  color: var(--color-accent);
   font-weight: bold;
 }
 
@@ -604,7 +604,7 @@ export default {
 }
 
 .related-links a {
-  color: #667eea;
+  color: var(--color-accent);
   text-decoration: none;
   font-weight: 500;
 }
@@ -689,12 +689,12 @@ export default {
 }
 
 .btn-secondary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-secondary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 /* Feedback Section */
@@ -740,8 +740,8 @@ export default {
 }
 
 .feedback-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .feedback-btn.yes:hover {

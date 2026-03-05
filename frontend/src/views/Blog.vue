@@ -479,7 +479,7 @@ export default {
 
 /* Header */
 .blog-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
@@ -521,7 +521,7 @@ export default {
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -550,7 +550,7 @@ export default {
 
 .filter-select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 /* Posts Container */
@@ -588,7 +588,7 @@ export default {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -606,7 +606,7 @@ export default {
 .post-category {
   display: inline-block;
   background-color: #e8f0ff;
-  color: #667eea;
+  color: var(--color-accent);
   padding: 0.5rem 1rem;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -656,12 +656,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {
@@ -783,9 +783,9 @@ export default {
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .pagination-btn:disabled {
@@ -811,18 +811,18 @@ export default {
 }
 
 .page-number:hover {
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .page-number.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 /* Newsletter Section */
 .newsletter-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #764ba2 100%);
   color: white;
   padding: 3rem 2rem;
   text-align: center;
@@ -905,14 +905,14 @@ export default {
 }
 
 .tag:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 .tag.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 @media (max-width: 768px) {

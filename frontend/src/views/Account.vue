@@ -620,7 +620,7 @@ export default {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid #667eea;
+  border: 3px solid var(--color-accent);
 }
 
 .user-profile h2 {
@@ -663,11 +663,11 @@ export default {
 
 .menu-item:hover {
   background-color: #f0f0f0;
-  color: #667eea;
+  color: var(--color-accent);
 }
 
 .menu-item.active {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
@@ -706,7 +706,7 @@ export default {
   margin-top: 0;
   margin-bottom: 1.5rem;
   color: #333;
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid var(--color-accent);
   padding-bottom: 0.5rem;
 }
 
@@ -755,7 +755,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -771,7 +771,7 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .radio-option {
@@ -786,7 +786,7 @@ export default {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--color-accent);
 }
 
 .help-text {
@@ -970,12 +970,12 @@ export default {
 }
 
 .btn-primary {
-  background-color: #667eea;
+  background-color: var(--color-accent);
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #5568d3;
+  background-color: var(--color-accent-dark);
 }
 
 .btn-secondary {

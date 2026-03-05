@@ -208,7 +208,7 @@ export default {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--color-accent);
 }
 
 .count {
@@ -249,7 +249,7 @@ export default {
 .edit-btn {
   border: none;
   border-radius: 4px;
-  background: #667eea;
+  background: var(--color-accent);
   color: #fff;
   padding: 0.45rem 0.75rem;
   font-weight: 600;
@@ -277,7 +277,7 @@ export default {
 }
 
 .btn-primary {
-  background-color: #2F4F3E;
+  background-color: var(--color-forest);
   color: var(--color-sand);
 }
 

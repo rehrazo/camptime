@@ -1,11 +1,16 @@
 <template>
   <div class="product-management">
     <!-- Header -->
-    <div class="management-header">
-      <h1>Product Management</h1>
-      <button @click="showProductEditor = true" class="btn btn-primary">
-        + Add Product
-      </button>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
+        <h1>Product Management</h1>
+        <p class="admin-page-subtitle">Manage products, pricing, tax groups, and shipping groups.</p>
+      </div>
+      <div class="admin-page-actions">
+        <button @click="showProductEditor = true" class="btn btn-primary">
+          + Add Product
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -734,18 +739,6 @@ export default {
   max-width: 1600px;
   margin: 0 auto;
   padding: 2rem;
-}
-
-.management-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.management-header h1 {
-  margin: 0;
-  color: #333;
 }
 
 .product-filters {

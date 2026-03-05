@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const XLSX = require('xlsx');
+const { requireAdminAuthIfConfigured } = require('../middleware/adminAuth');
 
 const router = express.Router();
 
@@ -203,7 +204,7 @@ router.post('/', (req, res) => {
   }
 });
 
-router.post('/export/doba', (req, res) => {
+router.post('/export/doba', requireAdminAuthIfConfigured, (req, res) => {
   try {
     const orderIds = Array.isArray(req.body?.orderIds)
       ? req.body.orderIds.map((value) => String(value || '').trim()).filter(Boolean)
@@ -257,7 +258,7 @@ router.post('/export/doba', (req, res) => {
   }
 });
 
-router.post('/lifecycle/update', (req, res) => {
+router.post('/lifecycle/update', requireAdminAuthIfConfigured, (req, res) => {
   const orderIds = Array.isArray(req.body?.orderIds)
     ? req.body.orderIds.map((value) => String(value || '').trim()).filter(Boolean)
     : [];

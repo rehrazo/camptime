@@ -1,6 +1,9 @@
 # Node.js
 node_modules/
 package-lock.json
+frontend/dist/
+backend/uploads/
+uploads/
 
 # IDE
 .idea/

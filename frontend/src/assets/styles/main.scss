@@ -121,3 +121,43 @@ input, textarea, select {
 .p-2 { padding: 1rem; }
 .p-3 { padding: 1.5rem; }
 .p-4 { padding: 2rem; }
+
+/* Admin page top layout */
+.admin-page-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-page-heading h1 {
+  margin: 0;
+  line-height: 1.15;
+}
+
+.admin-page-subtitle {
+  margin: 0.35rem 0 0;
+  color: #555;
+}
+
+.admin-page-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .admin-page-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-page-actions {
+    width: 100%;
+  }
+
+  .admin-page-actions .btn {
+    flex: 1;
+  }
+}

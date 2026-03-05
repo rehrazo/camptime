@@ -1,11 +1,11 @@
 <template>
   <div class="admin-product-edit">
-    <div class="page-header">
-      <div>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
         <h1>{{ isCreateMode ? 'Create Product' : 'Edit Product' }}</h1>
-        <p class="subtitle">Update product fields used by storefront UI</p>
+        <p class="admin-page-subtitle">Update product fields used by storefront UI</p>
       </div>
-      <div class="actions">
+      <div class="admin-page-actions">
         <button class="btn btn-secondary" @click="goBackToList" :disabled="saving">Cancel</button>
         <button class="btn btn-primary" @click="saveProduct" :disabled="saving || loading">
           {{ saving ? 'Saving...' : isCreateMode ? 'Create Product' : 'Save Product' }}
@@ -607,26 +607,9 @@ export default {
   padding: 2rem;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
 .subtitle {
   margin: 0.35rem 0 0;
   color: #555;
-}
-
-.actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .form-card {
@@ -863,14 +846,6 @@ export default {
 }
 
 @media (max-width: 980px) {
-  .page-header {
-    flex-direction: column;
-  }
-
-  .actions {
-    width: 100%;
-  }
-
   .image-add-row {
     flex-direction: column;
     align-items: stretch;
@@ -879,10 +854,6 @@ export default {
   .variation-header,
   .variation-row {
     grid-template-columns: 1fr;
-  }
-
-  .actions .btn {
-    flex: 1;
   }
 }
 </style>

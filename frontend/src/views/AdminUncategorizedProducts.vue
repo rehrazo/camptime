@@ -1,12 +1,11 @@
 <template>
   <div class="admin-uncategorized-products">
-    <div class="page-header">
-      <div>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
         <h1>Uncategorized Products</h1>
-        <p class="subtitle">Products missing a category assignment (`category_id` is null).</p>
+        <p class="admin-page-subtitle">Products missing a category assignment (`category_id` is null).</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" @click="goBack">Back to Admin</button>
+      <div class="admin-page-actions">
         <button class="btn btn-primary" @click="loadProducts" :disabled="loading">Refresh</button>
       </div>
     </div>
@@ -83,10 +82,6 @@ export default {
       })
     })
 
-    const goBack = () => {
-      router.push({ path: '/admin', query: { tab: 'products' } })
-    }
-
     const loadProducts = async () => {
       loading.value = true
       error.value = ''
@@ -142,7 +137,6 @@ export default {
       products,
       search,
       filteredProducts,
-      goBack,
       loadProducts,
       openEdit,
     }
@@ -155,28 +149,6 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.subtitle {
-  margin-top: 0.35rem;
-  color: #555;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .controls {
@@ -292,7 +264,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .page-header,
   .controls {
     flex-direction: column;
     align-items: stretch;

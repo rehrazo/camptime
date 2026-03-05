@@ -1,18 +1,14 @@
 <template>
   <div class="product-category-mover">
-    <div class="page-header">
-      <div>
-        <h1>Product Category Mover</h1>
-        <p class="subtitle">Pick a source category, then drag products onto a destination category in the tree.</p>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
+        <h1>Category Product Mover</h1>
+        <p class="admin-page-subtitle">Pick a source category, then drag products onto a destination category in the tree.</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" @click="goBack">Back to Admin</button>
+      <div class="admin-page-actions">
         <button class="btn btn-primary" @click="loadInitialData" :disabled="loading">Refresh</button>
       </div>
     </div>
-
-    <p v-if="error" class="error-message">{{ error }}</p>
-    <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
 
     <div class="controls">
       <div class="form-group">
@@ -29,6 +25,10 @@
         <input id="productSearch" v-model="productSearch" type="text" class="form-input" placeholder="Search name or SKU" />
       </div>
     </div>
+    <p v-if="error" class="error-message">{{ error }}</p>
+    <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+
+    
 
     <div class="layout">
       <section class="panel category-tree-panel">
@@ -49,7 +49,19 @@
             @dragleave="onCategoryDragLeave(category)"
             @drop.prevent="onCategoryDrop(category)"
           >
-            <span class="tree-name">{{ category.name }}</span>
+            <div class="tree-row-main">
+              <button
+                v-if="category.hasChildren"
+                type="button"
+                class="collapse-btn"
+                :aria-label="isCategoryCollapsed(category) ? 'Expand category' : 'Collapse category'"
+                @click.stop="toggleCategoryCollapse(category)"
+              >
+                {{ isCategoryCollapsed(category) ? '▸' : '▾' }}
+              </button>
+              <span v-else class="collapse-spacer" aria-hidden="true"></span>
+              <span class="tree-name">{{ category.name }}</span>
+            </div>
             <span class="tree-path">{{ category.path }}</span>
           </div>
         </div>
@@ -87,12 +99,10 @@
 
 <script>
 import { computed, nextTick, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 export default {
   name: 'ProductCategoryMover',
   setup() {
-    const router = useRouter()
     const loading = ref(false)
     const productsLoading = ref(false)
     const error = ref('')
@@ -101,7 +111,9 @@ export default {
     const productSearch = ref('')
 
     const categoryTree = ref([])
+    const allCategoryRows = ref([])
     const flatCategoryRows = ref([])
+    const collapsedCategoryIds = ref(new Set())
     const draggedProduct = ref(null)
     const dropTargetCategoryId = ref(null)
     const products = ref([])
@@ -110,7 +122,7 @@ export default {
     const placeholderImage = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="%23e8ecf5"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="18">%F0%9F%93%A6</text></svg>'
 
     const flatCategoryOptions = computed(() => {
-      return flatCategoryRows.value.map((category) => ({
+      return allCategoryRows.value.map((category) => ({
         ...category,
         label: `${'— '.repeat(category.depth)}${category.name}`,
       }))
@@ -137,14 +149,55 @@ export default {
           path: node.path,
           parent_id: node.parent_id,
           depth,
+          hasChildren: Array.isArray(node.children) && node.children.length > 0,
         }
 
         return [current, ...flattenTree(node.children || [], depth + 1)]
       })
     }
 
-    const goBack = () => {
-      router.push({ path: '/admin', query: { tab: 'products' } })
+    const flattenVisibleTree = (nodes = [], depth = 0) => {
+      return nodes.flatMap((node) => {
+        const hasChildren = Array.isArray(node.children) && node.children.length > 0
+        const current = {
+          category_id: node.category_id,
+          name: node.name,
+          path: node.path,
+          parent_id: node.parent_id,
+          depth,
+          hasChildren,
+        }
+
+        if (!hasChildren || collapsedCategoryIds.value.has(node.category_id)) {
+          return [current]
+        }
+
+        return [current, ...flattenVisibleTree(node.children || [], depth + 1)]
+      })
+    }
+
+    const rebuildVisibleCategoryRows = () => {
+      flatCategoryRows.value = flattenVisibleTree(categoryTree.value)
+    }
+
+    const isCategoryCollapsed = (category) => {
+      return collapsedCategoryIds.value.has(category.category_id)
+    }
+
+    const toggleCategoryCollapse = (category) => {
+      if (!category?.hasChildren) {
+        return
+      }
+
+      const next = new Set(collapsedCategoryIds.value)
+      if (next.has(category.category_id)) {
+        next.delete(category.category_id)
+      } else {
+        next.add(category.category_id)
+      }
+
+      collapsedCategoryIds.value = next
+      rebuildVisibleCategoryRows()
     }
 
     const loadCategories = async () => {
@@ -156,7 +209,9 @@ export default {
       }
 
       categoryTree.value = Array.isArray(data.data) ? data.data : []
-      flatCategoryRows.value = flattenTree(categoryTree.value)
+      allCategoryRows.value = flattenTree(categoryTree.value)
+      collapsedCategoryIds.value = new Set()
+      rebuildVisibleCategoryRows()
 
       if (selectedSourceCategoryId.value === null && flatCategoryRows.value.length > 0) {
         selectedSourceCategoryId.value = flatCategoryRows.value[0].category_id
@@ -220,7 +275,7 @@ export default {
         await loadCategories()
         await loadProductsForSource()
       } catch (loadError) {
-        error.value = loadError.message || 'Failed to initialize product category mover'
+        error.value = loadError.message || 'Failed to initialize category product mover'
       } finally {
         loading.value = false
       }
@@ -314,10 +369,11 @@ export default {
       productSearch,
       flatCategoryRows,
       flatCategoryOptions,
+      isCategoryCollapsed,
+      toggleCategoryCollapse,
       dropTargetCategoryId,
       filteredProducts,
       productListRef,
-      goBack,
       loadInitialData,
       loadProductsForSource,
       onProductDragStart,
@@ -336,28 +392,6 @@ export default {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.subtitle {
-  margin-top: 0.35rem;
-  color: #555;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .controls {
@@ -438,6 +472,34 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+}
+
+.tree-row-main {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.collapse-btn {
+  border: 1px solid #d5dbe7;
+  background: #fff;
+  color: #2f3f5a;
+  border-radius: 4px;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.collapse-spacer {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-block;
 }
 
 .tree-row.active {

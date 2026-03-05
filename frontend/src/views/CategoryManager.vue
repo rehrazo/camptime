@@ -1,12 +1,11 @@
 <template>
   <div class="category-manager">
-    <div class="page-header">
-      <div>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
         <h1>Category Manager</h1>
-        <p class="subtitle">Drag a category and drop it on another category to make it a child.</p>
+        <p class="admin-page-subtitle">Drag a category and drop it on another category to make it a child.</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" @click="goBack">Back to Admin</button>
+      <div class="admin-page-actions">
         <button class="btn btn-primary" @click="loadCategories" :disabled="loading">Refresh</button>
       </div>
     </div>
@@ -69,12 +68,10 @@
 
 <script>
 import { nextTick, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 export default {
   name: 'CategoryManager',
   setup() {
-    const router = useRouter()
     const loading = ref(false)
     const error = ref('')
     const successMessage = ref('')
@@ -87,10 +84,6 @@ export default {
     const rootDropActive = ref(false)
     const descendantsMap = ref(new Map())
     const treeCardRef = ref(null)
-
-    const goBack = () => {
-      router.push({ path: '/admin', query: { tab: 'categories' } })
-    }
 
     const flattenTree = (nodes = [], depth = 0) => {
       return nodes.flatMap((node) => {
@@ -337,7 +330,6 @@ export default {
       rootDropActive,
       treeCardRef,
       getProductCount,
-      goBack,
       loadCategories,
       onDragStart,
       onDragEnd,
@@ -356,29 +348,7 @@ export default {
 .category-manager {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.subtitle {
-  margin-top: 0.35rem;
-  color: #555;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
+  padding: 1.25rem 2rem 2rem;
 }
 
 .drop-root {
@@ -506,7 +476,7 @@ export default {
 }
 
 .btn {
-  padding: 0.65rem 1rem;
+  padding: 0.5rem 0.85rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -529,18 +499,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-  }
-
-  .header-actions {
-    width: 100%;
-  }
-
-  .header-actions .btn {
-    flex: 1;
-  }
-
   .category-row {
     grid-template-columns: 1fr;
     gap: 0.35rem;

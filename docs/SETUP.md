@@ -30,6 +30,16 @@ Before you begin, ensure you have the following installed on your system:
    - `DB_PASSWORD`: Your MySQL password
    - `DB_NAME`: Your database name (default is camptime)
    - `PORT`: The port on which the application will run (default is 5000)
+   - `ADMIN_API_TOKEN`: Required shared token for admin write endpoints (products/categories/import/order export lifecycle)
+
+   For frontend admin writes, copy `frontend/.env.example` to `frontend/.env.local` and set:
+   ```dotenv
+   VITE_ADMIN_API_TOKEN=replace_with_the_same_token_as_ADMIN_API_TOKEN
+   ```
+
+   Notes:
+   - In development, if `ADMIN_API_TOKEN` is missing, protected admin write requests return `500` with a configuration error.
+   - In production, backend startup fails fast when `ADMIN_API_TOKEN` is missing.
    
 ## Database Setup
 1. **MySQL Configuration**: Ensure your MySQL server is running. You can start it with:
@@ -69,6 +79,13 @@ Before you begin, ensure you have the following installed on your system:
 - **Database Connection Errors**: Ensure your MySQL server is running and the credentials in the `.env` file are correct.
 - **Check Logs**: Review application logs for specific error messages that can help in diagnosing issues.
 - **MySQL Connection Issues**: Verify that MySQL is running with `Get-Service MySQL*` in PowerShell.
+- **Admin Auth Readiness**: Check `GET /api/health` and confirm `checks.adminAuthConfigured` is `true`.
+- **CORS Verification**: Check `GET /api/health` and confirm `checks.corsAllowedOrigins` matches expected frontend origins.
+- **Store Health Verification**: Check `GET /api/health` and confirm these are healthy:
+   - `checks.databaseConnected`
+   - `checks.stripeConfigured`
+   - `checks.productsRouteReady`
+   - `checks.categoriesRouteReady`
 
 ## Security Checklist
 - Ensure your MySQL instance is secured (strong passwords, appropriate user privileges, firewall rules).

@@ -21,6 +21,7 @@ import PrivacyPolicy from '../views/PrivacyPolicy.vue'
 import TermsConditions from '../views/TermsConditions.vue'
 import TrackOrder from '../views/TrackOrder.vue'
 import { applyPageSeo, DEFAULT_DESCRIPTION } from '../utils/seo'
+import { useAuthStore } from '../stores/auth'
 
 const routes = [
   {
@@ -158,6 +159,9 @@ const routes = [
   {
     path: '/admin',
     component: AdminLayout,
+    meta: {
+      requiresAuth: true,
+    },
     children: [
       {
         path: '',
@@ -206,6 +210,25 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to) => {
+  const requiresAuth = to.matched.some((record) => Boolean(record.meta?.requiresAuth))
+  if (!requiresAuth) {
+    return true
+  }
+
+  const authStore = useAuthStore()
+  if (authStore.isLoggedIn) {
+    return true
+  }
+
+  return {
+    name: 'Login',
+    query: {
+      redirect: to.fullPath,
+    },
+  }
 })
 
 router.afterEach((to) => {

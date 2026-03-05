@@ -2,69 +2,7 @@
   <div class="admin-dashboard">
     <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
-      <header class="dashboard-header">
-        <div class="admin-brand-row">
-          <div class="logo">
-            <span class="logo-icon">⛺</span>
-            <span class="logo-text">Camptime Admin</span>
-          </div>
-
-          <div class="header-actions">
-            <div class="notification-bell">
-              <button class="bell-btn">🔔</button>
-              <span v-if="notificationCount > 0" class="badge">{{ notificationCount }}</span>
-            </div>
-            <div class="user-profile">
-              <img src="https://i.pravatar.cc/150?img=1" alt="Admin" class="profile-pic" />
-              <div class="user-info">
-                <p class="user-name">John Martinez</p>
-                <p class="user-role">Administrator</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <nav class="header-nav">
-          <button
-            v-for="item in navItems"
-            :key="item.id"
-            @click="activeTab = item.id"
-            class="nav-item"
-            :class="{ active: activeTab === item.id }"
-          >
-            <span class="nav-icon">{{ item.icon }}</span>
-            <span class="nav-text">{{ item.label }}</span>
-          </button>
-          <button class="nav-item" @click="openCategoryManager">
-            <span class="nav-icon">🧩</span>
-            <span class="nav-text">Category Manager</span>
-          </button>
-          <button class="nav-item" @click="openProductCategoryMover">
-            <span class="nav-icon">🧲</span>
-            <span class="nav-text">Product Mover</span>
-          </button>
-          <button class="nav-item" @click="openUncategorizedProducts">
-            <span class="nav-icon">🗃️</span>
-            <span class="nav-text">Uncategorized</span>
-          </button>
-          <button class="nav-item" @click="openOrderExportManager">
-            <span class="nav-icon">📤</span>
-            <span class="nav-text">Order Export</span>
-          </button>
-          <button class="nav-item nav-item-logout">
-            <span class="nav-icon">🚪</span>
-            <span class="nav-text">Logout</span>
-          </button>
-        </nav>
-
-        <div class="header-title">
-          <h1>{{ getCurrentTabName() }}</h1>
-          <p class="subtitle">Manage your Camptime business</p>
-        </div>
-      </header>
-
-      <!-- Tab Content -->
+      <!-- Header Tab Content -->
       <div class="tab-content">
         <!-- Dashboard Overview -->
         <section v-if="activeTab === 'overview'" class="overview-tab">
@@ -115,6 +53,55 @@
                 </div>
               </div>
             </div>
+
+            <div class="chart-card">
+              <h3>System Status</h3>
+              <button class="btn btn-secondary btn-small mb-1" @click="loadSystemHealth" :disabled="healthLoading">
+                {{ healthLoading ? 'Refreshing...' : 'Refresh Status' }}
+              </button>
+              <p v-if="healthLoading" class="subtitle">Checking health...</p>
+              <p v-else-if="healthError" class="import-status">{{ healthError }}</p>
+              <div v-else class="status-list">
+                <div class="status-row">
+                  <span>Admin Auth</span>
+                  <span class="status-pill" :class="healthChecks.adminAuthConfigured ? 'ok' : 'warn'">
+                    {{ healthChecks.adminAuthConfigured ? 'Configured' : 'Missing' }}
+                  </span>
+                </div>
+                <div class="status-row">
+                  <span>Database</span>
+                  <span class="status-pill" :class="healthChecks.databaseConnected ? 'ok' : 'warn'">
+                    {{ healthChecks.databaseConnected ? 'Connected' : 'Unavailable' }}
+                  </span>
+                </div>
+                <div class="status-row">
+                  <span>Stripe</span>
+                  <span class="status-pill" :class="healthChecks.stripeConfigured ? 'ok' : 'warn'">
+                    {{ healthChecks.stripeConfigured ? 'Configured' : 'Missing' }}
+                  </span>
+                </div>
+                <div class="status-row">
+                  <span>Products API</span>
+                  <span class="status-pill" :class="healthChecks.productsRouteReady ? 'ok' : 'warn'">
+                    {{ healthChecks.productsRouteReady ? 'Ready' : 'Check Failed' }}
+                  </span>
+                </div>
+                <div class="status-row">
+                  <span>Categories API</span>
+                  <span class="status-pill" :class="healthChecks.categoriesRouteReady ? 'ok' : 'warn'">
+                    {{ healthChecks.categoriesRouteReady ? 'Ready' : 'Check Failed' }}
+                  </span>
+                </div>
+                <div class="status-row">
+                  <span>CORS Origins</span>
+                  <span class="status-pill ok">{{ healthChecks.corsAllowedOrigins.length }}</span>
+                </div>
+                <p class="subtitle mt-1" v-if="healthChecks.error">{{ healthChecks.error }}</p>
+                <p class="subtitle mt-1" v-if="healthChecks.corsAllowedOrigins.length">
+                  {{ healthChecks.corsAllowedOrigins.join(', ') }}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div class="recent-orders">
@@ -157,7 +144,7 @@
             <div class="action-buttons">
               <button class="btn btn-secondary" @click="openUncategorizedProducts">Uncategorized Products</button>
               <button class="btn btn-primary" @click="openProductCategoryMover">Category Product Mover</button>
-              <button class="btn btn-secondary" @click="loadProducts" :disabled="productsLoading">Refresh</button>
+              <button class="btn btn-primary btn-refresh" @click="loadProducts" :disabled="productsLoading">Refresh</button>
               <button class="btn btn-primary" @click="openCreateProductForm">+ Add Product</button>
             </div>
           </div>
@@ -343,8 +330,7 @@
           <div class="section-header">
             <h2>Categories Management</h2>
             <div class="action-buttons">
-              <button class="btn btn-primary" @click="openCategoryManager">Drag & Drop Manager</button>
-              <button class="btn btn-secondary" @click="loadCategories" :disabled="categoriesLoading">Refresh</button>
+              <button class="btn btn-primary btn-refresh" @click="loadCategories" :disabled="categoriesLoading">Refresh</button>
             </div>
           </div>
 
@@ -721,13 +707,23 @@ export default {
     const categorySortKey = ref('name')
     const categorySortDirection = ref('asc')
     const customerSearch = ref('')
-    const notificationCount = ref(5)
     const importFile = ref(null)
     const importDryRun = ref(true)
     const importLimit = ref(null)
     const importStatus = ref('')
     const importResult = ref(null)
     const importing = ref(false)
+    const healthLoading = ref(false)
+    const healthError = ref('')
+    const healthChecks = ref({
+      adminAuthConfigured: false,
+      corsAllowedOrigins: [],
+      databaseConnected: false,
+      stripeConfigured: false,
+      productsRouteReady: false,
+      categoriesRouteReady: false,
+      error: null,
+    })
 
     const navItems = [
       { id: 'overview', label: 'Dashboard', icon: '📊' },
@@ -788,9 +784,12 @@ export default {
       productsError.value = ''
 
       try {
+        const currentPage = String(productPagination.value.page || 1)
+        const currentLimit = String(productPagination.value.limit || 20)
+
         const params = new URLSearchParams({
-          page: String(productPagination.value.page || 1),
-          limit: String(productPagination.value.limit || 20),
+          page: currentPage,
+          limit: currentLimit,
         })
 
         if (productSearch.value) {
@@ -809,7 +808,32 @@ export default {
           throw new Error(data.error || 'Failed to load products')
         }
 
-        products.value = Array.isArray(data.data) ? data.data : []
+        const items = Array.isArray(data.data) ? data.data : []
+
+        if (categoryId > 0 && items.length === 0) {
+          const fallbackParams = new URLSearchParams({
+            page: currentPage,
+            limit: currentLimit,
+          })
+
+          if (productSearch.value) {
+            fallbackParams.append('search', productSearch.value)
+          }
+
+          const fallbackResponse = await fetch(`/api/products?${fallbackParams.toString()}`)
+          const fallbackData = await fallbackResponse.json().catch(() => ({}))
+
+          if (fallbackResponse.ok && Array.isArray(fallbackData.data) && fallbackData.data.length > 0) {
+            productCategory.value = null
+            products.value = fallbackData.data
+            if (fallbackData.pagination) {
+              productPagination.value = fallbackData.pagination
+            }
+            return
+          }
+        }
+
+        products.value = items
         if (data.pagination) {
           productPagination.value = data.pagination
         }
@@ -1371,6 +1395,8 @@ export default {
       if (activeTab.value === 'categories') {
         await loadCategories()
       }
+
+      await loadSystemHealth()
     })
 
     const onFileSelected = (event) => {
@@ -1417,6 +1443,34 @@ export default {
       }
     }
 
+    const loadSystemHealth = async () => {
+      healthLoading.value = true
+      healthError.value = ''
+
+      try {
+        const response = await fetch('/api/health')
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(payload.error || 'Failed to load system health')
+        }
+
+        const checks = payload?.checks || {}
+        healthChecks.value = {
+          adminAuthConfigured: Boolean(checks.adminAuthConfigured),
+          corsAllowedOrigins: Array.isArray(checks.corsAllowedOrigins) ? checks.corsAllowedOrigins : [],
+          databaseConnected: Boolean(checks.databaseConnected),
+          stripeConfigured: Boolean(checks.stripeConfigured),
+          productsRouteReady: Boolean(checks.productsRouteReady),
+          categoriesRouteReady: Boolean(checks.categoriesRouteReady),
+          error: payload?.error || null,
+        }
+      } catch (error) {
+        healthError.value = error.message || 'Failed to load system health'
+      } finally {
+        healthLoading.value = false
+      }
+    }
+
     return {
       activeTab,
       productSearch,
@@ -1437,12 +1491,14 @@ export default {
       categorySortKey,
       categorySortDirection,
       customerSearch,
-      notificationCount,
       importDryRun,
       importLimit,
       importStatus,
       importResult,
       importing,
+      healthLoading,
+      healthError,
+      healthChecks,
       navItems,
       stats,
       topProducts,
@@ -1472,6 +1528,7 @@ export default {
       openProductCategoryMover,
       openUncategorizedProducts,
       openOrderExportManager,
+      loadSystemHealth,
       onFileSelected,
       runImport,
     }
@@ -1500,11 +1557,6 @@ export default {
   font-weight: 700;
   font-size: 1.3rem;
 }
-
-.logo-icon {
-  font-size: 1.8rem;
-}
-
 
 .header-nav {
   display: flex;
@@ -1550,23 +1602,6 @@ export default {
   overflow: hidden;
 }
 
-/* Header */
-.dashboard-header {
-  background: white;
-  padding: 1.2rem 2rem;
-  border-bottom: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.admin-brand-row {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 .header-title {
   width: 100%;
 }
@@ -1586,65 +1621,6 @@ export default {
   margin-left: auto;
   border-color: #f2c6c6;
   color: #9b2d2d;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.notification-bell {
-  position: relative;
-  cursor: pointer;
-}
-
-.bell-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #e74c3c;
-  color: white;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.profile-pic {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-name {
-  margin: 0;
-  font-weight: 600;
-  color: #333;
-}
-
-.user-role {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #999;
 }
 
 /* Tab Content */
@@ -1735,6 +1711,38 @@ export default {
   gap: 1rem;
 }
 
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-pill.ok {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-pill.warn {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
 .product-row {
   display: flex;
   justify-content: space-between;
@@ -1764,21 +1772,25 @@ export default {
   overflow: hidden;
 }
 
-.recent-orders h3,
-.section-header h2 {
+.recent-orders h3 {
   padding: 1.5rem;
   padding-bottom: 0.75rem;
   margin-bottom: 0;
   color: #333;
 }
 
+.section-header h2,
+.section-header h3 {
+  margin: 0;
+  line-height: 1.15;
+  color: #333;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px 8px 0 0;
+  align-items: flex-start;
+  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -1892,6 +1904,18 @@ tr:hover {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.products-controls .search-input,
+.products-controls .filter-select,
+.products-controls .form-input:not(textarea),
+.products-controls .btn {
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.products-controls .btn {
+  align-self: flex-end;
 }
 
 .search-input {
@@ -2136,6 +2160,15 @@ tr:hover {
   background-color: var(--color-accent-dark);
 }
 
+.btn-refresh {
+  background-color: var(--color-forest);
+  color: var(--color-sand);
+}
+
+.btn-refresh:hover {
+  background-color: #549841;
+}
+
 .btn-secondary {
   background-color: #f0f0f0;
   color: #333;
@@ -2178,27 +2211,30 @@ tr:hover {
     grid-template-columns: 1fr;
   }
 
+  .section-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-header .action-buttons {
+    width: 100%;
+  }
+
+  .section-header .action-buttons .btn {
+    flex: 1;
+  }
+
+  .section-header > .search-input,
+  .section-header > .filter-select {
+    width: 100%;
+  }
+
   table {
     font-size: 0.85rem;
   }
 
   th, td {
     padding: 0.75rem;
-  }
-
-  .dashboard-header {
-    padding: 1rem 1rem;
-  }
-
-  .admin-brand-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: space-between;
   }
 
   .header-nav {

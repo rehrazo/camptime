@@ -11,10 +11,55 @@ const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
+const { requireAdminAuthIfConfigured } = require('./middleware/adminAuth');
 
 dotenv.config();
 
 const app = express();
+
+function enforceStartupSecurityConfig() {
+  const nodeEnv = String(process.env.NODE_ENV || 'development').toLowerCase();
+  const adminToken = String(process.env.ADMIN_API_TOKEN || '').trim();
+
+  console.log(`[security] CORS allowed origins: ${corsAllowedOrigins.join(', ') || '(none configured)'}`);
+
+  if (adminToken) {
+    console.log('[security] ADMIN_API_TOKEN is configured. Admin write protection is enabled.');
+    return;
+  }
+
+  const message = '[security] ADMIN_API_TOKEN is not set. Admin write routes will return 500 until configured.';
+
+  if (nodeEnv === 'production') {
+    console.error(`${message} Refusing to start in production.`);
+    process.exit(1);
+    return;
+  }
+
+  console.warn(message);
+}
+
+const corsAllowedOrigins = String(process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:3001')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (corsAllowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('CORS not allowed for this origin'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-token'],
+};
 
 function escapeXml(value) {
   return String(value || '')
@@ -59,7 +104,7 @@ const upload = multer({
 });
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -81,8 +126,46 @@ app.get('/', (req, res) => {
   res.json({ message: 'Camptime Backend API', version: '1.0.0', health: '/api/health' });
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Server is running' });
+app.get('/api/health', async (req, res) => {
+  const adminAuthConfigured = Boolean(String(process.env.ADMIN_API_TOKEN || '').trim());
+  const stripeConfigured = Boolean(String(process.env.STRIPE_SECRET_KEY || '').trim());
+
+  let databaseConnected = false;
+  let productsRouteReady = false;
+  let categoriesRouteReady = false;
+  let dbError = null;
+
+  try {
+    await pool.query('SELECT 1');
+    databaseConnected = true;
+
+    const [[productsCountRow]] = await pool.execute('SELECT COUNT(*) AS total FROM products');
+    productsRouteReady = Number.isFinite(Number(productsCountRow?.total));
+
+    const [[categoriesCountRow]] = await pool.execute('SELECT COUNT(*) AS total FROM categories');
+    categoriesRouteReady = Number.isFinite(Number(categoriesCountRow?.total));
+  } catch (error) {
+    dbError = error.message || 'Database check failed';
+  }
+
+  const checks = {
+    adminAuthConfigured,
+    corsAllowedOrigins,
+    databaseConnected,
+    stripeConfigured,
+    productsRouteReady,
+    categoriesRouteReady,
+  };
+
+  const allHealthy = Object.entries(checks)
+    .filter(([key]) => key !== 'corsAllowedOrigins')
+    .every(([, value]) => value === true);
+
+  res.status(allHealthy ? 200 : 503).json({
+    status: allHealthy ? 'ok' : 'degraded',
+    checks,
+    error: dbError,
+  });
 });
 
 app.get('/robots.txt', (req, res) => {
@@ -150,7 +233,7 @@ app.get('/sitemap.xml', async (req, res) => {
   }
 });
 
-app.post('/api/admin/import-products', upload.single('csvFile'), async (req, res) => {
+app.post('/api/admin/import-products', requireAdminAuthIfConfigured, upload.single('csvFile'), async (req, res) => {
   const uploadedFile = req.file;
 
   if (!uploadedFile) {
@@ -178,8 +261,8 @@ app.post('/api/admin/import-products', upload.single('csvFile'), async (req, res
 
 // Import routes (to be created)
 // app.use('/api/auth', require('./routes/auth')); 
-app.use('/api/products', productsRouter);
-app.use('/api/categories', categoriesRouter);
+app.use('/api/products', requireAdminAuthIfConfigured, productsRouter);
+app.use('/api/categories', requireAdminAuthIfConfigured, categoriesRouter);
 // app.use('/api/cart', require('./routes/cart')); 
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
@@ -191,6 +274,8 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
+enforceStartupSecurityConfig();
 
 app.listen(PORT, () => {
   console.log(`Camptime Backend Server running on port ${PORT}`);

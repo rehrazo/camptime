@@ -1,13 +1,12 @@
 <template>
   <div class="admin-order-export-manager">
-    <div class="page-header">
-      <div>
+    <div class="admin-page-top">
+      <div class="admin-page-heading">
         <h1>Order Export Manager</h1>
-        <p class="subtitle">Export orders to Doba template and track lifecycle statuses.</p>
+        <p class="admin-page-subtitle">Export orders to Doba template and track lifecycle statuses.</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-secondary" @click="goBack">Back to Admin</button>
-        <button class="btn btn-secondary" @click="loadOrders" :disabled="loading">Refresh</button>
+      <div class="admin-page-actions">
+        <button class="btn btn-primary" @click="loadOrders" :disabled="loading">Refresh</button>
       </div>
     </div>
 
@@ -77,12 +76,10 @@
 
 <script>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 export default {
   name: 'AdminOrderExportManager',
   setup() {
-    const router = useRouter()
     const loading = ref(false)
     const isBusy = ref(false)
     const error = ref('')
@@ -111,10 +108,6 @@ export default {
       }
       return filteredOrders.value.every((order) => selectedOrderIds.value.includes(order.orderId))
     })
-
-    const goBack = () => {
-      router.push({ path: '/admin', query: { tab: 'orders' } })
-    }
 
     const loadOrders = async () => {
       loading.value = true
@@ -200,7 +193,7 @@ export default {
         }
 
         const disposition = response.headers.get('Content-Disposition') || ''
-        const fileNameMatch = disposition.match(/filename="?([^\"]+)"?/i)
+        const fileNameMatch = disposition.match(/filename="?([^"]+)"?/i)
         const fileName = fileNameMatch?.[1] || 'doba_orders.xls'
         const blob = await response.blob()
         downloadBlob(blob, fileName)
@@ -292,7 +285,6 @@ export default {
       filteredOrders,
       selectedOrderIds,
       allVisibleSelected,
-      goBack,
       loadOrders,
       toggleSelect,
       toggleSelectAll,
@@ -312,28 +304,6 @@ export default {
   max-width: 1300px;
   margin: 0 auto;
   padding: 2rem;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.page-header h1 {
-  margin: 0;
-}
-
-.subtitle {
-  margin-top: 0.35rem;
-  color: #555;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
 }
 
 .toolbar {

@@ -11,6 +11,7 @@
     "dev:admin:frontend": "cd frontend && npm run dev:admin",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm run dev:storefront",
+    "restart:all": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/restart-all.ps1",
     "ports:check": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/check-ports.ps1",
     "ports:kill": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/kill-ports.ps1",
     "build": "cd frontend && npm run build"

@@ -127,9 +127,9 @@
 <script>
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useCartStore } from '../stores/cart'
+import { useCartStore } from '../../stores/cart'
 import DOMPurify from 'dompurify'
-import { applyPageSeo, setJsonLd, clearJsonLd } from '../utils/seo'
+import { applyPageSeo, setJsonLd, clearJsonLd } from '../../utils/seo'
 
 export default {
   name: 'ProductDetail',

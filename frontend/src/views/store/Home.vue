@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import homeBanner from '../assets/images/site/home_page_banner_cropped.jpg'
+import homeBanner from '../../assets/images/site/home_page_banner_cropped.jpg'
 
 const defaultRoute = '/products'
 

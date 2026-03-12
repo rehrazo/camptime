@@ -123,7 +123,7 @@
 <script>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useCartStore } from '../stores/cart'
+import { useCartStore } from '../../stores/cart'
 
 export default {
   name: 'OrderConfirmation',

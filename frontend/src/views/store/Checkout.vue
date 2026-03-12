@@ -206,7 +206,7 @@
 <script>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCartStore } from '../stores/cart'
+import { useCartStore } from '../../stores/cart'
 import { loadStripe } from '@stripe/stripe-js'
 
 export default {

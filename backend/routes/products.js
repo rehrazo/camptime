@@ -197,6 +197,8 @@ router.get('/', async (req, res) => {
     const page = Math.max(1, toNumber(req.query.page, 1));
     const limit = Math.min(100, Math.max(1, toNumber(req.query.limit, 20)));
     const offset = (page - 1) * limit;
+    const safeLimit = Math.trunc(limit);
+    const safeOffset = Math.max(0, Math.trunc(offset));
     const search = req.query.search ? `%${req.query.search}%` : null;
     const category = req.query.category || null;
     const categoryId = toNumber(req.query.category_id);
@@ -261,8 +263,8 @@ router.get('/', async (req, res) => {
        LEFT JOIN categories c ON c.category_id = p.category_id
        ${whereSql}
        ORDER BY p.updated_at DESC
-       LIMIT ? OFFSET ?`,
-      [...params, limit, offset]
+       LIMIT ${safeLimit} OFFSET ${safeOffset}`,
+      params
     );
 
     const [[countRow]] = await pool.execute(

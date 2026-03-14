@@ -4,18 +4,18 @@
       <div class="top-header-inner">
         <span class="top-header-label">Follow Us</span>
         <div class="social-links">
-          <a href="https://x.com/itscamptime" target="_blank" rel="noopener noreferrer">Twitter</a>
-          <a href="https://www.facebook.com/itscamptime" target="_blank" rel="noopener noreferrer">Facebook</a>
-          <a href="https://www.pinterest.com/itscamptime/" target="_blank" rel="noopener noreferrer">Pinterest</a>
-          <a href="https://www.instagram.com/itscamptime" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://www.youtube.com/@ItsCampTime" target="_blank" rel="noopener noreferrer">YouTube</a>
+          <a href="https://x.com/razowild" target="_blank" rel="noopener noreferrer">Twitter</a>
+          <a href="https://www.facebook.com/razowild" target="_blank" rel="noopener noreferrer">Facebook</a>
+          <a href="https://www.pinterest.com/razowild/" target="_blank" rel="noopener noreferrer">Pinterest</a>
+          <a href="https://www.instagram.com/razowild" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@razowild" target="_blank" rel="noopener noreferrer">YouTube</a>
         </div>
       </div>
     </div>
 
     <nav class="navbar">
       <div class="navbar-brand">
-        <router-link to="/">It's Camp Time</router-link>
+        <router-link to="/">Razo Wild</router-link>
       </div>
 
       <form class="navbar-search" @submit.prevent="submitHeaderSearch">
@@ -102,16 +102,16 @@
 
         <div class="footer-column">
           <h4>Connect With Us</h4>
-          <a href="https://x.com/itscamptime" target="_blank" rel="noopener noreferrer">Twitter</a>
-          <a href="https://www.facebook.com/itscamptime" target="_blank" rel="noopener noreferrer">Facebook</a>
-          <a href="https://www.pinterest.com/itscamptime/" target="_blank" rel="noopener noreferrer">Pinterest</a>
-          <a href="https://www.instagram.com/itscamptime" target="_blank" rel="noopener noreferrer">Instagram</a>
-          <a href="https://www.youtube.com/@ItsCampTime" target="_blank" rel="noopener noreferrer">YouTube</a>
+          <a href="https://x.com/razowild" target="_blank" rel="noopener noreferrer">Twitter</a>
+          <a href="https://www.facebook.com/razowild" target="_blank" rel="noopener noreferrer">Facebook</a>
+          <a href="https://www.pinterest.com/razowild/" target="_blank" rel="noopener noreferrer">Pinterest</a>
+          <a href="https://www.instagram.com/razowild" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.youtube.com/@razowild" target="_blank" rel="noopener noreferrer">YouTube</a>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>&copy; {{ currentYear }} It's Camp Time. All rights reserved.</p>
+        <p>&copy; {{ currentYear }} Razo Wild. All rights reserved.</p>
       </div>
     </footer>
   </div>

@@ -3,7 +3,7 @@
     <section class="hero" :style="heroStyle">
       <div class="hero-overlay"></div>
       <div class="hero-content container">
-        <p class="hero-brand">IT'S CAMP TIME</p>
+        <p class="hero-brand">RAZO WILD</p>
         <h1>PACK UP. HEAD OUT. CAMP ON.</h1>
         <p>Premium camping, hiking, and outdoor essentials built for every adventure.</p>
         <router-link to="/products" class="btn btn-primary">Shop Now</router-link>
@@ -27,10 +27,10 @@
 
     <section class="welcome-section">
       <div class="container welcome-content">
-        <h2>Welcome to It's Camp Time</h2>
+        <h2>Welcome to Razo Wild</h2>
         <p>
-          Here at It's Camp Time, our mission is to deliver a fast, user-friendly shopping experience
-          with high-quality camping products at fair prices.
+          Here at Razo Wild, our mission is to deliver a fast, user-friendly shopping experience
+          with high-quality outdoor products at fair prices.
         </p>
         <p class="promise">We promise the highest quality camping products.</p>
       </div>

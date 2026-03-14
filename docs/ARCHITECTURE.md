@@ -1,4 +1,4 @@
-# Architecture Documentation for Camptime
+# Architecture Documentation for Razo Wild
 
 ## Technology Stack
 - **Frontend:** Vue 3, Vue Router, Pinia, Axios, Vite
@@ -10,7 +10,7 @@
 
 ## Project Structure
 ```
-camptime/
+razowild/
 ├── backend/
 │   ├── routes/            # API route handlers (auth, products, categories, orders, payments)
 │   ├── middleware/        # Auth/authorization middleware
@@ -65,4 +65,4 @@ camptime/
 - Nginx handles TLS termination and reverse proxying to internal services on ports `3000`, `3001`, and `4000`.
 
 ### Conclusion
-This document reflects the current Camptime architecture. Keep it updated as routes, services, and infrastructure evolve.
+This document reflects the current Razo Wild architecture. Keep it updated as routes, services, and infrastructure evolve.

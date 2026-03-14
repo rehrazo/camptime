@@ -1,6 +1,6 @@
-# Camptime
+# Razo Wild
 
-Camptime is an e-commerce storefront and admin platform for camping and outdoor products.
+Razo Wild is an e-commerce storefront and admin platform for outdoor and adventure products.
 
 ## Technology Stack
 - **Frontend:** Vue 3, Vue Router, Pinia, Vite

@@ -3,11 +3,11 @@
 ## Common commands
 
 ```bash
-cd /var/www/camptime
+cd /var/www/razowild
 pm2 status
-pm2 logs camptime-api --lines 200
-pm2 logs camptime-storefront --lines 200
-pm2 logs camptime-admin --lines 200
+pm2 logs razowild-api --lines 200
+pm2 logs razowild-storefront --lines 200
+pm2 logs razowild-admin --lines 200
 sudo systemctl status nginx
 sudo tail -n 200 /var/log/nginx/error.log
 curl -s http://127.0.0.1:4000/api/health
@@ -18,8 +18,8 @@ curl -s http://127.0.0.1:4000/api/health
 Use this order to minimize user impact:
 
 1. `npm --prefix frontend run build`
-2. `pm2 restart camptime-storefront camptime-admin`
-3. `pm2 restart camptime-api`
+2. `pm2 restart razowild-storefront razowild-admin`
+3. `pm2 restart razowild-api`
 
 ## Incident quick triage
 

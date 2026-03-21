@@ -50,7 +50,7 @@
 
       <div class="support-section">
         <h3>Need Help?</h3>
-        <p>Contact our support team at <a href="mailto:support@camptime.com">support@camptime.com</a></p>
+        <p>Contact our support team at <a href="mailto:support@razowild.com">support@razowild.com</a></p>
         <p>Or call us at <a href="tel:1-800-CAMP-TIME">1-800-CAMP-TIME</a></p>
       </div>
 

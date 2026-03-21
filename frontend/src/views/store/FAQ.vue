@@ -95,7 +95,7 @@
           <span class="help-icon">📧</span>
           <h3>Email Support</h3>
           <p>Send us an email and we'll respond within 24 hours</p>
-          <a href="mailto:support@camptime.com" class="btn btn-secondary">Send Email</a>
+          <a href="mailto:support@razowild.com" class="btn btn-secondary">Send Email</a>
         </div>
 
         <div class="help-card">
@@ -219,7 +219,7 @@ export default {
       {
         category: 'Products',
         question: 'What does "verified purchase" mean?',
-        answer: 'Verified purchases indicate that a reviewer actually bought the product from Camptime. These reviews are marked with a special badge, helping other customers identify authentic customer experiences.',
+        answer: 'Verified purchases indicate that a reviewer actually bought the product from Razo Wild. These reviews are marked with a special badge, helping other customers identify authentic customer experiences.',
       },
       {
         category: 'Products',

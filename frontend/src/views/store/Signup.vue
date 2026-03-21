@@ -5,7 +5,7 @@
       <div class="signup-branding">
         <div class="brand-content">
           <div class="brand-icon">⛺</div>
-          <h1>Camptime</h1>
+          <h1>Razo Wild</h1>
           <p>Join thousands of outdoor enthusiasts</p>
           
           <div class="features">

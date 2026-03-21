@@ -10,11 +10,15 @@
         "import:products": "node importProducts.js",
         "backfill:categories": "node scripts/backfillCategories.js",
         "reassign:categories": "node scripts/reassignProductCategories.js",
+        "migrate:category-home-fields": "node scripts/addCategoryHomeFields.js",
+        "migrate:home-group-none": "node scripts/addNoneToHomeFeatureGroup.js",
+        "migrate:drop-home-flag": "node scripts/dropIsHomeFeaturedColumn.js",
         "migrate:variation-sku": "node scripts/addVariationSkuColumn.js",
         "backfill:brief-descriptions": "node scripts/backfillBriefDescriptions.js",
         "clean:descriptions": "node scripts/cleanProductDescriptions.js",
         "backfill:long-descriptions": "node scripts/backfillLongDescriptions.js",
         "backfill:description-images": "node scripts/backfillDescriptionImages.js",
+        "migrate:category-sort-order": "node scripts/addCategorySortOrder.js",
         "seed:admin-user": "node scripts/seedAdminUser.js"
     },
     "keywords": [

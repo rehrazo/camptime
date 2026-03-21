@@ -12,7 +12,7 @@ Use this checklist on deployment day.
 - [ ] `backend/.env` has production values and no placeholders
 - [ ] `frontend/.env.production` points to `https://api.yourdomain.com`
 - [ ] `npm --prefix frontend run build` completed successfully
-- [ ] PM2 processes are running: `camptime-api`, `camptime-storefront`, `camptime-admin`
+- [ ] PM2 processes are running: `razowild-api`, `razowild-storefront`, `razowild-admin`
 - [ ] `curl http://127.0.0.1:4000/api/health` is healthy
 - [ ] Nginx config test passes: `sudo nginx -t`
 - [ ] TLS certificates issued for `www`, `admin`, `api`

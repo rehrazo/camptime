@@ -358,6 +358,14 @@
                 </option>
               </select>
             </div>
+            <div class="form-group">
+              <label for="newCategoryHomeGroup">Home Section</label>
+              <select id="newCategoryHomeGroup" v-model="newCategoryHomeFeatureGroup" class="filter-select">
+                <option value="none">None (not on home)</option>
+                <option value="featured">Featured</option>
+                <option value="recommended">Recommended</option>
+              </select>
+            </div>
             <button class="btn btn-primary" @click="createCategory" :disabled="categoriesLoading">+ Add Category</button>
           </div>
 
@@ -387,6 +395,7 @@
                     Parent {{ getSortIndicator('parent') }}
                   </button>
                 </th>
+                <th>Home Section</th>
                 <th>Products</th>
                 <th>Actions</th>
               </tr>
@@ -397,18 +406,66 @@
                 <td>{{ category.label }}</td>
                 <td>{{ category.path }}</td>
                 <td>{{ getCategoryParentPath(category) }}</td>
+                <td>
+                  <select
+                    class="filter-select"
+                    :value="String(category.home_feature_group || 'none').toLowerCase()"
+                    @change="updateCategoryHomeGroup(category, $event.target.value)"
+                  >
+                    <option value="none">None</option>
+                    <option value="featured">Featured</option>
+                    <option value="recommended">Recommended</option>
+                  </select>
+                </td>
                 <td>{{ getCategoryProductCount(category.category_id) }}</td>
                 <td class="action-buttons">
+                  <img
+                    v-if="category.home_feature_image_url"
+                    :src="category.home_feature_image_url"
+                    alt="Category image thumbnail"
+                    class="upload-preview upload-preview-inline"
+                  />
                   <button class="edit-btn" title="Rename" @click="renameCategory(category)">✎</button>
                   <button class="view-btn" title="Move" @click="moveCategory(category)">⇄</button>
+                  <button
+                    class="btn btn-secondary btn-small"
+                    title="Upload category image"
+                    @click="openExistingCategoryImagePicker(category)"
+                    :disabled="uploadingCategoryImageId === category.category_id"
+                  >
+                    Choose Image
+                  </button>
+                  <button
+                    v-if="selectedCategoryForImageUploadId === category.category_id && existingCategoryImagePendingFile"
+                    class="btn btn-secondary btn-small"
+                    title="Save selected image"
+                    @click="saveExistingCategoryImage(category)"
+                    :disabled="uploadingCategoryImageId === category.category_id"
+                  >
+                    {{ uploadingCategoryImageId === category.category_id ? 'Uploading...' : 'Save Image' }}
+                  </button>
+                  <img
+                    v-if="selectedCategoryForImageUploadId === category.category_id && existingCategoryImagePreviewUrl"
+                    :src="existingCategoryImagePreviewUrl"
+                    alt="Pending category image preview"
+                    class="upload-preview upload-preview-inline"
+                  />
                   <button class="delete-btn" title="Delete" @click="deleteCategory(category)">🗑️</button>
                 </td>
               </tr>
               <tr v-if="!categoriesLoading && filteredCategoryRows.length === 0">
-                <td colspan="6" class="center">No categories found.</td>
+                <td colspan="7" class="center">No categories found.</td>
               </tr>
             </tbody>
           </table>
+
+          <input
+            ref="existingCategoryImageInput"
+            type="file"
+            accept="image/*"
+            class="hidden-file-input"
+            @change="onExistingCategoryImageSelected"
+          />
         </section>
 
         <!-- Orders Management -->
@@ -602,12 +659,12 @@
               <form class="settings-form">
                 <div class="form-group">
                   <label>Store Name</label>
-                  <input type="text" value="Camptime" class="form-input" />
+                  <input type="text" value="Razo Wild" class="form-input" />
                 </div>
 
                 <div class="form-group">
                   <label>Store Email</label>
-                  <input type="email" value="support@camptime.com" class="form-input" />
+                  <input type="email" value="support@razowild.com" class="form-input" />
                 </div>
 
                 <div class="form-group">
@@ -703,6 +760,17 @@ export default {
     const categoryFilterSearch = ref('')
     const newCategoryName = ref('')
     const newCategoryParentId = ref(null)
+    const newCategoryHomeFeatureImageUrl = ref('')
+    const newCategoryHomeFeatureOrder = ref(0)
+    const newCategoryHomeFeatureGroup = ref('none')
+    const newCategoryHomeImageFile = ref(null)
+    const newCategoryHomeImagePreviewUrl = ref('')
+    const newCategoryHomeImageUploading = ref(false)
+    const existingCategoryImageInput = ref(null)
+    const selectedCategoryForImageUploadId = ref(null)
+    const existingCategoryImagePendingFile = ref(null)
+    const existingCategoryImagePreviewUrl = ref('')
+    const uploadingCategoryImageId = ref(null)
     const categoryProductCounts = ref({})
     const categorySortKey = ref('name')
     const categorySortDirection = ref('asc')
@@ -1116,6 +1184,163 @@ export default {
       return Number(categoryProductCounts.value?.[categoryId] || 0)
     }
 
+    const uploadCategoryImageFile = async (file) => {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/categories/upload-image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload category image')
+      }
+
+      return String(data?.data?.image_url || '').trim()
+    }
+
+    const setPreviewUrl = (targetRef, file) => {
+      if (targetRef.value && String(targetRef.value).startsWith('blob:')) {
+        URL.revokeObjectURL(targetRef.value)
+      }
+
+      if (!file) {
+        targetRef.value = ''
+        return
+      }
+
+      targetRef.value = URL.createObjectURL(file)
+    }
+
+    const onNewCategoryHomeImageSelected = (event) => {
+      const file = event?.target?.files?.[0] || null
+      newCategoryHomeImageFile.value = file
+      setPreviewUrl(newCategoryHomeImagePreviewUrl, file)
+    }
+
+    const uploadNewCategoryHomeImage = async () => {
+      if (!newCategoryHomeImageFile.value) {
+        categoriesError.value = 'Choose an image file first'
+        return
+      }
+
+      categoriesError.value = ''
+      newCategoryHomeImageUploading.value = true
+
+      try {
+        const imageUrl = await uploadCategoryImageFile(newCategoryHomeImageFile.value)
+        if (!imageUrl) {
+          throw new Error('Image upload did not return a URL')
+        }
+
+        newCategoryHomeFeatureImageUrl.value = imageUrl
+        newCategoryHomeImageFile.value = null
+        setPreviewUrl(newCategoryHomeImagePreviewUrl, null)
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to upload category image'
+      } finally {
+        newCategoryHomeImageUploading.value = false
+      }
+    }
+
+    const openExistingCategoryImagePicker = (category) => {
+      selectedCategoryForImageUploadId.value = category.category_id
+      if (existingCategoryImageInput.value) {
+        existingCategoryImageInput.value.value = ''
+        existingCategoryImageInput.value.click()
+      }
+    }
+
+    const onExistingCategoryImageSelected = (event) => {
+      const file = event?.target?.files?.[0] || null
+      const categoryId = Number(selectedCategoryForImageUploadId.value)
+
+      if (!file || !Number.isInteger(categoryId) || categoryId <= 0) {
+        return
+      }
+
+      existingCategoryImagePendingFile.value = file
+      setPreviewUrl(existingCategoryImagePreviewUrl, file)
+    }
+
+    const saveExistingCategoryImage = async (category) => {
+      const categoryId = Number(category?.category_id)
+      if (!Number.isInteger(categoryId) || categoryId <= 0) {
+        return
+      }
+
+      if (!existingCategoryImagePendingFile.value || selectedCategoryForImageUploadId.value !== categoryId) {
+        categoriesError.value = 'Choose an image first'
+        return
+      }
+
+      categoriesError.value = ''
+      uploadingCategoryImageId.value = categoryId
+
+      try {
+        const imageUrl = await uploadCategoryImageFile(existingCategoryImagePendingFile.value)
+        if (!imageUrl) {
+          throw new Error('Image upload did not return a URL')
+        }
+
+        const response = await fetch(`/api/categories/${categoryId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ home_feature_image_url: imageUrl }),
+        })
+
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to save uploaded category image')
+        }
+
+        existingCategoryImagePendingFile.value = null
+        setPreviewUrl(existingCategoryImagePreviewUrl, null)
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to upload category image'
+      } finally {
+        uploadingCategoryImageId.value = null
+      }
+    }
+
+    const updateCategoryHomeGroup = async (category, nextGroup) => {
+      const categoryId = Number(category?.category_id)
+      const normalizedGroup = String(nextGroup || '').trim().toLowerCase()
+
+      if (!Number.isInteger(categoryId) || categoryId <= 0) {
+        return
+      }
+
+      if (!['featured', 'recommended', 'none'].includes(normalizedGroup)) {
+        categoriesError.value = 'Home section must be featured, recommended, or none'
+        return
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch(`/api/categories/${categoryId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            home_feature_group: normalizedGroup,
+          }),
+        })
+
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update home section')
+        }
+
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to update home section'
+      }
+    }
+
     const createCategory = async () => {
       const name = newCategoryName.value.trim()
       if (!name) {
@@ -1132,6 +1357,9 @@ export default {
           body: JSON.stringify({
             name,
             parent_id: newCategoryParentId.value || null,
+            home_feature_image_url: String(newCategoryHomeFeatureImageUrl.value || '').trim() || null,
+            home_feature_order: Number(newCategoryHomeFeatureOrder.value || 0),
+            home_feature_group: String(newCategoryHomeFeatureGroup.value || 'none'),
           }),
         })
 
@@ -1142,9 +1370,84 @@ export default {
 
         newCategoryName.value = ''
         newCategoryParentId.value = null
+        newCategoryHomeFeatureImageUrl.value = ''
+        newCategoryHomeFeatureOrder.value = 0
+        newCategoryHomeFeatureGroup.value = 'none'
+        newCategoryHomeImageFile.value = null
+        setPreviewUrl(newCategoryHomeImagePreviewUrl, null)
         await loadCategories()
       } catch (error) {
         categoriesError.value = error.message || 'Failed to create category'
+      }
+    }
+
+    const editHomeCategorySettings = async (category) => {
+      const currentGroup = String(category.home_feature_group || 'none').toLowerCase()
+      const groupInput = window.prompt(
+        `Home section for "${category.name}":\n\nEnter: featured, recommended, or none`,
+        currentGroup
+      )
+
+      if (groupInput === null) {
+        return
+      }
+
+      const homeFeatureGroup = String(groupInput || '').trim().toLowerCase() || 'none'
+      if (!['featured', 'recommended', 'none'].includes(homeFeatureGroup)) {
+        categoriesError.value = 'Home section must be featured, recommended, or none'
+        return
+      }
+
+      let homeFeatureImageUrl = String(category.home_feature_image_url || '').trim()
+      let homeFeatureOrder = Number(category.home_feature_order || 0)
+
+      if (homeFeatureGroup !== 'none') {
+        const imageInput = window.prompt(
+          'Home image URL (leave blank to clear):',
+          homeFeatureImageUrl
+        )
+
+        if (imageInput === null) {
+          return
+        }
+
+        homeFeatureImageUrl = String(imageInput || '').trim()
+
+        const orderInput = window.prompt('Home display order (0, 1, 2, ...):', String(homeFeatureOrder))
+        if (orderInput === null) {
+          return
+        }
+
+        const nextOrder = Number(orderInput)
+        if (!Number.isInteger(nextOrder) || nextOrder < 0) {
+          categoriesError.value = 'Home display order must be a non-negative integer'
+          return
+        }
+
+        homeFeatureOrder = nextOrder
+      }
+
+      categoriesError.value = ''
+
+      try {
+        const response = await fetch(`/api/categories/${category.category_id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            home_feature_group: homeFeatureGroup,
+            home_feature_image_url: homeFeatureImageUrl || null,
+            home_feature_order: homeFeatureOrder,
+          }),
+        })
+
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update home category settings')
+        }
+
+        await loadCategories()
+      } catch (error) {
+        categoriesError.value = error.message || 'Failed to update home category settings'
       }
     }
 
@@ -1262,6 +1565,14 @@ export default {
 
       if (key === 'parent') {
         return String(getCategoryParentPath(category) || '').toLowerCase()
+      }
+
+      if (key === 'home_group') {
+        return String(category?.home_feature_group || '').toLowerCase()
+      }
+
+      if (key === 'home_order') {
+        return Number(category?.home_feature_order || 0)
       }
 
       return ''
@@ -1488,6 +1799,11 @@ export default {
       categoriesError,
       newCategoryName,
       newCategoryParentId,
+      newCategoryHomeFeatureImageUrl,
+      newCategoryHomeFeatureOrder,
+      newCategoryHomeFeatureGroup,
+      newCategoryHomeImagePreviewUrl,
+      newCategoryHomeImageUploading,
       categorySortKey,
       categorySortDirection,
       customerSearch,
@@ -1517,13 +1833,25 @@ export default {
       productFormMode,
       productForm,
       loadCategories,
+      onNewCategoryHomeImageSelected,
+      uploadNewCategoryHomeImage,
       createCategory,
       renameCategory,
       moveCategory,
+      editHomeCategorySettings,
+      openExistingCategoryImagePicker,
+      onExistingCategoryImageSelected,
+      saveExistingCategoryImage,
+      updateCategoryHomeGroup,
       deleteCategory,
       getCategoryParentPath,
       toggleCategorySort,
       getSortIndicator,
+      existingCategoryImageInput,
+      selectedCategoryForImageUploadId,
+      existingCategoryImagePendingFile,
+      existingCategoryImagePreviewUrl,
+      uploadingCategoryImageId,
       openCategoryManager,
       openProductCategoryMover,
       openUncategorizedProducts,
@@ -2190,6 +2518,28 @@ tr:hover {
 .btn-small {
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.upload-preview-wrap {
+  margin-top: 0.5rem;
+}
+
+.upload-preview {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #d8dfe8;
+  background: #f6f8fc;
+}
+
+.upload-preview-inline {
+  display: block;
+  margin-bottom: 0.35rem;
 }
 
 .full-width {

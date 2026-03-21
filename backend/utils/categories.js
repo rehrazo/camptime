@@ -30,7 +30,11 @@ async function getCategoryById(connection, categoryId) {
   }
 
   const [[row]] = await connection.execute(
-    'SELECT category_id, parent_id, name, slug, path, level FROM categories WHERE category_id = ? LIMIT 1',
+    `SELECT category_id, parent_id, name, slug, path, level, sort_order,
+            home_feature_image_url, home_feature_order, home_feature_group
+     FROM categories
+     WHERE category_id = ?
+     LIMIT 1`,
     [categoryId]
   )
 
@@ -52,7 +56,11 @@ async function ensureCategoryPath(connection, rawPath) {
     pathParts.push(name)
 
     const [existingRows] = await connection.execute(
-      'SELECT category_id, parent_id, name, slug, path, level FROM categories WHERE parent_id <=> ? AND name = ? LIMIT 1',
+      `SELECT category_id, parent_id, name, slug, path, level, sort_order,
+              home_feature_image_url, home_feature_order, home_feature_group
+       FROM categories
+       WHERE parent_id <=> ? AND name = ?
+       LIMIT 1`,
       [parentId, name]
     )
 
@@ -79,6 +87,10 @@ async function ensureCategoryPath(connection, rawPath) {
       slug,
       path: normalizedPath,
       level,
+      sort_order: index + 1,
+      home_feature_image_url: null,
+      home_feature_order: 0,
+      home_feature_group: 'none',
     }
     parentId = insertResult.insertId
   }
@@ -113,9 +125,10 @@ async function getDescendantCategoryIds(connection, categoryId) {
 
 async function getCategoryTree(connection) {
   const [rows] = await connection.execute(
-    `SELECT category_id, parent_id, name, slug, path, level
+    `SELECT category_id, parent_id, name, slug, path, level, sort_order,
+            home_feature_image_url, home_feature_order, home_feature_group
      FROM categories
-     ORDER BY level ASC, name ASC`
+     ORDER BY parent_id ASC, sort_order ASC, name ASC, category_id ASC`
   )
 
   const byId = new Map()
@@ -145,9 +158,10 @@ async function getCategoryTree(connection) {
 
 async function getAllCategories(connection) {
   const [rows] = await connection.execute(
-    `SELECT category_id, parent_id, name, slug, path, level
+    `SELECT category_id, parent_id, name, slug, path, level, sort_order,
+            home_feature_image_url, home_feature_order, home_feature_group
      FROM categories
-     ORDER BY level ASC, name ASC`
+     ORDER BY parent_id ASC, sort_order ASC, name ASC, category_id ASC`
   )
 
   return rows

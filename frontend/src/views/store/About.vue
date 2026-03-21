@@ -3,7 +3,7 @@
     <!-- Hero Section -->
     <div class="hero-section">
       <div class="hero-content">
-        <h1>About Camptime</h1>
+        <h1>About Razo Wild</h1>
         <p>Your trusted companion for outdoor adventures</p>
       </div>
     </div>
@@ -38,17 +38,17 @@
           <div class="story-text">
             <h2>Our Story</h2>
             <p>
-              Camptime was founded in 2015 by a group of passionate outdoor enthusiasts who grew frustrated with the lack of quality camping gear options. What started as a small project to curate the best camping equipment has grown into a thriving business serving thousands of customers worldwide.
+              Razo Wild was founded in 2015 by a group of passionate outdoor enthusiasts who grew frustrated with the lack of quality camping gear options. What started as a small project to curate the best camping equipment has grown into a thriving business serving thousands of customers worldwide.
             </p>
             <p>
               We began with a simple belief: everyone deserves access to reliable, high-quality camping gear at fair prices. Whether you're a seasoned backcountry explorer or just starting your outdoor journey, we're here to support you every step of the way.
             </p>
             <p>
-              Today, Camptime is proud to be a leading destination for camping enthusiasts, offering carefully selected products from trusted brands and expert guides to help you make the most of your outdoor adventures.
+              Today, Razo Wild is proud to be a leading destination for camping enthusiasts, offering carefully selected products from trusted brands and expert guides to help you make the most of your outdoor adventures.
             </p>
           </div>
           <div class="story-image">
-            <img src="/images/about-hero.jpg" alt="Camptime founders" />
+            <img src="/images/about-hero.jpg" alt="Razo Wild founders" />
           </div>
         </div>
       </div>
@@ -156,7 +156,7 @@
           <div class="sustainability-text">
             <h3>Making a Positive Impact</h3>
             <p>
-              At Camptime, we believe that outdoor enthusiasts have a responsibility to protect the environments we love to explore. That's why sustainability is at the heart of everything we do.
+              At Razo Wild, we believe that outdoor enthusiasts have a responsibility to protect the environments we love to explore. That's why sustainability is at the heart of everything we do.
             </p>
             <ul class="sustainability-list">
               <li>Partner exclusively with eco-conscious brands</li>
@@ -239,7 +239,7 @@ export default {
         id: 1,
         name: 'John Martinez',
         role: 'Founder & CEO',
-        bio: 'Passionate mountaineer with 15+ years of outdoor experience. John founded Camptime with a vision to make quality gear accessible to everyone.',
+        bio: 'Passionate mountaineer with 15+ years of outdoor experience. John founded Razo Wild with a vision to make quality gear accessible to everyone.',
         image: 'https://i.pravatar.cc/150?img=1',
         socials: [
           { name: 'LinkedIn', icon: '🔗', link: '#' },
@@ -315,7 +315,7 @@ export default {
       {
         year: '2015',
         title: 'Founded',
-        description: 'Camptime is founded by a group of passionate outdoor enthusiasts with a vision to provide quality camping gear.',
+        description: 'Razo Wild is founded by a group of passionate outdoor enthusiasts with a vision to provide quality camping gear.',
       },
       {
         year: '2016',

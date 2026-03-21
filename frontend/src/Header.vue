@@ -4,7 +4,7 @@
       <!-- Logo -->
       <router-link to="/" class="logo">
         <span class="logo-icon">⛺</span>
-        <span class="logo-text">Camptime</span>
+        <span class="logo-text">Razo Wild</span>
       </router-link>
 
       <!-- Search Bar -->

@@ -29,7 +29,7 @@ sudo chown -R "$APP_USER":"$APP_USER" /var/www
 
 if [ ! -d "$APP_DIR/.git" ]; then
   echo "[6/7] Cloning repository"
-   git clone https://github.com/rehrazo/camptime.git "$APP_DIR"
+   git clone https://github.com/rehrazo/razowild.git "$APP_DIR"
 else
   echo "[6/7] Repository already present, skipping clone"
 fi
@@ -58,12 +58,12 @@ Next steps:
 
 4) Start services with PM2:
    cp deploy/pm2/ecosystem.config.cjs /var/www/razowild/ecosystem.config.cjs
-   pm2 start /var/www/camptime/ecosystem.config.cjs
+   pm2 start /var/www/razowild/ecosystem.config.cjs
    pm2 save
    pm2 startup systemd -u ubuntu --hp /home/ubuntu
 
 5) Configure Nginx:
-   sudo cp deploy/nginx/camptime.conf /etc/nginx/sites-available/razowild.conf
+   sudo cp deploy/nginx/razowild.conf /etc/nginx/sites-available/razowild.conf
    sudo ln -sf /etc/nginx/sites-available/razowild.conf /etc/nginx/sites-enabled/razowild.conf
    sudo nginx -t
    sudo systemctl reload nginx

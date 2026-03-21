@@ -2,7 +2,7 @@
   <div class="blog-page">
     <!-- Header -->
     <div class="blog-header">
-      <h1>Camptime Blog</h1>
+      <h1>Razo Wild Blog</h1>
       <p>Tips, guides, and stories from the trail</p>
     </div>
 

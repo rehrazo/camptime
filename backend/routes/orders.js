@@ -150,7 +150,7 @@ function buildDobaRow(order = {}) {
 
   const row = [
     order.orderId,
-    'Camptime',
+    'RazoWild',
     Number(order.totals?.total || 0).toFixed(2),
     fullName,
     order.customer?.phone || '',

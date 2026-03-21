@@ -1,6 +1,6 @@
-# AWS EC2 Deployment Guide (Camptime)
+# AWS EC2 Deployment Guide (RazoWild)
 
-This guide deploys Camptime to one EC2 host with three public subdomains:
+This guide deploys Razowild to one EC2 host with three public subdomains:
 
 - `https://www.yourdomain.com` -> storefront frontend
 - `https://admin.yourdomain.com` -> admin frontend
@@ -81,7 +81,7 @@ For `razowild.com`, create:
 - `A`/`CNAME` record: `admin.razowild.com` -> same target
 - `A`/`CNAME` record: `api.razowild.com` -> same target
 
-The provided Nginx config in `deploy/nginx/camptime.conf` enforces:
+The provided Nginx config in `deploy/nginx/razowild.conf` enforces:
 
 - HTTP -> HTTPS for all hostnames
 - `https://razowild.com` -> `https://www.razowild.com`
@@ -91,15 +91,15 @@ The provided Nginx config in `deploy/nginx/camptime.conf` enforces:
 SSH into EC2 and run:
 
 ```bash
-chmod +x /var/www/camptime/deploy/scripts/ec2-bootstrap.sh
-/var/www/camptime/deploy/scripts/ec2-bootstrap.sh
+chmod +x /var/www/razowild/deploy/scripts/ec2-bootstrap.sh
+/var/www/razowild/deploy/scripts/ec2-bootstrap.sh
 ```
 
 If repo is not present yet:
 
 ```bash
-git clone https://github.com/rehrazo/camptime.git /var/www/camptime
-cd /var/www/camptime
+git clone https://github.com/rehrazo/razowild.git /var/www/razowild
+cd /var/www/razowild
 chmod +x deploy/scripts/ec2-bootstrap.sh
 ./deploy/scripts/ec2-bootstrap.sh
 ```
@@ -109,8 +109,8 @@ chmod +x deploy/scripts/ec2-bootstrap.sh
 Create `backend/.env` from root `.env.example`:
 
 ```bash
-cp /var/www/camptime/.env.example /var/www/camptime/backend/.env
-nano /var/www/camptime/backend/.env
+cp /var/www/razowild/.env.example /var/www/razowild/backend/.env
+nano /var/www/razowild/backend/.env
 ```
 
 Set production values (required):
@@ -120,7 +120,7 @@ Set production values (required):
 - `DB_HOST=<rds-endpoint>`
 - `DB_USER=<db-user>`
 - `DB_PASSWORD=<db-password>`
-- `DB_NAME=camptime`
+- `DB_NAME=razowild_db`
 - `JWT_SECRET=<long-random-secret>`
 - `JWT_EXPIRE=7d`
 - `ADMIN_EMAILS=<comma-separated-admin-emails>`
@@ -135,8 +135,8 @@ Set production values (required):
 Create frontend env:
 
 ```bash
-cp /var/www/camptime/frontend/.env.example /var/www/camptime/frontend/.env.production
-nano /var/www/camptime/frontend/.env.production
+cp /var/www/razowild/frontend/.env.example /var/www/razowild/frontend/.env.production
+nano /var/www/razowild/frontend/.env.production
 ```
 
 Set:
@@ -147,9 +147,9 @@ Set:
 ## 4) Build + run app
 
 ```bash
-cd /var/www/camptime
+cd /var/www/razowild
 npm --prefix frontend run build
-pm2 start /var/www/camptime/deploy/pm2/ecosystem.config.cjs
+pm2 start /var/www/razowild/deploy/pm2/ecosystem.config.cjs
 pm2 save
 pm2 startup systemd -u ubuntu --hp /home/ubuntu
 ```
@@ -166,8 +166,8 @@ pm2 status
 ## 5) Configure Nginx
 
 ```bash
-sudo cp /var/www/camptime/deploy/nginx/camptime.conf /etc/nginx/sites-available/camptime.conf
-sudo ln -sf /etc/nginx/sites-available/camptime.conf /etc/nginx/sites-enabled/camptime.conf
+sudo cp /var/www/razowild/deploy/nginx/razowild.conf /etc/nginx/sites-available/razowild.conf
+sudo ln -sf /etc/nginx/sites-available/razowild.conf /etc/nginx/sites-enabled/razowild.conf
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -203,13 +203,13 @@ sudo systemctl status certbot.timer
 ## 7) Deploy updates
 
 ```bash
-cd /var/www/camptime
+cd /var/www/razowild
 git pull
 npm install
 npm --prefix backend install
 npm --prefix frontend install
 npm --prefix frontend run build
-pm2 restart camptime-api camptime-storefront camptime-admin
+pm2 restart razowild-api razowild-storefront razowild-admin
 pm2 save
 ```
 

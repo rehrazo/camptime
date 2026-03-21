@@ -15,7 +15,7 @@ Use these files for EC2 deployments:
 - Go-live checklist: `docs/deploy/GO-LIVE-CHECKLIST-AWS.md`
 - Ops runbook: `docs/deploy/OPERATIONS-RUNBOOK.md`
 - PM2 processes: `deploy/pm2/ecosystem.config.cjs`
-- Nginx vhosts: `deploy/nginx/camptime.conf`
+- Nginx vhosts: `deploy/nginx/razowild.conf`
 - EC2 bootstrap script: `deploy/scripts/ec2-bootstrap.sh`
 
 ## Recommended Production Topology

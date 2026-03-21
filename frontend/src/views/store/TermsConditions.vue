@@ -2,7 +2,7 @@
   <div class="policy-page">
     <div class="policy-container">
       <h1>Terms &amp; Conditions</h1>
-      <p class="intro">These terms govern use of the Camptime website, account features, and purchases made through our storefront.</p>
+      <p class="intro">These terms govern use of the Razo Wild website, account features, and purchases made through our storefront.</p>
 
       <section>
         <h2>Overview</h2>
@@ -39,7 +39,7 @@
 
       <section>
         <h2>Liability &amp; Warranties</h2>
-        <p>Services are provided on an "as available" basis. To the extent permitted by law, Camptime disclaims implied warranties and limits liability for indirect or consequential damages.</p>
+        <p>Services are provided on an "as available" basis. To the extent permitted by law, Razo Wild disclaims implied warranties and limits liability for indirect or consequential damages.</p>
       </section>
 
       <section>

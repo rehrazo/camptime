@@ -191,7 +191,7 @@
             <span class="tip-icon">⚠️</span>
             <div>
               <h4>Check for Phishing</h4>
-              <p>Always verify you're on camptime.com before entering credentials</p>
+              <p>Always verify you're on razowild.com before entering credentials</p>
             </div>
           </div>
           <div class="tip">

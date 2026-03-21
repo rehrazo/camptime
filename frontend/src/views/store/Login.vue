@@ -5,7 +5,7 @@
       <div class="login-branding">
         <div class="brand-content">
           <div class="brand-icon">⛺</div>
-          <h1>Camptime</h1>
+          <h1>Razo Wild</h1>
           <p>Your one-stop shop for quality camping gear</p>
           
           <div class="benefits">

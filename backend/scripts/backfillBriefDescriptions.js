@@ -34,11 +34,11 @@ async function backfillBriefDescriptions() {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'camptime',
+    database: process.env.DB_NAME || 'razowild_db',
   })
 
   try {
-    const columnAdded = await ensureBriefDescriptionColumn(connection, process.env.DB_NAME || 'camptime')
+    const columnAdded = await ensureBriefDescriptionColumn(connection, process.env.DB_NAME || 'razowild_db')
 
     const [rows] = await connection.execute(
       `SELECT product_id, name, description, html_description, brief_description

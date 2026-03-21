@@ -80,13 +80,30 @@
 </template>
 
 <script>
+import { onMounted, ref } from 'vue'
 import homeBanner from '../../assets/images/site/home_page_banner_cropped.jpg'
 
 const defaultRoute = '/products'
+const defaultFeaturedCategories = [
+  { title: 'Tents / Shelter', image: homeBanner, to: defaultRoute },
+  { title: 'Sleeping Gear', image: homeBanner, to: defaultRoute },
+  { title: 'Camping Cookware', image: homeBanner, to: defaultRoute },
+  { title: 'Hiking Gear', image: homeBanner, to: defaultRoute },
+]
+
+const defaultRecommendedCategories = [
+  { title: 'Power & Lighting', image: homeBanner, to: defaultRoute },
+  { title: 'Survival Tools', image: homeBanner, to: defaultRoute },
+  { title: 'Camping Clothing', image: homeBanner, to: defaultRoute },
+  { title: 'Camping Furniture', image: homeBanner, to: defaultRoute },
+]
 
 export default {
   name: 'Home',
   setup() {
+    const featuredCategories = ref([...defaultFeaturedCategories])
+    const recommendedCategories = ref([...defaultRecommendedCategories])
+
     const heroStyle = {
       backgroundImage: `url(${homeBanner})`,
       backgroundSize: 'cover',
@@ -94,19 +111,65 @@ export default {
       backgroundRepeat: 'no-repeat',
     }
 
-    const featuredCategories = [
-      { title: 'Tents / Shelter', image: homeBanner, to: defaultRoute },
-      { title: 'Sleeping Gear', image: homeBanner, to: defaultRoute },
-      { title: 'Camping Cookware', image: homeBanner, to: defaultRoute },
-      { title: 'Hiking Gear', image: homeBanner, to: defaultRoute },
-    ]
+    const mapCategoryToCard = (category) => {
+      const categoryId = Number(category?.category_id)
 
-    const recommendedCategories = [
-      { title: 'Power & Lighting', image: homeBanner, to: defaultRoute },
-      { title: 'Survival Tools', image: homeBanner, to: defaultRoute },
-      { title: 'Camping Clothing', image: homeBanner, to: defaultRoute },
-      { title: 'Camping Furniture', image: homeBanner, to: defaultRoute },
-    ]
+      return {
+        title: String(category?.name || '').trim() || 'Category',
+        image: String(category?.home_feature_image_url || '').trim() || homeBanner,
+        to: Number.isInteger(categoryId) && categoryId > 0 ? `/products?category_id=${categoryId}` : defaultRoute,
+      }
+    }
+
+    const flattenTree = (nodes = []) => {
+      return nodes.flatMap((node) => [node, ...flattenTree(node.children || [])])
+    }
+
+    const loadHomeCategories = async () => {
+      try {
+        const response = await fetch('/api/categories/tree')
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          return
+        }
+
+        const tree = Array.isArray(data?.data) ? data.data : []
+        const categories = flattenTree(tree)
+
+        const byHomeOrder = (a, b) => {
+          const orderA = Number(a?.home_feature_order || 0)
+          const orderB = Number(b?.home_feature_order || 0)
+          if (orderA !== orderB) {
+            return orderA - orderB
+          }
+
+          return String(a?.name || '').localeCompare(String(b?.name || ''), undefined, { sensitivity: 'base' })
+        }
+
+        const featured = categories
+          .filter((category) => String(category?.home_feature_group || 'none').toLowerCase() === 'featured')
+          .sort(byHomeOrder)
+          .slice(0, 4)
+          .map(mapCategoryToCard)
+
+        const recommended = categories
+          .filter((category) => String(category?.home_feature_group || 'none').toLowerCase() === 'recommended')
+          .sort(byHomeOrder)
+          .slice(0, 4)
+          .map(mapCategoryToCard)
+
+        if (featured.length > 0) {
+          featuredCategories.value = featured
+        }
+
+        if (recommended.length > 0) {
+          recommendedCategories.value = recommended
+        }
+      } catch (_error) {
+        // Keep defaults when categories request fails.
+      }
+    }
 
     const categoryCardStyle = (image) => {
       return {
@@ -115,6 +178,10 @@ export default {
         backgroundPosition: 'center',
       }
     }
+
+    onMounted(async () => {
+      await loadHomeCategories()
+    })
 
     return {
       heroStyle,

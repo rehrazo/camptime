@@ -34,8 +34,8 @@ const routes = [
         name: 'Home',
         component: Home,
         meta: {
-          title: 'Camptime | Camping Gear and Outdoor Essentials',
-          description: 'Find premium tents, sleeping bags, camp furniture, and outdoor gear at Camptime.',
+          title: 'Razo Wild | Camping Gear and Outdoor Essentials',
+          description: 'Find premium tents, sleeping bags, camp furniture, and outdoor gear at Razo Wild.',
         },
       },
       {
@@ -43,8 +43,8 @@ const routes = [
         name: 'Products',
         component: Products,
         meta: {
-          title: 'Shop Camping Products | Camptime',
-          description: 'Browse the Camptime catalog of camping products, outdoor equipment, and travel essentials.',
+          title: 'Shop Camping Products | Razo Wild',
+          description: 'Browse the Razo Wild catalog of camping products, outdoor equipment, and travel essentials.',
         },
       },
       {
@@ -52,8 +52,8 @@ const routes = [
         name: 'ProductDetail',
         component: ProductDetail,
         meta: {
-          title: 'Product Details | Camptime',
-          description: 'View product features, specifications, packaging, shipping, and availability on Camptime.',
+          title: 'Product Details | Razo Wild',
+          description: 'View product features, specifications, packaging, shipping, and availability on Razo Wild.',
         },
       },
       {
@@ -61,7 +61,7 @@ const routes = [
         name: 'Cart',
         component: Cart,
         meta: {
-          title: 'Your Cart | Camptime',
+          title: 'Your Cart | Razo Wild',
           description: 'Review items in your cart before checkout.',
           noindex: true,
         },
@@ -71,8 +71,8 @@ const routes = [
         name: 'Login',
         component: Login,
         meta: {
-          title: 'Login | Camptime',
-          description: 'Sign in to your Camptime account.',
+          title: 'Login | Razo Wild',
+          description: 'Sign in to your Razo Wild account.',
           noindex: true,
         },
       },
@@ -81,8 +81,8 @@ const routes = [
         name: 'AdminLogin',
         component: AdminLogin,
         meta: {
-          title: 'Admin Login | Camptime',
-          description: 'Sign in to the Camptime admin portal.',
+          title: 'Admin Login | Razo Wild',
+          description: 'Sign in to the Razo Wild admin portal.',
           noindex: true,
         },
       },
@@ -95,8 +95,8 @@ const routes = [
         name: 'Signup',
         component: Signup,
         meta: {
-          title: 'Create Account | Camptime',
-          description: 'Create your Camptime account to manage orders and checkout faster.',
+          title: 'Create Account | Razo Wild',
+          description: 'Create your Razo Wild account to manage orders and checkout faster.',
           noindex: true,
         },
       },
@@ -106,8 +106,8 @@ const routes = [
         component: Account,
         meta: {
           requiresAuth: true,
-          title: 'My Account | Camptime',
-          description: 'Manage your Camptime account settings and order history.',
+          title: 'My Account | Razo Wild',
+          description: 'Manage your Razo Wild account settings and order history.',
           noindex: true,
         },
       },
@@ -117,8 +117,8 @@ const routes = [
         component: Checkout,
         meta: {
           requiresAuth: true,
-          title: 'Checkout | Camptime',
-          description: 'Complete your order securely on Camptime.',
+          title: 'Checkout | Razo Wild',
+          description: 'Complete your order securely on Razo Wild.',
           noindex: true,
         },
       },
@@ -127,7 +127,7 @@ const routes = [
         name: 'OrderConfirmation',
         component: OrderConfirmation,
         meta: {
-          title: 'Order Confirmation | Camptime',
+          title: 'Order Confirmation | Razo Wild',
           description: 'Review your order confirmation details.',
           noindex: true,
         },
@@ -137,8 +137,8 @@ const routes = [
         name: 'ShippingReturns',
         component: ShippingReturns,
         meta: {
-          title: 'Shipping and Returns | Camptime',
-          description: 'Read Camptime shipping timelines and return policy information.',
+          title: 'Shipping and Returns | Razo Wild',
+          description: 'Read Razo Wild shipping timelines and return policy information.',
         },
       },
       {
@@ -146,8 +146,8 @@ const routes = [
         name: 'PrivacyPolicy',
         component: PrivacyPolicy,
         meta: {
-          title: 'Privacy Policy | Camptime',
-          description: 'Review how Camptime collects, uses, and protects your information.',
+          title: 'Privacy Policy | Razo Wild',
+          description: 'Review how Razo Wild collects, uses, and protects your information.',
         },
       },
       {
@@ -155,8 +155,8 @@ const routes = [
         name: 'TermsConditions',
         component: TermsConditions,
         meta: {
-          title: 'Terms and Conditions | Camptime',
-          description: 'Read Camptime terms and conditions for using the site and services.',
+          title: 'Terms and Conditions | Razo Wild',
+          description: 'Read Razo Wild terms and conditions for using the site and services.',
         },
       },
       {
@@ -164,8 +164,8 @@ const routes = [
         name: 'TrackOrder',
         component: TrackOrder,
         meta: {
-          title: 'Track Order | Camptime',
-          description: 'Track your Camptime order status and delivery progress.',
+          title: 'Track Order | Razo Wild',
+          description: 'Track your Razo Wild order status and delivery progress.',
           noindex: true,
         },
       },
@@ -184,7 +184,7 @@ const routes = [
         name: 'AdminDashboard',
         component: AdminDashboard,
         meta: {
-          title: 'Admin Dashboard | Camptime',
+          title: 'Admin Dashboard | Razo Wild',
           description: DEFAULT_DESCRIPTION,
           noindex: true,
         },
@@ -194,7 +194,7 @@ const routes = [
         name: 'AdminProductEdit',
         component: AdminProductEdit,
         meta: {
-          title: 'Admin Product Edit | Camptime',
+          title: 'Admin Product Edit | Razo Wild',
           description: DEFAULT_DESCRIPTION,
           noindex: true,
         },
@@ -228,12 +228,53 @@ const router = createRouter({
   routes,
 })
 
+function decodeJwtPayload(token) {
+  try {
+    const payloadPart = String(token || '').split('.')[1] || ''
+    if (!payloadPart) {
+      return null
+    }
+
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+    const payloadJson = atob(padded)
+    return JSON.parse(payloadJson)
+  } catch (_error) {
+    return null
+  }
+}
+
+function isTokenExpired(token) {
+  const payload = decodeJwtPayload(token)
+  const exp = Number(payload?.exp || 0)
+  if (!exp) {
+    return false
+  }
+
+  const now = Math.floor(Date.now() / 1000)
+  return exp <= now
+}
+
+function clearStoredAuth() {
+  localStorage.removeItem('authToken')
+  localStorage.removeItem('authRole')
+  localStorage.removeItem('adminApiToken')
+}
+
 router.beforeEach((to) => {
   const requiresAuth = to.matched.some((record) => Boolean(record.meta?.requiresAuth))
   const requiresAdmin = to.matched.some((record) => Boolean(record.meta?.requiresAdmin))
   const authStore = useAuthStore()
+  const authToken = String(localStorage.getItem('authToken') || '').trim()
+  const adminApiToken = String(localStorage.getItem('adminApiToken') || '').trim()
+  const authTokenExpired = isTokenExpired(authToken)
+  const adminTokenExpired = isTokenExpired(adminApiToken)
 
-  if (requiresAdmin && !authStore.isAdmin) {
+  if ((authToken && authTokenExpired) || (adminApiToken && adminTokenExpired)) {
+    clearStoredAuth()
+  }
+
+  if (requiresAdmin && (!authStore.isAdmin || !adminApiToken || !authToken || authTokenExpired || adminTokenExpired)) {
     return {
       name: 'AdminLogin',
       query: {
@@ -246,7 +287,7 @@ router.beforeEach((to) => {
     return true
   }
 
-  if (authStore.isLoggedIn) {
+  if (authStore.isLoggedIn && authToken && !authTokenExpired) {
     return true
   }
 
@@ -264,7 +305,7 @@ router.afterEach((to) => {
   }
 
   applyPageSeo({
-    title: to.meta?.title || 'Camptime - Camping Gear E-commerce',
+    title: to.meta?.title || 'Razo Wild - Camping Gear E-commerce',
     description: to.meta?.description || DEFAULT_DESCRIPTION,
     path: to.fullPath,
     noindex: Boolean(to.meta?.noindex),

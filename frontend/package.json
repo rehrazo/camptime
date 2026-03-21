@@ -1,7 +1,7 @@
 {
-  "name": "camptime-frontend",
+  "name": "razowild-frontend",
   "version": "1.0.0",
-  "description": "Frontend for Camptime e-commerce platform",
+  "description": "Frontend for RazoWild e-commerce platform",
   "type": "module",
   "scripts": {
     "dev": "vite",

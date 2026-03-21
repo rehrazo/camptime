@@ -20,7 +20,7 @@
       <!-- Footer Links -->
       <div class="footer-links">
         <div class="footer-column">
-          <h4>About Camptime</h4>
+          <h4>About Razo Wild</h4>
           <ul>
             <li><a href="#about">About Us</a></li>
             <li><a href="#careers">Careers</a></li>
@@ -74,7 +74,7 @@
       <!-- Footer Bottom -->
       <div class="footer-bottom">
         <p class="copyright">
-          &copy; 2026 Camptime. All rights reserved.
+          &copy; 2026 Razo Wild. All rights reserved.
         </p>
         <p class="footer-text">
           Made with ♥ for outdoor enthusiasts

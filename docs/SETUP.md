@@ -1,4 +1,4 @@
-# Setup Guide for Camptime
+# Setup Guide for Razowild
 
 ## Prerequisites
 Before you begin, ensure you have the following installed on your system:
@@ -10,8 +10,8 @@ Before you begin, ensure you have the following installed on your system:
 ## Installation Steps
 1. **Clone the Repository**:  Open your terminal and run the following command:
    ```bash
-   git clone https://github.com/rehrazo/camptime.git
-   cd camptime
+   git clone https://github.com/rehrazo/razowild.git
+   cd razowild
    ```
 
 2. **Install Dependencies**: Use npm to install the necessary packages:
@@ -107,4 +107,4 @@ Before you begin, ensure you have the following installed on your system:
 - Regularly update dependencies to minimize security vulnerabilities.
 - Implement rate limiting and input validation to protect against common web vulnerabilities.
 
-This guide should provide a comprehensive overview to get started with the Camptime project!
+This guide should provide a comprehensive overview to get started with the razowild project!

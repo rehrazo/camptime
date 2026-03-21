@@ -129,7 +129,7 @@
               <span class="contact-icon">📧</span>
               <div>
                 <h4>Email</h4>
-                <p><a href="mailto:support@camptime.com">support@camptime.com</a></p>
+                <p><a href="mailto:support@razowild.com">support@razowild.com</a></p>
                 <small>Response time: 24-48 hours</small>
               </div>
             </div>

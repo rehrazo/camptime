@@ -1,5 +1,5 @@
-const DEFAULT_TITLE = 'Camptime - Camping Gear E-commerce'
-const DEFAULT_DESCRIPTION = 'Shop camping gear, tents, sleeping bags, and outdoor essentials at Camptime.'
+const DEFAULT_TITLE = 'Razo Wild - Camping Gear E-commerce'
+const DEFAULT_DESCRIPTION = 'Shop camping gear, tents, sleeping bags, and outdoor essentials at Razo Wild.'
 
 function upsertMetaTag({ name, property, content }) {
   if (!content) {

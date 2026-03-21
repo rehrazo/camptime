@@ -315,11 +315,11 @@ export default {
       const descriptionSource =
         mappedProduct.briefDescription ||
         mappedProduct.description ||
-        'View product details, specifications, packaging, and shipping information on Camptime.'
+        'View product details, specifications, packaging, and shipping information on Razo Wild.'
       const description = String(descriptionSource).replace(/\s+/g, ' ').trim().slice(0, 160)
 
       applyPageSeo({
-        title: `${mappedProduct.name} | Camptime`,
+        title: `${mappedProduct.name} | Razo Wild`,
         description,
         path: `/products/${mappedProduct.id}`,
         imageUrl: mappedProduct.image,

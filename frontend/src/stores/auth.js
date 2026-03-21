@@ -1,6 +1,33 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+function decodeJwtPayload(token) {
+  try {
+    const payloadPart = String(token || '').split('.')[1] || ''
+    if (!payloadPart) {
+      return null
+    }
+
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+    const payloadJson = atob(padded)
+    return JSON.parse(payloadJson)
+  } catch (_error) {
+    return null
+  }
+}
+
+function isTokenExpired(token) {
+  const payload = decodeJwtPayload(token)
+  const exp = Number(payload?.exp || 0)
+  if (!exp) {
+    return false
+  }
+
+  const now = Math.floor(Date.now() / 1000)
+  return exp <= now
+}
+
 export const useAuthStore = defineStore('auth', () => {
   // State
   const user = ref(null)
@@ -43,12 +70,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Initialize user from token if available
-  if (token.value) {
+  if (token.value && !isTokenExpired(token.value)) {
     // In a real app, you'd validate the token here
     const initialRole = role.value || 'customer'
     role.value = initialRole
     localStorage.setItem('authRole', initialRole)
     user.value = { id: 'temp', email: 'user@example.com', role: initialRole }
+  } else if (token.value && isTokenExpired(token.value)) {
+    token.value = null
+    role.value = null
+    localStorage.removeItem('authToken')
+    localStorage.removeItem('authRole')
+    localStorage.removeItem('adminApiToken')
   }
 
   return {

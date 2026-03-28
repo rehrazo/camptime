@@ -228,11 +228,12 @@ export default {
   setup() {
     const router = useRouter()
     const cartStore = useCartStore()
-    const shippingMethods = [
+    const fallbackShippingMethods = [
       { id: 'standard', name: 'Standard Shipping (5-7 days)', price: 9.99 },
       { id: 'express', name: 'Express Shipping (2-3 days)', price: 24.99 },
       { id: 'overnight', name: 'Overnight Shipping', price: 49.99 },
     ]
+    const shippingMethods = ref([...fallbackShippingMethods])
     
     const form = ref({
       firstName: '',
@@ -243,7 +244,7 @@ export default {
       city: '',
       state: '',
       zip: '',
-      shippingMethod: shippingMethods[0]?.id || '',
+      shippingMethod: shippingMethods.value[0]?.id || '',
       agreeTerms: false,
     })
 
@@ -265,6 +266,38 @@ export default {
       }
     }
 
+    const loadShippingGroups = async () => {
+      try {
+        const response = await fetch('/api/shipping-groups')
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          return
+        }
+
+        const groups = Array.isArray(data?.data) ? data.data : []
+        if (!groups.length) {
+          return
+        }
+
+        shippingMethods.value = groups.map((group) => ({
+          id: String(group.id),
+          name: String(group.name || 'Shipping'),
+          price: Number(group.cost || 0),
+        }))
+
+        const hasCurrentSelection = shippingMethods.value.some(
+          (entry) => entry.id === String(form.value.shippingMethod)
+        )
+
+        if (!hasCurrentSelection) {
+          form.value.shippingMethod = shippingMethods.value[0]?.id || ''
+        }
+      } catch (_error) {
+        // keep fallback shipping methods
+      }
+    }
+
     const orderItems = computed(() => cartStore.items)
 
     const subtotal = computed(() => {
@@ -273,8 +306,8 @@ export default {
 
     const shippingCost = computed(() => {
       const method = form.value.shippingMethod
-      const selectedMethod = shippingMethods.find((item) => item.id === method)
-      return selectedMethod ? selectedMethod.price : Number(shippingMethods[0]?.price || 0)
+      const selectedMethod = shippingMethods.value.find((item) => item.id === method)
+      return selectedMethod ? selectedMethod.price : Number(shippingMethods.value[0]?.price || 0)
     })
 
     const tax = computed(() => {
@@ -391,7 +424,10 @@ export default {
       }
     }
 
-    onMounted(loadTaxRate)
+    onMounted(() => {
+      loadTaxRate()
+      loadShippingGroups()
+    })
 
     return {
       form,

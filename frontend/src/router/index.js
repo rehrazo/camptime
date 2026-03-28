@@ -23,6 +23,8 @@ import ProductCategoryMover from '../views/admin/ProductCategoryMover.vue'
 import OrderConfirmation from '../views/store/OrderConfirmation.vue'
 import AdminOrderExportManager from '../views/admin/AdminOrderExportManager.vue'
 import TaxManagement from '../views/admin/TaxManagement.vue'
+import ShippingManagement from '../views/admin/ShippingManagement.vue'
+import DropShippersManagement from '../views/admin/DropShippersManagement.vue'
 import ShippingReturns from '../views/store/ShippingReturns.vue'
 import PrivacyPolicy from '../views/store/PrivacyPolicy.vue'
 import TermsConditions from '../views/store/TermsConditions.vue'
@@ -281,6 +283,24 @@ const routes = [
         component: TaxManagement,
         meta: {
           title: 'Tax Management | Razo Wild',
+          noindex: true,
+        },
+      },
+      {
+        path: 'shipping',
+        name: 'ShippingManagement',
+        component: ShippingManagement,
+        meta: {
+          title: 'Shipping Management | Razo Wild',
+          noindex: true,
+        },
+      },
+      {
+        path: 'drop-shippers',
+        name: 'DropShippersManagement',
+        component: DropShippersManagement,
+        meta: {
+          title: 'Drop Shippers | Razo Wild',
           noindex: true,
         },
       },

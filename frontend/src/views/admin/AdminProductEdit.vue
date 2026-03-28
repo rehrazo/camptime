@@ -72,6 +72,15 @@
           </select>
         </div>
         <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productDropShipperId">Drop Shipper</label>
+          <select id="productDropShipperId" v-model="form.drop_shipper_id" class="form-input">
+            <option :value="null">Direct / In-house Fulfillment</option>
+            <option v-for="shipper in dropShippers" :key="shipper.id" :value="shipper.id">
+              {{ shipper.name }}
+            </option>
+          </select>
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
           <label for="productPrice">Price</label>
           <input id="productPrice" v-model.number="form.price" type="number" min="0" step="0.01" class="form-input" />
         </div>
@@ -245,6 +254,7 @@ export default {
     const error = ref('')
     const activeTab = ref('details')
     const categoryOptions = ref([])
+    const dropShippers = ref([])
     const newImageUrl = ref('')
     const imageFormError = ref('')
     const imageFallback = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220"><rect width="100%" height="100%" fill="%23ece3d1"/><text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="%23666">Image unavailable</text></svg>'
@@ -262,6 +272,7 @@ export default {
       sku_code: '',
       spu_no: '',
       category_id: null,
+      drop_shipper_id: null,
       is_featured: false,
       price: 0,
       stock_quantity: 0,
@@ -443,6 +454,7 @@ export default {
         sku_code: data.sku_code || '',
         spu_no: data.spu_no || '',
         category_id: data.category_id || null,
+        drop_shipper_id: data.drop_shipper_id || null,
         is_featured: Boolean(data.is_featured),
         price: Number(data.price || 0),
         stock_quantity: Number(data.stock_quantity || 0),
@@ -521,6 +533,7 @@ export default {
         sku_code: String(form.value.sku_code || '').trim() || null,
         spu_no: String(form.value.spu_no || '').trim() || null,
         category_id: form.value.category_id || null,
+        drop_shipper_id: form.value.drop_shipper_id || null,
         is_featured: Boolean(form.value.is_featured),
         price: Number(form.value.price || 0),
         stock_quantity: Number(form.value.stock_quantity || 0),
@@ -583,6 +596,12 @@ export default {
       error.value = ''
 
       try {
+        const dropShippersResponse = await fetch('/api/drop-shippers')
+        const dropShippersData = await dropShippersResponse.json().catch(() => ({}))
+        if (dropShippersResponse.ok) {
+          dropShippers.value = Array.isArray(dropShippersData.data) ? dropShippersData.data : []
+        }
+
         await loadCategories()
         await loadProduct()
       } catch (loadError) {
@@ -600,6 +619,7 @@ export default {
       form,
       editorToolbar,
       categoryOptions,
+      dropShippers,
         newImageUrl,
         imageFormError,
       isCreateMode,

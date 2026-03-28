@@ -28,6 +28,22 @@ CREATE TABLE categories (
     INDEX idx_categories_parent (parent_id)
 );
 
+CREATE TABLE drop_shippers (
+    drop_shipper_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(100),
+    address_line1 VARCHAR(255),
+    address_line2 VARCHAR(255),
+    city VARCHAR(120),
+    state VARCHAR(120),
+    postal_code VARCHAR(40),
+    country VARCHAR(120),
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE TABLE products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     -- Basic Information
@@ -36,6 +52,7 @@ CREATE TABLE products (
     url VARCHAR(500),
     category VARCHAR(255),
     category_id INT,
+    drop_shipper_id INT NULL,
     is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     name VARCHAR(255) NOT NULL,
     supplier VARCHAR(255),
@@ -92,6 +109,7 @@ CREATE TABLE products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL,
+    FOREIGN KEY (drop_shipper_id) REFERENCES drop_shippers(drop_shipper_id) ON DELETE SET NULL,
     INDEX (category_id)
 );
 

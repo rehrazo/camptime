@@ -12,6 +12,8 @@ const categoriesRouter = require('./routes/categories');
 const ordersRouter = require('./routes/orders');
 const paymentsRouter = require('./routes/payments');
 const taxRatesRouter = require('./routes/tax-rates');
+const shippingGroupsRouter = require('./routes/shipping-groups');
+const dropShippersRouter = require('./routes/drop-shippers');
 const { requireAdminAuthIfConfigured } = require('./middleware/adminAuth');
 
 dotenv.config();
@@ -47,6 +49,70 @@ const corsAllowedOrigins = String(process.env.FRONTEND_URL || 'http://localhost:
   .filter(Boolean);
 
 const nodeEnv = String(process.env.NODE_ENV || 'development').toLowerCase();
+
+async function ensureDropShipperSchema() {
+  await pool.execute(
+    `CREATE TABLE IF NOT EXISTS drop_shippers (
+      drop_shipper_id INT PRIMARY KEY AUTO_INCREMENT,
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255),
+      phone VARCHAR(100),
+      address_line1 VARCHAR(255),
+      address_line2 VARCHAR(255),
+      city VARCHAR(120),
+      state VARCHAR(120),
+      postal_code VARCHAR(40),
+      country VARCHAR(120),
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`
+  );
+
+  const [dropShipperColumn] = await pool.execute(
+    `SHOW COLUMNS FROM products LIKE 'drop_shipper_id'`
+  );
+
+  if (!dropShipperColumn.length) {
+    await pool.execute(
+      `ALTER TABLE products
+       ADD COLUMN drop_shipper_id INT NULL`
+    );
+  }
+
+  const [fkRows] = await pool.execute(
+    `SELECT CONSTRAINT_NAME
+     FROM information_schema.KEY_COLUMN_USAGE
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'products'
+       AND COLUMN_NAME = 'drop_shipper_id'
+       AND REFERENCED_TABLE_NAME = 'drop_shippers'`
+  );
+
+  if (!fkRows.length) {
+    await pool.execute(
+      `ALTER TABLE products
+       ADD CONSTRAINT fk_products_drop_shipper
+       FOREIGN KEY (drop_shipper_id)
+       REFERENCES drop_shippers(drop_shipper_id)
+       ON DELETE SET NULL`
+    );
+  }
+
+  const [indexRows] = await pool.execute(
+    `SELECT INDEX_NAME
+     FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME = 'products'
+       AND INDEX_NAME = 'idx_products_drop_shipper_id'`
+  );
+
+  if (!indexRows.length) {
+    await pool.execute(
+      `CREATE INDEX idx_products_drop_shipper_id ON products (drop_shipper_id)`
+    );
+  }
+}
 
 function isLocalDevelopmentOrigin(origin) {
   try {
@@ -289,6 +355,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', requireAdminAuthIfConfigured, productsRouter);
 app.use('/api/categories', requireAdminAuthIfConfigured, categoriesRouter);
 app.use('/api/tax-rates', requireAdminAuthIfConfigured, taxRatesRouter);
+app.use('/api/shipping-groups', requireAdminAuthIfConfigured, shippingGroupsRouter);
+app.use('/api/drop-shippers', requireAdminAuthIfConfigured, dropShippersRouter);
 // app.use('/api/cart', require('./routes/cart')); 
 app.use('/api/orders', ordersRouter);
 app.use('/api/payments', paymentsRouter);
@@ -311,8 +379,19 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-enforceStartupSecurityConfig();
+async function startServer() {
+  enforceStartupSecurityConfig();
 
-app.listen(PORT, () => {
-  console.log(`Razo Wild Backend Server running on port ${PORT}`);
-});
+  try {
+    await ensureDropShipperSchema();
+    console.log('[startup] Drop shipper schema is ready.');
+  } catch (error) {
+    console.warn(`[startup] Could not ensure drop shipper schema: ${error.message || error}`);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Razo Wild Backend Server running on port ${PORT}`);
+  });
+}
+
+startServer();

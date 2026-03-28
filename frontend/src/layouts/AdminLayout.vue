@@ -63,6 +63,20 @@
           >
             Tax
           </router-link>
+          <router-link
+            class="admin-nav-link"
+            :class="{ active: route.path === '/admin/shipping' }"
+            to="/admin/shipping"
+          >
+            Shipping
+          </router-link>
+          <router-link
+            class="admin-nav-link"
+            :class="{ active: route.path === '/admin/drop-shippers' }"
+            to="/admin/drop-shippers"
+          >
+            Drop Shippers
+          </router-link>
         </nav>
 
         <div class="header-actions">

@@ -70,6 +70,32 @@
       </div>
     </section>
 
+    <section class="featured-products-section">
+      <div class="container">
+        <div class="section-head">
+          <h2>Featured Products</h2>
+          <router-link to="/products" class="view-all-link">View all products</router-link>
+        </div>
+        <div class="featured-products-grid">
+          <article v-for="product in featuredProducts" :key="product.id" class="featured-product-card">
+            <router-link :to="`/products/${product.id}`" class="featured-product-image-wrap">
+              <img :src="product.image" :alt="product.name" class="featured-product-image" />
+            </router-link>
+            <div class="featured-product-body">
+              <h3>
+                <router-link :to="`/products/${product.id}`" class="featured-product-link">{{ product.name }}</router-link>
+              </h3>
+              <p class="featured-product-description">{{ product.description }}</p>
+              <div class="featured-product-footer">
+                <span class="featured-product-price">${{ product.price.toFixed(2) }}</span>
+                <router-link :to="`/products/${product.id}`" class="btn btn-secondary">View</router-link>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <section class="cta">
       <div class="container">
         <h2>Get In Touch</h2>
@@ -123,6 +149,7 @@ export default {
   setup() {
     const featuredCategories = ref([...defaultFeaturedCategories])
     const recommendedCategories = ref([...defaultRecommendedCategories])
+    const featuredProducts = ref([])
 
     const heroStyle = {
       backgroundImage: `url(${homeBanner})`,
@@ -146,6 +173,41 @@ export default {
 
     const flattenTree = (nodes = []) => {
       return nodes.flatMap((node) => [node, ...flattenTree(node.children || [])])
+    }
+
+    const mapFeaturedProduct = (product = {}) => {
+      const id = Number(product?.product_id)
+      const image = String(product?.primary_image_url || product?.image_url || product?.image || '').trim()
+      const description = String(product?.brief_description || product?.description || '').trim()
+
+      return {
+        id,
+        name: String(product?.name || 'Product').trim() || 'Product',
+        image: image || homeBanner,
+        description: description || 'No description available.',
+        price: Number(product?.price || 0),
+      }
+    }
+
+    const loadFeaturedProducts = async () => {
+      try {
+        const params = new URLSearchParams({
+          is_featured: 'true',
+          limit: '4',
+          page: '1',
+        })
+        const response = await fetch(`/api/products?${params.toString()}`)
+        const data = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          return
+        }
+
+        const items = Array.isArray(data?.data) ? data.data.map(mapFeaturedProduct) : []
+        featuredProducts.value = items.filter((item) => Number.isInteger(item.id) && item.id > 0)
+      } catch (_error) {
+        featuredProducts.value = []
+      }
     }
 
     const loadHomeCategories = async () => {
@@ -204,12 +266,14 @@ export default {
 
     onMounted(async () => {
       await loadHomeCategories()
+      await loadFeaturedProducts()
     })
 
     return {
       heroStyle,
       featuredCategories,
       recommendedCategories,
+      featuredProducts,
       welcomeLeftImage,
       welcomeRightImage,
       categoryCardStyle,
@@ -467,6 +531,94 @@ export default {
   background: rgba(12, 124, 89, 0.1);
 }
 
+.featured-products-section {
+  background: #f7f0e3;
+  padding: 3rem 0;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.view-all-link {
+  color: var(--dark-spruce);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.featured-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.featured-product-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #eadcc6;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-product-image-wrap {
+  display: block;
+  background: #f4ede0;
+}
+
+.featured-product-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.featured-product-body {
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.featured-product-link {
+  color: var(--dark-spruce);
+  text-decoration: none;
+}
+
+.featured-product-link:hover {
+  text-decoration: underline;
+}
+
+.featured-product-description {
+  margin: 0;
+  color: #4f4a41;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.featured-product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.featured-product-price {
+  color: #1f5f31;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
 
 
 .cta {
@@ -524,10 +676,23 @@ export default {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
+
+  .featured-products-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 540px) {
   .featured-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .featured-products-grid {
     grid-template-columns: 1fr;
   }
 }

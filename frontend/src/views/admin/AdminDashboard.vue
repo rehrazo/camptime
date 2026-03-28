@@ -163,6 +163,11 @@
                 {{ category.label }}
               </option>
             </select>
+            <select class="filter-select" v-model="productFeaturedFilter" @change="loadProducts">
+              <option value="all">All Products</option>
+              <option value="featured">Featured Only</option>
+              <option value="regular">Non-Featured Only</option>
+            </select>
           </div>
 
           <div v-if="productFormVisible" class="import-card mb-2">
@@ -209,6 +214,13 @@
               <div class="form-group">
                 <label for="productStock">Stock</label>
                 <input id="productStock" v-model.number="productForm.stock_quantity" type="number" min="0" step="1" class="form-input" />
+              </div>
+              <div class="form-group checkbox-group">
+                <label for="productIsFeatured">Featured Product</label>
+                <label class="checkbox-option" for="productIsFeatured">
+                  <input id="productIsFeatured" v-model="productForm.is_featured" type="checkbox" />
+                  <span>Display this product on the storefront featured products section.</span>
+                </label>
               </div>
               <div class="form-group">
                 <label for="productShippingMethod">Shipping Method</label>
@@ -292,6 +304,7 @@
                 <th>Category</th>
                 <th>Price</th>
                 <th>Stock</th>
+                <th>Featured</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -309,13 +322,18 @@
                     {{ product.stock_quantity }}
                   </span>
                 </td>
+                <td>
+                  <span class="status-pill" :class="Boolean(product.is_featured) ? 'ok' : 'warn'">
+                    {{ Boolean(product.is_featured) ? 'Yes' : 'No' }}
+                  </span>
+                </td>
                 <td class="action-buttons">
                   <button class="edit-btn" title="Edit" @click="openEditProductForm(product)">✎</button>
                   <button class="delete-btn" title="Delete" @click="deleteProduct(product)">🗑️</button>
                 </td>
               </tr>
               <tr v-if="!productsLoading && products.length === 0">
-                <td colspan="6" class="center">No products found.</td>
+                <td colspan="7" class="center">No products found.</td>
               </tr>
             </tbody>
           </table>
@@ -729,6 +747,7 @@ export default {
     const activeTab = ref('overview')
     const productSearch = ref('')
     const productCategory = ref(null)
+    const productFeaturedFilter = ref('all')
     const products = ref([])
     const productsLoading = ref(false)
     const productsError = ref('')
@@ -742,6 +761,7 @@ export default {
       sku_code: '',
       spu_no: '',
       category_id: null,
+      is_featured: false,
       price: 0,
       stock_quantity: 0,
       brief_description: '',
@@ -869,6 +889,12 @@ export default {
           params.append('category_id', String(categoryId))
         }
 
+        if (productFeaturedFilter.value === 'featured') {
+          params.append('is_featured', 'true')
+        } else if (productFeaturedFilter.value === 'regular') {
+          params.append('is_featured', 'false')
+        }
+
         const response = await fetch(`/api/products?${params.toString()}`)
         const data = await response.json()
 
@@ -886,6 +912,12 @@ export default {
 
           if (productSearch.value) {
             fallbackParams.append('search', productSearch.value)
+          }
+
+          if (productFeaturedFilter.value === 'featured') {
+            fallbackParams.append('is_featured', 'true')
+          } else if (productFeaturedFilter.value === 'regular') {
+            fallbackParams.append('is_featured', 'false')
           }
 
           const fallbackResponse = await fetch(`/api/products?${fallbackParams.toString()}`)
@@ -920,6 +952,7 @@ export default {
         sku_code: '',
         spu_no: '',
         category_id: null,
+          is_featured: false,
         price: 0,
         stock_quantity: 0,
         brief_description: '',
@@ -1012,6 +1045,7 @@ export default {
         sku_code: String(productForm.value.sku_code || '').trim() || null,
         spu_no: String(productForm.value.spu_no || '').trim() || null,
         category_id: productForm.value.category_id || null,
+        is_featured: Boolean(productForm.value.is_featured),
         price: Number(productForm.value.price || 0),
         stock_quantity: Number(productForm.value.stock_quantity || 0),
         brief_description: String(productForm.value.brief_description || '').trim() || null,
@@ -1786,6 +1820,7 @@ export default {
       activeTab,
       productSearch,
       productCategory,
+      productFeaturedFilter,
       products,
       productsLoading,
       productsError,

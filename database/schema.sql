@@ -36,6 +36,7 @@ CREATE TABLE products (
     url VARCHAR(500),
     category VARCHAR(255),
     category_id INT,
+    is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     name VARCHAR(255) NOT NULL,
     supplier VARCHAR(255),
     brand VARCHAR(255),

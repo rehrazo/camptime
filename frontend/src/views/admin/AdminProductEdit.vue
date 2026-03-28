@@ -79,6 +79,13 @@
           <label for="productStock">Stock</label>
           <input id="productStock" v-model.number="form.stock_quantity" type="number" min="0" step="1" class="form-input" />
         </div>
+        <div v-if="activeTab === 'details'" class="form-group checkbox-group">
+          <label for="productIsFeatured">Featured Product</label>
+          <label class="checkbox-option" for="productIsFeatured">
+            <input id="productIsFeatured" v-model="form.is_featured" type="checkbox" />
+            <span>Show this product in the storefront featured products section.</span>
+          </label>
+        </div>
         <div v-if="activeTab === 'details'" class="form-group">
           <label for="productShippingMethod">Shipping Method</label>
           <input id="productShippingMethod" v-model="form.shipping_method" type="text" class="form-input" placeholder="e.g. Standard, Air" />
@@ -255,6 +262,7 @@ export default {
       sku_code: '',
       spu_no: '',
       category_id: null,
+      is_featured: false,
       price: 0,
       stock_quantity: 0,
       brief_description: '',
@@ -435,6 +443,7 @@ export default {
         sku_code: data.sku_code || '',
         spu_no: data.spu_no || '',
         category_id: data.category_id || null,
+        is_featured: Boolean(data.is_featured),
         price: Number(data.price || 0),
         stock_quantity: Number(data.stock_quantity || 0),
         brief_description: data.brief_description || '',
@@ -512,6 +521,7 @@ export default {
         sku_code: String(form.value.sku_code || '').trim() || null,
         spu_no: String(form.value.spu_no || '').trim() || null,
         category_id: form.value.category_id || null,
+        is_featured: Boolean(form.value.is_featured),
         price: Number(form.value.price || 0),
         stock_quantity: Number(form.value.stock_quantity || 0),
         brief_description: String(form.value.brief_description || '').trim() || null,
@@ -653,6 +663,17 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.checkbox-group {
+  justify-content: center;
+}
+
+.checkbox-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333;
 }
 
 .form-group-full {

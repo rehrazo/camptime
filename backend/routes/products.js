@@ -47,6 +47,27 @@ function toNumber(value, fallback = null) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function toBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['0', 'false', 'no', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return fallback;
+}
+
 async function replaceChildRows(connection, tableName, productId, columns, rows = []) {
   validateChildTableConfig(tableName, columns);
 
@@ -97,6 +118,7 @@ function mapProductPayload(payload = {}) {
     url: payload.url || null,
     category: payload.category || null,
     category_id: toNumber(payload.category_id),
+    is_featured: toBoolean(payload.is_featured, false),
     name: payload.name || 'Unnamed Product',
     supplier: payload.supplier || null,
     brand: payload.brand || null,
@@ -204,6 +226,10 @@ router.get('/', async (req, res) => {
     const categoryId = toNumber(req.query.category_id);
     const includeDescendants = String(req.query.include_descendants || 'true').toLowerCase() !== 'false';
     const brand = req.query.brand || null;
+    const hasFeaturedFilter = req.query.is_featured !== undefined || req.query.featured_only !== undefined;
+    const isFeatured = req.query.is_featured !== undefined
+      ? toBoolean(req.query.is_featured, false)
+      : toBoolean(req.query.featured_only, false);
 
     const where = [];
     const params = [];
@@ -246,6 +272,10 @@ router.get('/', async (req, res) => {
     if (brand) {
       where.push('p.brand = ?');
       params.push(brand);
+    }
+    if (hasFeaturedFilter) {
+      where.push('p.is_featured = ?');
+      params.push(isFeatured ? 1 : 0);
     }
 
     const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
@@ -343,7 +373,7 @@ router.post('/', async (req, res) => {
 
     const [result] = await connection.execute(
       `INSERT INTO products (
-        spu_no, item_no, url, category, category_id, name, supplier, brand, sku_code,
+        spu_no, item_no, url, category, category_id, is_featured, name, supplier, brand, sku_code,
         price, msrp, map, dropshipping_price,
         stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
         description, html_description, long_description, brief_description, upc, asin,
@@ -352,9 +382,9 @@ router.post('/', async (req, res) => {
         product_length, product_width, product_height, product_size_unit,
         product_weight, product_weight_unit,
         number_of_packages, packaging_size_unit, packaging_weight_unit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
       [
-        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,
@@ -426,7 +456,7 @@ router.put('/:id', async (req, res) => {
 
     await connection.execute(
       `UPDATE products SET
-        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
+        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, is_featured = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
         description = ?, html_description = ?, long_description = ?, brief_description = ?, upc = ?, asin = ?,
@@ -438,7 +468,7 @@ router.put('/:id', async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?`,
       [
-        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,

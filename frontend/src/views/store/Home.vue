@@ -52,6 +52,7 @@
       </div>
     </section>
 
+    <!-- TEMPORARILY HIDDEN: Recommended / Popular & top-rated collections
     <section class="category-section recommended">
       <div class="container">
         <h2>Recommended</h2>
@@ -69,6 +70,7 @@
         </div>
       </div>
     </section>
+    -->
 
     <section class="featured-products-section">
       <div class="container">

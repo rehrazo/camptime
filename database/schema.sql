@@ -53,6 +53,7 @@ CREATE TABLE products (
     category VARCHAR(255),
     category_id INT,
     drop_shipper_id INT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_featured BOOLEAN NOT NULL DEFAULT FALSE,
     name VARCHAR(255) NOT NULL,
     supplier VARCHAR(255),

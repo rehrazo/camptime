@@ -119,6 +119,7 @@ function mapProductPayload(payload = {}) {
     category: payload.category || null,
     category_id: toNumber(payload.category_id),
     drop_shipper_id: toNumber(payload.drop_shipper_id),
+    is_active: toBoolean(payload.is_active, true),
     is_featured: toBoolean(payload.is_featured, false),
     name: payload.name || 'Unnamed Product',
     supplier: payload.supplier || null,
@@ -238,6 +239,9 @@ router.get('/', async (req, res) => {
     const categoryId = toNumber(req.query.category_id);
     const includeDescendants = String(req.query.include_descendants || 'true').toLowerCase() !== 'false';
     const brand = req.query.brand || null;
+    const includeInactive = toBoolean(req.query.include_inactive, false);
+    const hasActiveFilter = req.query.is_active !== undefined;
+    const isActiveFilter = toBoolean(req.query.is_active, true);
     const hasFeaturedFilter = req.query.is_featured !== undefined || req.query.featured_only !== undefined;
     const isFeatured = req.query.is_featured !== undefined
       ? toBoolean(req.query.is_featured, false)
@@ -284,6 +288,12 @@ router.get('/', async (req, res) => {
     if (brand) {
       where.push('p.brand = ?');
       params.push(brand);
+    }
+    if (hasActiveFilter) {
+      where.push('p.is_active = ?');
+      params.push(isActiveFilter ? 1 : 0);
+    } else if (!includeInactive) {
+      where.push('p.is_active = 1');
     }
     if (hasFeaturedFilter) {
       where.push('p.is_featured = ?');
@@ -335,11 +345,55 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/audit/dropshipping-price', async (req, res) => {
+  const pool = req.app.locals.pool;
+
+  try {
+    const includeZero = toBoolean(req.query.include_zero, false);
+    const limit = Math.min(500, Math.max(1, toNumber(req.query.limit, 100)));
+    const safeLimit = Math.trunc(limit);
+
+    const [[totals]] = await pool.execute(
+      `SELECT
+         COUNT(*) AS total_products,
+         SUM(CASE WHEN dropshipping_price IS NULL THEN 1 ELSE 0 END) AS missing_null,
+         SUM(CASE WHEN dropshipping_price IS NULL OR dropshipping_price = 0 THEN 1 ELSE 0 END) AS missing_null_or_zero
+       FROM products`
+    );
+
+    const missingWhereSql = includeZero
+      ? '(dropshipping_price IS NULL OR dropshipping_price = 0)'
+      : 'dropshipping_price IS NULL';
+
+    const [missingProducts] = await pool.execute(
+      `SELECT product_id, name, sku_code, dropshipping_price, is_active
+       FROM products
+       WHERE ${missingWhereSql}
+       ORDER BY updated_at DESC, product_id DESC
+       LIMIT ${safeLimit}`
+    );
+
+    return res.json({
+      data: {
+        total_products: Number(totals.total_products || 0),
+        missing_null: Number(totals.missing_null || 0),
+        missing_null_or_zero: Number(totals.missing_null_or_zero || 0),
+        include_zero: includeZero,
+        listed_count: missingProducts.length,
+        products: missingProducts,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message || 'Failed to load dropshipping price audit' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   const pool = req.app.locals.pool;
 
   try {
     const productId = toNumber(req.params.id);
+    const includeInactive = toBoolean(req.query.include_inactive, false);
     if (!productId) {
       return res.status(400).json({ error: 'Invalid product id' });
     }
@@ -348,6 +402,10 @@ router.get('/:id', async (req, res) => {
     try {
       const product = await fetchProductById(connection, productId);
       if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+
+      if (!includeInactive && !toBoolean(product.is_active, false)) {
         return res.status(404).json({ error: 'Product not found' });
       }
 
@@ -389,7 +447,7 @@ router.post('/', async (req, res) => {
 
     const [result] = await connection.execute(
       `INSERT INTO products (
-        spu_no, item_no, url, category, category_id, drop_shipper_id, is_featured, name, supplier, brand, sku_code,
+        spu_no, item_no, url, category, category_id, drop_shipper_id, is_active, is_featured, name, supplier, brand, sku_code,
         price, msrp, map, dropshipping_price,
         stock_quantity, inventory_location, shipping_method, shipping_limitations, processing_time,
         description, html_description, long_description, brief_description, upc, asin,
@@ -398,9 +456,9 @@ router.post('/', async (req, res) => {
         product_length, product_width, product_height, product_size_unit,
         product_weight, product_weight_unit,
         number_of_packages, packaging_size_unit, packaging_weight_unit
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
       [
-        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.drop_shipper_id, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.drop_shipper_id, payload.is_active ? 1 : 0, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,
@@ -472,7 +530,7 @@ router.put('/:id', async (req, res) => {
 
     await connection.execute(
       `UPDATE products SET
-        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, drop_shipper_id = ?, is_featured = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
+        spu_no = ?, item_no = ?, url = ?, category = ?, category_id = ?, drop_shipper_id = ?, is_active = ?, is_featured = ?, name = ?, supplier = ?, brand = ?, sku_code = ?,
         price = ?, msrp = ?, map = ?, dropshipping_price = ?,
         stock_quantity = ?, inventory_location = ?, shipping_method = ?, shipping_limitations = ?, processing_time = ?,
         description = ?, html_description = ?, long_description = ?, brief_description = ?, upc = ?, asin = ?,
@@ -484,7 +542,7 @@ router.put('/:id', async (req, res) => {
         updated_at = CURRENT_TIMESTAMP
       WHERE product_id = ?`,
       [
-        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.drop_shipper_id, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
+        payload.spu_no, payload.item_no, payload.url, resolvedCategoryPath, resolvedCategoryId, payload.drop_shipper_id, payload.is_active ? 1 : 0, payload.is_featured ? 1 : 0, payload.name, payload.supplier, payload.brand, payload.sku_code,
         payload.price, payload.msrp, payload.map, payload.dropshipping_price,
         payload.stock_quantity, payload.inventory_location, payload.shipping_method, payload.shipping_limitations, payload.processing_time,
         payload.description, payload.html_description, payload.long_description, payload.brief_description, payload.upc, payload.asin,

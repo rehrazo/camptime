@@ -112,6 +112,17 @@ async function ensureDropShipperSchema() {
       `CREATE INDEX idx_products_drop_shipper_id ON products (drop_shipper_id)`
     );
   }
+
+  const [activeColumnRows] = await pool.execute(
+    `SHOW COLUMNS FROM products LIKE 'is_active'`
+  );
+
+  if (!activeColumnRows.length) {
+    await pool.execute(
+      `ALTER TABLE products
+       ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE`
+    );
+  }
 }
 
 function isLocalDevelopmentOrigin(origin) {

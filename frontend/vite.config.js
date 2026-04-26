@@ -2,6 +2,12 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
+const allowedPreviewHosts = [
+  'razowild.com',
+  'www.razowild.com',
+  'admin.razowild.com',
+]
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -21,6 +27,7 @@ export default defineConfig({
   },
   preview: {
     port: 3000,
+    allowedHosts: allowedPreviewHosts,
   },
   build: {
     outDir: 'dist',

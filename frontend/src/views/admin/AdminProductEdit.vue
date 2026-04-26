@@ -6,6 +6,14 @@
         <p class="admin-page-subtitle">Update product fields used by storefront UI</p>
       </div>
       <div class="admin-page-actions">
+        <button
+          v-if="!isCreateMode"
+          class="btn btn-secondary"
+          @click="openVariantEditor"
+          :disabled="saving || loading"
+        >
+          Open Variant Editor
+        </button>
         <button class="btn btn-secondary" @click="goBackToList" :disabled="saving">Cancel</button>
         <button class="btn btn-primary" @click="saveProduct" :disabled="saving || loading">
           {{ saving ? 'Saving...' : isCreateMode ? 'Create Product' : 'Save Product' }}
@@ -41,7 +49,15 @@
           :class="{ active: activeTab === 'media' }"
           @click="activeTab = 'media'"
         >
-          Media & Variants
+          Media
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          :class="{ active: activeTab === 'variants' }"
+          @click="activeTab = 'variants'"
+        >
+          Variants
         </button>
       </div>
 
@@ -53,6 +69,10 @@
         <div v-if="activeTab === 'details'" class="form-group">
           <label for="productBrand">Brand</label>
           <input id="productBrand" v-model="form.brand" type="text" class="form-input" placeholder="Brand" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productSupplier">Supplier</label>
+          <input id="productSupplier" v-model="form.supplier" type="text" class="form-input" placeholder="Supplier or vendor name" />
         </div>
         <div v-if="activeTab === 'details'" class="form-group">
           <label for="productSku">SKU</label>
@@ -85,14 +105,49 @@
           <input id="productPrice" v-model.number="form.price" type="number" min="0" step="0.01" class="form-input" />
         </div>
         <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productMsrp">MSRP</label>
+          <input id="productMsrp" v-model.number="form.msrp" type="number" min="0" step="0.01" class="form-input" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productMap">MAP</label>
+          <input id="productMap" v-model.number="form.map" type="number" min="0" step="0.01" class="form-input" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productDropshipPrice">Dropship Price</label>
+          <input id="productDropshipPrice" v-model.number="form.dropshipping_price" type="number" min="0" step="0.01" class="form-input" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
           <label for="productStock">Stock</label>
           <input id="productStock" v-model.number="form.stock_quantity" type="number" min="0" step="1" class="form-input" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productItemNo">Item Number</label>
+          <input id="productItemNo" v-model="form.item_no" type="text" class="form-input" placeholder="Supplier item number" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productUpc">UPC</label>
+          <input id="productUpc" v-model="form.upc" type="text" class="form-input" placeholder="Universal Product Code" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group">
+          <label for="productAsin">ASIN</label>
+          <input id="productAsin" v-model="form.asin" type="text" class="form-input" placeholder="Amazon Standard Identification Number" />
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group form-group-full">
+          <label for="productUrl">Source URL</label>
+          <input id="productUrl" v-model="form.url" type="url" class="form-input" placeholder="https://..." />
         </div>
         <div v-if="activeTab === 'details'" class="form-group checkbox-group">
           <label for="productIsFeatured">Featured Product</label>
           <label class="checkbox-option" for="productIsFeatured">
             <input id="productIsFeatured" v-model="form.is_featured" type="checkbox" />
             <span>Show this product in the storefront featured products section.</span>
+          </label>
+        </div>
+        <div v-if="activeTab === 'details'" class="form-group checkbox-group">
+          <label for="productIsActive">Product Status</label>
+          <label class="checkbox-option" for="productIsActive">
+            <input id="productIsActive" v-model="form.is_active" type="checkbox" />
+            <span>Enabled (visible on storefront). Turn off to disable this product.</span>
           </label>
         </div>
         <div v-if="activeTab === 'details'" class="form-group">
@@ -191,13 +246,16 @@
           </div>
           <p v-else class="subtitle">No images added yet.</p>
         </div>
-        <div v-if="activeTab === 'media'" class="form-group form-group-full">
+        <div v-if="activeTab === 'variants'" class="form-group form-group-full">
           <label>Variations</label>
+          <p class="subtitle">Dropship and actual price are shown per variation row for review.</p>
           <div class="variation-editor">
             <div class="variation-header">
               <span>Theme</span>
               <span>Value</span>
               <span>SKU (optional)</span>
+              <span>Dropship Price</span>
+              <span>Actual Price</span>
               <span></span>
             </div>
 
@@ -223,6 +281,18 @@
                 type="text"
                 class="form-input"
                 placeholder="e.g. SKU-RED"
+              />
+              <input
+                :value="displayVariationDropshipPrice(variation)"
+                type="text"
+                class="form-input price-readonly"
+                readonly
+              />
+              <input
+                :value="displayVariationActualPrice(variation)"
+                type="text"
+                class="form-input price-readonly"
+                readonly
               />
               <button type="button" class="remove-image-btn" @click="removeVariation(index)">Remove</button>
             </div>
@@ -269,12 +339,21 @@ export default {
       product_id: null,
       name: '',
       brand: '',
+      supplier: '',
+      item_no: '',
       sku_code: '',
       spu_no: '',
+      upc: '',
+      asin: '',
+      url: '',
       category_id: null,
       drop_shipper_id: null,
+      is_active: true,
       is_featured: false,
       price: 0,
+      msrp: null,
+      map: null,
+      dropshipping_price: null,
       stock_quantity: 0,
       brief_description: '',
       description: '',
@@ -291,6 +370,21 @@ export default {
 
     const goBackToList = () => {
       router.push({ path: '/admin', query: { tab: 'products' } })
+    }
+
+    const openVariantEditor = () => {
+      const productId = Number(form.value.product_id || route.params.id || 0)
+      if (!productId) {
+        return
+      }
+
+      router.push({
+        path: '/admin/dolba-sync',
+        query: {
+          tab: 'variant-editor',
+          product_id: String(productId),
+        },
+      })
     }
 
     const flattenCategoryTree = (nodes = [], depth = 0) => {
@@ -399,6 +493,8 @@ export default {
         theme_name: '',
         variation_value: '',
         variation_sku: '',
+        dropshipping_price: form.value.dropshipping_price,
+        actual_price: form.value.price,
       })
     }
 
@@ -426,7 +522,7 @@ export default {
         return
       }
 
-      const response = await fetch(`/api/products/${route.params.id}`)
+      const response = await fetch(`/api/products/${route.params.id}?include_inactive=true`)
       const data = await response.json()
 
       if (!response.ok) {
@@ -444,6 +540,8 @@ export default {
             theme_name: String(item?.theme_name || '').trim(),
             variation_value: String(item?.variation_value || '').trim(),
             variation_sku: String(item?.variation_sku || '').trim(),
+            dropshipping_price: item?.dropshipping_price ?? data.dropshipping_price ?? null,
+            actual_price: item?.actual_price ?? data.price ?? null,
           }))
         : []
 
@@ -451,12 +549,21 @@ export default {
         product_id: data.product_id,
         name: data.name || '',
         brand: data.brand || '',
+        supplier: data.supplier || '',
+        item_no: data.item_no || '',
         sku_code: data.sku_code || '',
         spu_no: data.spu_no || '',
+        upc: data.upc || '',
+        asin: data.asin || '',
+        url: data.url || '',
         category_id: data.category_id || null,
         drop_shipper_id: data.drop_shipper_id || null,
+        is_active: data.is_active !== undefined ? Boolean(data.is_active) : true,
         is_featured: Boolean(data.is_featured),
         price: Number(data.price || 0),
+        msrp: data.msrp !== null && data.msrp !== undefined ? Number(data.msrp) : null,
+        map: data.map !== null && data.map !== undefined ? Number(data.map) : null,
+        dropshipping_price: data.dropshipping_price !== null && data.dropshipping_price !== undefined ? Number(data.dropshipping_price) : null,
         stock_quantity: Number(data.stock_quantity || 0),
         brief_description: data.brief_description || '',
         description: data.description || '',
@@ -470,8 +577,26 @@ export default {
         imageUrls,
         variations: variationRows.length
           ? variationRows
-          : [{ theme_name: '', variation_value: '', variation_sku: '' }],
+          : [{ theme_name: '', variation_value: '', variation_sku: '', dropshipping_price: data.dropshipping_price ?? null, actual_price: data.price ?? null }],
       }
+    }
+
+    const toMoneyLabel = (value) => {
+      const num = Number(value)
+      if (!Number.isFinite(num)) {
+        return '-'
+      }
+      return `$${num.toFixed(2)}`
+    }
+
+    const displayVariationDropshipPrice = (variation) => {
+      const value = variation?.dropshipping_price ?? form.value.dropshipping_price
+      return toMoneyLabel(value)
+    }
+
+    const displayVariationActualPrice = (variation) => {
+      const value = variation?.actual_price ?? form.value.price
+      return toMoneyLabel(value)
     }
 
     const buildPayload = () => {
@@ -530,12 +655,24 @@ export default {
       return {
         name: String(form.value.name || '').trim(),
         brand: String(form.value.brand || '').trim() || null,
+        supplier: String(form.value.supplier || '').trim() || null,
+        item_no: String(form.value.item_no || '').trim() || null,
         sku_code: String(form.value.sku_code || '').trim() || null,
         spu_no: String(form.value.spu_no || '').trim() || null,
+        upc: String(form.value.upc || '').trim() || null,
+        asin: String(form.value.asin || '').trim() || null,
+        url: String(form.value.url || '').trim() || null,
         category_id: form.value.category_id || null,
         drop_shipper_id: form.value.drop_shipper_id || null,
+        is_active: Boolean(form.value.is_active),
         is_featured: Boolean(form.value.is_featured),
         price: Number(form.value.price || 0),
+        msrp: form.value.msrp === null || form.value.msrp === '' ? null : Number(form.value.msrp),
+        map: form.value.map === null || form.value.map === '' ? null : Number(form.value.map),
+        dropshipping_price:
+          form.value.dropshipping_price === null || form.value.dropshipping_price === ''
+            ? null
+            : Number(form.value.dropshipping_price),
         stock_quantity: Number(form.value.stock_quantity || 0),
         brief_description: String(form.value.brief_description || '').trim() || null,
         description: String(form.value.description || '').trim() || null,
@@ -629,6 +766,9 @@ export default {
         onPreviewError,
         addVariation,
         removeVariation,
+      displayVariationDropshipPrice,
+      displayVariationActualPrice,
+      openVariantEditor,
       saveProduct,
       goBackToList,
     }
@@ -764,7 +904,7 @@ export default {
 .variation-header,
 .variation-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr 140px 140px auto;
   gap: 0.5rem;
   align-items: center;
 }
@@ -846,6 +986,12 @@ export default {
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
+}
+
+.price-readonly {
+  background: #f4f4f4;
+  color: #333;
+  font-weight: 600;
 }
 
 .image-url {

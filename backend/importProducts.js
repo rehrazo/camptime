@@ -183,8 +183,9 @@ function mapProductRow(row) {
   const msrp = cleanNumber(pick(row, ['msrp us', 'msrp']));
   const mapPrice = cleanNumber(pick(row, ['map us', 'map']));
   const dropship = cleanNumber(pick(row, ['dropshipping price us', 'dropshipping price', 'dropshipping_price']));
-  const salePrice = cleanNumber(pick(row, ['sale price us', 'sale price']));
-  const effectivePrice = salePrice ?? dropship ?? mapPrice ?? msrp ?? 0;
+  const effectivePrice = dropship !== null
+    ? Number((dropship * 1.25).toFixed(2))
+    : (msrp ?? 0);
   const mapped = {
     spu_no: cleanText(pick(row, ['spu no', 'spu_no'])),
     item_no: cleanText(pick(row, ['item plus no', 'item no', 'item_no'])),

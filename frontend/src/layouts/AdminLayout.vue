@@ -3,7 +3,7 @@
     <header class="admin-global-header">
       <div class="admin-global-inner">
         <router-link class="admin-brand" to="/admin">
-          <img src="/src/assets/images/site/razowildLogo.svg" alt="Razo Wild" style="height:28px;border-radius:6px;" />
+          <img src="/src/assets/images/site/razoWildLogo.svg" alt="Razo Wild" style="height:28px;border-radius:6px;" />
           <span>Razo Wild Admin</span>
         </router-link>
         <nav class="admin-global-nav" aria-label="Admin menu">
@@ -76,6 +76,13 @@
             to="/admin/drop-shippers"
           >
             Drop Shippers
+          </router-link>
+          <router-link
+            class="admin-nav-link"
+            :class="{ active: route.path === '/admin/dolba-sync' }"
+            to="/admin/dolba-sync"
+          >
+            Dolba Sync
           </router-link>
         </nav>
 

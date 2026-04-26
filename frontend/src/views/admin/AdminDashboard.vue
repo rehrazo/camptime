@@ -34,6 +34,27 @@
               <p class="stat-value">{{ stats.conversionRate }}%</p>
               <p class="stat-change negative">↓ 2% from last month</p>
             </div>
+
+            <div class="stat-card">
+              <div class="stat-icon">🧾</div>
+              <h3>Missing Dropship Price</h3>
+              <p class="stat-value">{{ dropshipAudit.missing_null }}</p>
+              <p class="stat-change" :class="dropshipAudit.missing_null > 0 ? 'negative' : 'positive'">
+                {{ dropshipAuditLoading ? 'Loading audit...' : (dropshipAuditError || `${dropshipAudit.missing_null_or_zero} null or 0.00`) }}
+              </p>
+              <div v-if="!dropshipAuditLoading && !dropshipAuditError && dropshipAuditProducts.length" class="audit-links">
+                <a
+                  v-for="product in dropshipAuditProducts"
+                  :key="product.product_id"
+                  href="#"
+                  class="audit-link"
+                  @click.prevent="openEditProductById(product.product_id)"
+                >
+                  {{ product.name || `Product #${product.product_id}` }}
+                  <span v-if="product.sku_code">({{ product.sku_code }})</span>
+                </a>
+              </div>
+            </div>
           </div>
 
           <div class="charts-grid">
@@ -803,6 +824,14 @@ export default {
     const importing = ref(false)
     const healthLoading = ref(false)
     const healthError = ref('')
+    const dropshipAuditLoading = ref(false)
+    const dropshipAuditError = ref('')
+    const dropshipAudit = ref({
+      total_products: 0,
+      missing_null: 0,
+      missing_null_or_zero: 0,
+    })
+    const dropshipAuditProducts = ref([])
     const healthChecks = ref({
       adminAuthConfigured: false,
       corsAllowedOrigins: [],
@@ -890,6 +919,7 @@ export default {
         const params = new URLSearchParams({
           page: currentPage,
           limit: currentLimit,
+          include_inactive: 'true',
         })
 
         if (productSearch.value) {
@@ -920,6 +950,7 @@ export default {
           const fallbackParams = new URLSearchParams({
             page: currentPage,
             limit: currentLimit,
+            include_inactive: 'true',
           })
 
           if (productSearch.value) {
@@ -954,6 +985,44 @@ export default {
       } finally {
         productsLoading.value = false
       }
+    }
+
+    const loadDropshipAudit = async () => {
+      dropshipAuditLoading.value = true
+      dropshipAuditError.value = ''
+
+      try {
+        const response = await fetch('/api/products/audit/dropshipping-price', {
+          headers: getAdminApiHeaders(false),
+        })
+        const payload = await response.json().catch(() => ({}))
+
+        if (!response.ok) {
+          throw new Error(payload.error || 'Failed to load dropship audit')
+        }
+
+        const data = payload?.data || {}
+        dropshipAudit.value = {
+          total_products: Number(data.total_products || 0),
+          missing_null: Number(data.missing_null || 0),
+          missing_null_or_zero: Number(data.missing_null_or_zero || 0),
+        }
+        dropshipAuditProducts.value = Array.isArray(data.products) ? data.products : []
+      } catch (error) {
+        dropshipAuditError.value = error.message || 'Failed to load dropship audit'
+        dropshipAuditProducts.value = []
+      } finally {
+        dropshipAuditLoading.value = false
+      }
+    }
+
+    const openEditProductById = async (productId) => {
+      const parsed = Number(productId)
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        return
+      }
+
+      await router.push(`/admin/products/${parsed}/edit`)
     }
 
     const resetProductForm = () => {
@@ -1088,6 +1157,7 @@ export default {
 
         closeProductForm()
         await loadProducts()
+        await loadDropshipAudit()
       } catch (error) {
         productsError.value = error.message || 'Failed to save product'
       }
@@ -1111,6 +1181,7 @@ export default {
         }
 
         await loadProducts()
+        await loadDropshipAudit()
       } catch (error) {
         productsError.value = error.message || 'Failed to delete product'
       }
@@ -1757,6 +1828,7 @@ export default {
       }
 
       await loadSystemHealth()
+      await loadDropshipAudit()
     })
 
     const onFileSelected = (event) => {
@@ -1865,6 +1937,10 @@ export default {
       importing,
       healthLoading,
       healthError,
+      dropshipAuditLoading,
+      dropshipAuditError,
+      dropshipAudit,
+      dropshipAuditProducts,
       healthChecks,
       navItems,
       stats,
@@ -1908,6 +1984,8 @@ export default {
       openUncategorizedProducts,
       openOrderExportManager,
       loadSystemHealth,
+      loadDropshipAudit,
+      openEditProductById,
       onFileSelected,
       runImport,
     }
@@ -2053,6 +2131,28 @@ export default {
 
 .stat-change.negative {
   color: #e74c3c;
+}
+
+.audit-links {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eef1f6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.audit-link {
+  color: #2a5bd7;
+  text-decoration: none;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.audit-link:hover {
+  text-decoration: underline;
 }
 
 /* Charts */

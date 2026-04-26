@@ -489,8 +489,8 @@ export default {
 }
 
 .category-menu-link.active {
-  background: var(--dark-spruce);
-  color: var(--apricot-cream);
+  background: rgba(80, 135, 95, 0.2);
+  color: var(--color-text);
 }
 
 .category-menu-link.child {
@@ -651,8 +651,8 @@ export default {
 }
 
 .pagination-btn.active {
-  background: var(--dark-spruce);
-  border-color: var(--dark-spruce);
+  background: #123526;
+  border-color: #123526;
   color: var(--apricot-cream);
 }
 

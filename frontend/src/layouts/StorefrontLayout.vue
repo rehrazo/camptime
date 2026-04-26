@@ -108,6 +108,16 @@
         <p>&copy; {{ currentYear }} Razo Wild. All rights reserved.</p>
       </div>
     </footer>
+    <div v-if="showCookieBanner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Cookie consent banner">
+      <p class="cookie-banner-text">
+        We use cookies to improve site performance and your shopping experience. By clicking Accept, you agree to our cookie use.
+      </p>
+      <div class="cookie-banner-actions">
+        <router-link class="cookie-link" to="/privacy-policy">Privacy Policy</router-link>
+        <button type="button" class="cookie-btn cookie-btn-secondary" @click="setCookieConsent('rejected')">Reject</button>
+        <button type="button" class="cookie-btn cookie-btn-primary" @click="setCookieConsent('accepted')">Accept</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,6 +139,9 @@ export default {
     const isLoggedIn = computed(() => authStore.isLoggedIn)
     const cartItemCount = computed(() => cartStore.itemCount)
     const categoryMenuItems = ref([])
+    const cookieConsent = ref(null)
+
+    const showCookieBanner = computed(() => cookieConsent.value === null)
 
     const isAllCategoriesActive = computed(() => {
       return route.path === '/products' && !route.query.category_id
@@ -151,7 +164,31 @@ export default {
 
     onMounted(() => {
       fetchCategoryMenu()
+      refreshCookieDebugState()
     })
+
+    const refreshCookieDebugState = () => {
+      const savedConsent = String(localStorage.getItem('cookie_consent_choice') || '').trim().toLowerCase()
+
+      if (savedConsent === 'accepted' || savedConsent === 'rejected') {
+        cookieConsent.value = savedConsent
+        return
+      }
+
+      cookieConsent.value = null
+    }
+
+    const setCookieConsent = (choice) => {
+      const normalized = String(choice || '').trim().toLowerCase()
+      if (normalized !== 'accepted' && normalized !== 'rejected') {
+        return
+      }
+
+      cookieConsent.value = normalized
+      localStorage.setItem('cookie_consent_choice', normalized)
+      localStorage.setItem('cookie_consent_at', new Date().toISOString())
+      refreshCookieDebugState()
+    }
 
     const submitHeaderSearch = () => {
       const query = String(headerSearch.value || '').trim()
@@ -168,9 +205,11 @@ export default {
       isLoggedIn,
       cartItemCount,
       categoryMenuItems,
+      showCookieBanner,
       isCategoryActive,
       isAllCategoriesActive,
       submitHeaderSearch,
+      setCookieConsent,
     }
   },
 }
@@ -332,6 +371,7 @@ export default {
 
 .category-navbar {
   background-color: var(--sage-green);
+  color: var(--apricot-cream);
   border-bottom: 1px solid rgba(65, 39, 34, 0.2);
   overflow-x: auto;
 }
@@ -357,14 +397,28 @@ export default {
   white-space: nowrap;
 }
 
+.category-navbar a,
+.category-navbar a:link,
+.category-navbar a:visited,
+.category-navbar a:hover,
+.category-navbar a:active,
+.category-navbar a:focus {
+  color: var(--apricot-cream);
+}
+
+.category-link.router-link-active,
+.category-link.router-link-exact-active {
+  color: var(--cream-white);
+}
+
 .category-link:hover {
   color: var(--apricot-cream);
 }
 
 .category-link.active {
-  color: var(--apricot-cream);
+  color: var(--cream-white);
   border-color: var(--apricot-cream);
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(245, 231, 203, 0.18);
   border-radius: 4px;
   padding: 0.2rem 0.45rem 0.25rem;
 }
@@ -481,6 +535,77 @@ export default {
   .footer-inner {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 2rem 1rem;
+  }
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1200;
+  background: rgba(17, 51, 34, 0.96);
+  color: var(--cream-white);
+  border: 1px solid rgba(217, 199, 163, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cookie-banner-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.cookie-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cookie-link {
+  color: var(--apricot-cream);
+  text-decoration: underline;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.cookie-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cookie-btn-primary {
+  background: var(--sage-green);
+  color: var(--cream-white);
+}
+
+.cookie-btn-secondary {
+  background: transparent;
+  color: var(--cream-white);
+  border: 1px solid rgba(245, 231, 203, 0.5);
+}
+
+@media (max-width: 900px) {
+  .cookie-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cookie-banner-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
 }
 

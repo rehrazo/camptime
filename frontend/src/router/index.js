@@ -25,6 +25,7 @@ import AdminOrderExportManager from '../views/admin/AdminOrderExportManager.vue'
 import TaxManagement from '../views/admin/TaxManagement.vue'
 import ShippingManagement from '../views/admin/ShippingManagement.vue'
 import DropShippersManagement from '../views/admin/DropShippersManagement.vue'
+import DolbaVariantSyncManager from '../views/admin/DolbaVariantSyncManager.vue'
 import ShippingReturns from '../views/store/ShippingReturns.vue'
 import PrivacyPolicy from '../views/store/PrivacyPolicy.vue'
 import TermsConditions from '../views/store/TermsConditions.vue'
@@ -301,6 +302,15 @@ const routes = [
         component: DropShippersManagement,
         meta: {
           title: 'Drop Shippers | Razo Wild',
+          noindex: true,
+        },
+      },
+      {
+        path: 'dolba-sync',
+        name: 'DolbaVariantSyncManager',
+        component: DolbaVariantSyncManager,
+        meta: {
+          title: 'Dolba Sync | Razo Wild',
           noindex: true,
         },
       },
